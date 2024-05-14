@@ -396,3 +396,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# VS
+.vs
+
+# bin
+bin
+obj

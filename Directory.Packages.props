@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageVersion Include="Spectre.Console" Version="0.48.0" />
+    <PackageVersion Include="Spectre.Console.ImageSharp" Version="0.48.0" />
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Orleans.Server" Version="8.0.0" />
+    <PackageVersion Include="AutoGen" Version="0.0.13" />
+    <PackageVersion Include="AutoGen.OpenAI" Version="0.0.13" />
+    <PackageVersion Include="AutoGen.Core" Version="0.0.13" />
+    <PackageVersion Include="AutoGen.SourceGenerator" Version="0.0.13" />
+  </ItemGroup>
+</Project>

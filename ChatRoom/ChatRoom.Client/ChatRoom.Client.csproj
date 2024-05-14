@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="AutoGen" />
+    <PackageReference Include="Spectre.Console.ImageSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.Common.csproj" />
+  </ItemGroup>
+
+</Project>
