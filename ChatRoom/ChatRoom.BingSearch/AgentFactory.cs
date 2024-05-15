@@ -57,6 +57,16 @@ internal static class AgentFactory
             systemMessage: "You are a Bing search agent. You can search the web using Bing search engine.")
             .RegisterMessageConnector()
             .RegisterMiddleware(middleware)
+            .RegisterMiddleware(async (msgs, option, innerAgent, ct) =>
+            {
+                var reply = await innerAgent.GenerateReplyAsync(msgs, option, ct);
+                if (reply is AggregateMessage<ToolCallMessage, ToolCallResultMessage>)
+                {
+                    return await innerAgent.GenerateReplyAsync(msgs.Append(reply), option, ct);
+                }
+
+                return reply;
+            })
             .RegisterPrintMessage();
             
         return agent;

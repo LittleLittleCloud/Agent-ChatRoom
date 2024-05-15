@@ -13,5 +13,5 @@ public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
 
 public interface IOrchestratorGrain : IGrainWithStringKey
 {
-    Task<AgentInfo> GetNextAgentSpeaker();
+    Task<AgentInfo?> GetNextAgentSpeaker();
 }

@@ -66,11 +66,12 @@ public class ChannelGrain : Grain, IChannelGrain
 
     public async Task<bool> Message(ChatMsg msg)
     {
-        _messages.Add(msg);
-        var speaker = _onlineMembers.First(x => x.Name == msg.From);
-
         await _chatMsgStream.OnNextAsync(msg);
-        await GetNextAgentSpeaker();
+        if (msg.From != "System")
+        {
+            _messages.Add(msg);
+            await GetNextAgentSpeaker();
+        }
 
         return true;
     }
@@ -88,12 +89,13 @@ public class ChannelGrain : Grain, IChannelGrain
         return Task.FromResult(response);
     }
 
-    public async Task<AgentInfo> GetNextAgentSpeaker()
+    public async Task<AgentInfo?> GetNextAgentSpeaker()
     {
         var humanMembers = _onlineMembers.Where(x => x.IsHuman).ToArray();
         var notHumanMembers = _onlineMembers.Where(x => !x.IsHuman).ToArray();
         var humanAgents = humanMembers.Select(x => new DummyAgent(x)).ToArray();
         var notHumanAgents = notHumanMembers.Select(x => new DummyAgent(x)).ToArray();
+        var agents = humanAgents.Concat(notHumanAgents).ToArray();
         // create agents
         var AZURE_OPENAI_ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
         var AZURE_OPENAI_KEY = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
@@ -131,26 +133,48 @@ public class ChannelGrain : Grain, IChannelGrain
             }
         }
 
-        // allow self-loop
-        foreach (var agent in humanAgents.Concat(notHumanAgents))
-        {
-            transitions.Add(Transition.Create(agent, agent));
-        }
-
         var graph = new Graph(transitions);
-
-        var admin = AgentFactory.CreateGroupChatAdmin(openaiClient, modelName: "gpt-4");
-        var groupChat = new GroupChat(
-            workflow: graph,
-            members: humanAgents.Concat(notHumanAgents),
-            admin: admin);
-
         var chatHistory = _messages.Select(x => new TextMessage(Role.Assistant, x.Text, x.From)).ToArray();
-        var nextMessage = await groupChat.CallAsync(chatHistory, maxRound: 1);
-        var lastMessage = nextMessage.Last();
-        var nextSpeaker = _onlineMembers.First(x => x.Name == lastMessage.From);
-        await _agentInfoStream.OnNextAsync(nextSpeaker);
+        var lastSpeaker = agents.First(x => x.Name == _messages.Last().From);
+        var nextAvailableAgents = await graph.TransitToNextAvailableAgentsAsync(lastSpeaker, _messages);
+        if (nextAvailableAgents.Count() == 1 && _onlineMembers.Any(x => x.Name == nextAvailableAgents.First().Name))
+        {
+            var nextSpeaker = _onlineMembers.First(x => x.Name == nextAvailableAgents.First().Name);
 
-        return nextSpeaker;
+            await _agentInfoStream.OnNextAsync(nextSpeaker);
+
+            return nextSpeaker;
+        }
+        else if (nextAvailableAgents.Count() > 1)
+        {
+            IAgent admin = AgentFactory.CreateGroupChatAdmin(openaiClient, modelName: "gpt-4");
+            var groupChat = new GroupChat(
+                workflow: graph,
+                members: humanAgents.Concat(notHumanAgents),
+                admin: admin);
+
+            // add initial messages
+            foreach (var agent in humanMembers.Concat(notHumanMembers))
+            {
+                groupChat.AddInitializeMessage(new TextMessage(Role.Assistant, agent.SelfDescription!, agent.Name));
+            }
+
+            var nextMessage = await groupChat.CallAsync(chatHistory, maxRound: 1);
+            var lastMessage = nextMessage.Last();
+            var nextSpeaker = _onlineMembers.First(x => x.Name == lastMessage.From);
+            if (nextAvailableAgents.Any(x => x.Name == nextSpeaker.Name))
+            {
+                await _agentInfoStream.OnNextAsync(nextSpeaker);
+
+                return nextSpeaker;
+            }
+
+            return null;
+
+        }
+        else
+        {
+            return null;
+        }
     }
 }

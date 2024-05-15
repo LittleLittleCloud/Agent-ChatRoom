@@ -16,6 +16,7 @@
     <PackageVersion Include="AutoGen.Core" Version="0.0.13" />
     <PackageVersion Include="AutoGen.SourceGenerator" Version="0.0.13" />
     <PackageVersion Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.11.1-alpha"  />
+    <PackageVersion Include="Microsoft.PowerShell.SDK" Version="7.4.2"  />
 
   </ItemGroup>
 </Project>

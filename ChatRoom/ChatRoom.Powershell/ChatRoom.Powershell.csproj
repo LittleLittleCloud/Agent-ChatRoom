@@ -1,5 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -9,10 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoGen.OpenAI" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
-    <PackageReference Include="Microsoft.Orleans.Server" />
-    <!--<PackageReference Include="Microsoft.PowerShell.SDK" />-->
+    <PackageReference Include="Microsoft.PowerShell.SDK" />
   </ItemGroup>
 
   <ItemGroup>

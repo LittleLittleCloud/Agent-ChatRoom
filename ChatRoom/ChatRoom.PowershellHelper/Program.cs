@@ -45,12 +45,12 @@ else
 }
 
 var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
-var pwshDeveloper = AgentFactory.CreatePwshDeveloperAgent(openaiClient, Environment.CurrentDirectory, modelName: deployModelName);
 
-//// join the General channel
+// join the General channel
 var roomName = "General";
 var channel = client.GetGrain<IChannelGrain>(roomName);
-var agentInfo = new AgentInfo("powershell", "powershell developer");
+var agentInfo = new AgentInfo("ps-gpt", "I am PowerShell GPT, I am good at writing powershell scripts.", false);
+var pwshDeveloper = AgentFactory.CreatePwshDeveloperAgent(openaiClient, Environment.CurrentDirectory, name: agentInfo.Name, modelName: deployModelName);
 var streamId = await channel.Join(agentInfo);
 // subscribe to the chat stream
 var streamProvider = client.GetStreamProvider("chat");
@@ -60,7 +60,10 @@ Console.WriteLine("Subscribing to the agent info stream...");
 var observer = new NextAgentStreamObserver(pwshDeveloper, channel);
 await stream.SubscribeAsync(observer);
 
+// listen for control + c to exit
+Console.CancelKeyPress += async (sender, e) =>
+{
+    await channel.Leave(agentInfo);
+};
+
 await host.WaitForShutdownAsync();
-
-await channel.Leave(agentInfo);
-

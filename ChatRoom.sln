@@ -14,9 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.PowershellHelper", "ChatRoom\ChatRoom.PowershellHelper\ChatRoom.PowershellHelper.csproj", "{AEF196F5-E1DF-48AE-9493-1623D26634CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.PowershellGPT", "ChatRoom\ChatRoom.PowershellHelper\ChatRoom.PowershellGPT.csproj", "{AEF196F5-E1DF-48AE-9493-1623D26634CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.BingSearch", "ChatRoom\ChatRoom.BingSearch\ChatRoom.BingSearch.csproj", "{F7430E17-06A2-4310-B270-AEA70A3E1DD7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.Powershell", "ChatRoom\ChatRoom.Powershell\ChatRoom.Powershell.csproj", "{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +90,18 @@ Global
 		{F7430E17-06A2-4310-B270-AEA70A3E1DD7}.Release|x64.Build.0 = Release|Any CPU
 		{F7430E17-06A2-4310-B270-AEA70A3E1DD7}.Release|x86.ActiveCfg = Release|Any CPU
 		{F7430E17-06A2-4310-B270-AEA70A3E1DD7}.Release|x86.Build.0 = Release|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Debug|x64.Build.0 = Debug|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Debug|x86.Build.0 = Debug|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Release|x64.ActiveCfg = Release|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Release|x64.Build.0 = Release|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Release|x86.ActiveCfg = Release|Any CPU
+		{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
