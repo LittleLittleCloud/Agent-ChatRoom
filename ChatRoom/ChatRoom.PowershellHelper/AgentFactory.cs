@@ -7,43 +7,6 @@ namespace ChatRoom.PowershellHelper;
 
 internal static class AgentFactory
 {
-    public static IAgent CreateManagerAgent(OpenAIClient client, string name = "Manager", string modelName = "gpt-35-turbo-0125")
-    {
-        var planner = new OpenAIChatAgent(
-            openAIClient: client,
-            name: name,
-            modelName: modelName,
-            systemMessage: """
-            You are a manager of an software development team. If someone raise a powershell related question or task, you need to assign the task to the powershell developer in your team.
-            Otherwise, you say "Not a powershell question".
-
-            here's your team member:
-            - powershell developer: A developer who is expert in powershell
-
-            The task you create should be a json object with the following properties:
-            - name: The name of the task
-            - description: A description of the task
-            - to: The member who you want to assign the task to. Can be empty if the task is not relevant to any of the team member
-
-            here are some examples of tasks:
-            {
-                "name": "Not a powershell question",
-                "description": "The question or task is not relevant to powershell",
-                "to": null
-            }
-            {
-                "name": "Shut down the server",
-                "description": "Create a powershell script to shut down the server",
-                "to": "powershell developer"
-            }
-            """,
-            responseFormat: ChatCompletionsResponseFormat.JsonObject)
-            .RegisterMessageConnector()
-            .RegisterPrintMessage();
-
-        return planner;
-    }
-
     public static IAgent CreatePwshDeveloperAgent(
         OpenAIClient client,
         string cwd,

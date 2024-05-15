@@ -1,18 +1,15 @@
 ﻿using AutoGen.Core;
 using Orleans.Streams;
-using Spectre.Console;
 
-namespace ChatRoom.PowershellHelper;
+namespace ChatRoom.Common;
 
-internal class NextAgentStreamObserver : IAsyncObserver<AgentInfo>
+public class NextAgentStreamObserver : IAsyncObserver<AgentInfo>
 {
-    private readonly string _roomName;
     private readonly IAgent _agent;
     private readonly IChannelGrain _channel;
 
-    public NextAgentStreamObserver(string roomName, IAgent agent, IChannelGrain channel)
+    public NextAgentStreamObserver(IAgent agent, IChannelGrain channel)
     {
-        _roomName = roomName;
         _agent = agent;
         _channel = channel;
     }
@@ -21,7 +18,7 @@ internal class NextAgentStreamObserver : IAsyncObserver<AgentInfo>
 
     public Task OnErrorAsync(Exception ex)
     {
-        AnsiConsole.WriteException(ex);
+        Console.WriteLine(ex.Message);
 
         return Task.CompletedTask;
     }

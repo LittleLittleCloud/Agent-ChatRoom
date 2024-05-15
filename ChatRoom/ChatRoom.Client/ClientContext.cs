@@ -10,5 +10,5 @@ public readonly record struct ClientContext(
     /// </summary>
     public bool IsConnectedToChannel => CurrentChannel is not null;
 
-    public AgentInfo? AgentInfo { get => new AgentInfo(UserName!, "Dummy agent"); }
+    public AgentInfo? AgentInfo { get => new AgentInfo(UserName!, "Human user") { IsHuman = true}; }
 }

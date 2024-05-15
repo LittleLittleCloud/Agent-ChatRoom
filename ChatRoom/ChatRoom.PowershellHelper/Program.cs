@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Azure.AI.OpenAI;
 using ChatRoom;
+using ChatRoom.Common;
 using ChatRoom.PowershellHelper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,7 +45,6 @@ else
 }
 
 var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
-var manager = AgentFactory.CreateManagerAgent(openaiClient, modelName: deployModelName);
 var pwshDeveloper = AgentFactory.CreatePwshDeveloperAgent(openaiClient, Environment.CurrentDirectory, modelName: deployModelName);
 
 //// join the General channel
@@ -57,7 +57,7 @@ var streamProvider = client.GetStreamProvider("chat");
 var stream = streamProvider.GetStream<AgentInfo>(
        StreamId.Create("AgentInfo", "General"));
 Console.WriteLine("Subscribing to the agent info stream...");
-var observer = new NextAgentStreamObserver(roomName, pwshDeveloper, channel);
+var observer = new NextAgentStreamObserver(pwshDeveloper, channel);
 await stream.SubscribeAsync(observer);
 
 await host.WaitForShutdownAsync();

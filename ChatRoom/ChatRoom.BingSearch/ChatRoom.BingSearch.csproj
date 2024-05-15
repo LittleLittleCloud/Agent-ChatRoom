@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <NoWarn>$(NoWarn);SKEXP0050</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="AutoGen.OpenAI" />
+    <PackageReference Include="AutoGen.SemanticKernel" />
+    <PackageReference Include="Microsoft.SemanticKernel.Plugins.Web" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.Common.csproj" />
+  </ItemGroup>
+
+</Project>

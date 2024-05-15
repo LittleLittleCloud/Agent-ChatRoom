@@ -90,8 +90,10 @@ public class ChannelGrain : Grain, IChannelGrain
 
     public async Task<AgentInfo> GetNextAgentSpeaker()
     {
-        var agents = _onlineMembers.Select(x => new DummyAgent(x)).ToArray();
-
+        var humanMembers = _onlineMembers.Where(x => x.IsHuman).ToArray();
+        var notHumanMembers = _onlineMembers.Where(x => !x.IsHuman).ToArray();
+        var humanAgents = humanMembers.Select(x => new DummyAgent(x)).ToArray();
+        var notHumanAgents = notHumanMembers.Select(x => new DummyAgent(x)).ToArray();
         // create agents
         var AZURE_OPENAI_ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
         var AZURE_OPENAI_KEY = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
@@ -117,8 +119,31 @@ public class ChannelGrain : Grain, IChannelGrain
 
         var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
 
+        // create graph chat
+        // allow not human agents <-> human agents 
+        var transitions = new List<Transition>();
+        foreach (var humanAgent in humanAgents)
+        {
+            foreach (var notHumanAgent in notHumanAgents)
+            {
+                transitions.Add(Transition.Create(notHumanAgent, humanAgent));
+                transitions.Add(Transition.Create(humanAgent, notHumanAgent));
+            }
+        }
+
+        // allow self-loop
+        foreach (var agent in humanAgents.Concat(notHumanAgents))
+        {
+            transitions.Add(Transition.Create(agent, agent));
+        }
+
+        var graph = new Graph(transitions);
+
         var admin = AgentFactory.CreateGroupChatAdmin(openaiClient, modelName: "gpt-4");
-        var groupChat = new GroupChat(agents, admin);
+        var groupChat = new GroupChat(
+            workflow: graph,
+            members: humanAgents.Concat(notHumanAgents),
+            admin: admin);
 
         var chatHistory = _messages.Select(x => new TextMessage(Role.Assistant, x.Text, x.From)).ToArray();
         var nextMessage = await groupChat.CallAsync(chatHistory, maxRound: 1);

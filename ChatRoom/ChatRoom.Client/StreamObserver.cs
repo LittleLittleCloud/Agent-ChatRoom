@@ -20,9 +20,12 @@ public sealed class StreamObserver : IAsyncObserver<ChatMsg>
 
     public Task OnNextAsync(ChatMsg item, StreamSequenceToken? token = null)
     {
+        var text = item.Text;
+        text = text.Replace("[", "[[");
+        text = text.Replace("]", "]]");
         AnsiConsole.MarkupLine(
             "[[[dim]{0}[/]]][[{1}]] [bold yellow]{2}:[/] {3}",
-            item.Created.LocalDateTime, _roomName, item.From, item.Text);
+            item.Created.LocalDateTime, _roomName, item.From, text);
 
         return Task.CompletedTask;
     }
