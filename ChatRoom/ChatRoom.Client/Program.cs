@@ -1,9 +1,6 @@
 ﻿using System.Reflection;
-using AutoGen;
-using AutoGen.Core;
 using Azure.AI.OpenAI;
 using ChatRoom;
-using ChatRoom.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orleans.Runtime;
@@ -15,14 +12,6 @@ using var channelHost = new HostBuilder()
         clientBuilder
             .UseLocalhostClustering()
             .AddMemoryStreams("chat");
-    })
-    .Build();
-
-using var agentHost = new HostBuilder()
-    .UseOrleansClient(clientBuilder =>
-    {
-        clientBuilder
-            .UseLocalhostClustering(gatewayPort: 34567);
     })
     .Build();
 
@@ -54,11 +43,10 @@ else
 var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
 
 var client = channelHost.Services.GetRequiredService<IClusterClient>();
-var agentClient = agentHost.Services.GetRequiredService<IClusterClient>();
+//var agentClient = agentHost.Services.GetRequiredService<IClusterClient>();
 
-ClientContext context = new(client, agentClient);
+ClientContext context = new(client);
 await StartAsync(channelHost);
-await StartAsync(agentHost);
 context = context with
 {
     UserName = AnsiConsole.Ask<string>("What is your [aqua]name[/]?")
@@ -256,60 +244,9 @@ async Task SendMessage(
     ClientContext context,
     string messageText)
 {
-    var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-    var members = await room.GetMembers();
-    var agentGrains = new List<IAgentGrain>();
-    foreach (var member in members)
-    {
-        if (string.Equals(member, context.UserName, StringComparison.OrdinalIgnoreCase))
-        {
-            continue;
-        }
-        var agent = context.AgentClient.GetGrain<IAgentGrain>(member);
-        agentGrains.Add(agent);
-    }
-
-    var chatHistory = await room.ReadHistory(1_000);
-    // remove system message
-    chatHistory = chatHistory.Where(x => x.From != "System").ToArray();
-    var chatMsg = new ChatMsg(context.UserName, messageText);
-    await room.Message(chatMsg);
-    chatHistory = chatHistory.Append(chatMsg).ToArray();
-    IEnumerable<IAgent> agents = agentGrains.Select(a => new AgentGrainAgent(a)).ToArray();
-    var userAgent = new DefaultReplyAgent(context.UserName!, defaultReply: "It's your turn");
-    var groupAdmin = AgentFactory.CreateGroupChatAdmin(openaiClient, "admin", deployModelName);
-    var transitions = new List<Transition>();
-    foreach (var agent in agents)
-    {
-        transitions.Add(Transition.Create(agent, userAgent));
-        transitions.Add(Transition.Create(userAgent, agent));
-    }
-
-    var graph = new Graph(transitions);
-    
-    var group = new GroupChat(
-        workflow: graph,
-        admin: groupAdmin,
-        members: agents.Append(userAgent).ToArray());
-
-    while (true)
-    {
-        var nextMessages = await group.CallAsync(chatHistory, 1);
-        var nextMessage = nextMessages.Last();
-        if (nextMessage.From == userAgent.Name || !agents.Any(a => a.Name == nextMessage.From))
-        {
-            break;
-        }
-        else if (nextMessage is ChatMsg msg)
-        {
-            await room.Message(msg);
-            chatHistory = chatHistory.Append(msg).ToArray();
-        }
-        else
-        {
-            throw new InvalidOperationException("Unexpected message type");
-        }
-    }
+    var message = new ChatMsg(context.UserName!, messageText);
+    var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel!);
+    await room.Message(message);
 }
 
 static async Task<ClientContext> JoinChannel(
@@ -331,7 +268,7 @@ static async Task<ClientContext> JoinChannel(
     await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
     {
         var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-        await room.Join(context.UserName!);
+        await room.Join(context.AgentInfo!);
         var streamId = StreamId.Create("ChatRoom", context.CurrentChannel!);
         var stream =
             context.ChannelClient
@@ -360,7 +297,7 @@ static async Task<ClientContext> LeaveChannel(ClientContext context)
     await AnsiConsole.Status().StartAsync("Leaving channel...", async ctx =>
     {
         var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-        await room.Leave(context.UserName!);
+        await room.Leave(context.AgentInfo!);
         var streamId = StreamId.Create("ChatRoom", context.CurrentChannel!);
         var stream =
             context.ChannelClient

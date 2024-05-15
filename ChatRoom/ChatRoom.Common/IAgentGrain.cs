@@ -9,9 +9,7 @@ namespace ChatRoom;
 
 public interface IAgentGrain : IGrainWithStringKey
 {
-    Task<string> GetName();
-
-    Task<string> GetDescription();
+    Task<AgentInfo> GetAgentInfo();
 
     Task<ChatMsg> GenerateReplyAsync(ChatMsg[] messages);
 }

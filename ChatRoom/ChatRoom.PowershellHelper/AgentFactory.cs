@@ -47,7 +47,7 @@ internal static class AgentFactory
     public static IAgent CreatePwshDeveloperAgent(
         OpenAIClient client,
         string cwd,
-        string name = "powershell developer",
+        string name = "powershell",
         string modelName = "gpt-35-turbo-0125")
     {
         var agent = new OpenAIChatAgent(

@@ -1,12 +1,17 @@
-using Orleans.Runtime;
+﻿using Orleans.Runtime;
 
 namespace ChatRoom;
 
-public interface IChannelGrain : IGrainWithStringKey
+public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
 {
-    Task<StreamId> Join(string nickname);
-    Task<StreamId> Leave(string nickname);
+    Task<StreamId> Join(AgentInfo nickname);
+    Task<StreamId> Leave(AgentInfo nickname);
     Task<bool> Message(ChatMsg msg);
     Task<ChatMsg[]> ReadHistory(int numberOfMessages);
-    Task<string[]> GetMembers();
+    Task<AgentInfo[]> GetMembers();
+}
+
+public interface IOrchestratorGrain : IGrainWithStringKey
+{
+    Task<AgentInfo> GetNextAgentSpeaker();
 }

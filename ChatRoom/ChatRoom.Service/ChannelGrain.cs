@@ -1,4 +1,7 @@
-﻿using Orleans.Runtime;
+﻿using AutoGen.Core;
+using Azure.AI.OpenAI;
+using ChatRoom.Service;
+using Orleans.Runtime;
 using Orleans.Streams;
 
 namespace ChatRoom;
@@ -6,65 +9,73 @@ namespace ChatRoom;
 public class ChannelGrain : Grain, IChannelGrain
 {
     private readonly List<ChatMsg> _messages = new(100);
-    private readonly List<string> _onlineMembers = new(10);
+    private readonly List<AgentInfo> _onlineMembers = new(10);
 
-    private IAsyncStream<ChatMsg> _stream = null!;
+    private IAsyncStream<ChatMsg> _chatMsgStream = null!;
+    private IAsyncStream<AgentInfo> _agentInfoStream = null!;
 
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
         var streamProvider = this.GetStreamProvider("chat");
 
-        var streamId = StreamId.Create(
+        var chatStreamId = StreamId.Create(
             "ChatRoom", this.GetPrimaryKeyString());
 
-        _stream = streamProvider.GetStream<ChatMsg>(
-            streamId);
+        var agentInfoStreamId = StreamId.Create(
+            "AgentInfo", this.GetPrimaryKeyString());
+
+        _chatMsgStream = streamProvider.GetStream<ChatMsg>(
+            chatStreamId);
+        _agentInfoStream = streamProvider.GetStream<AgentInfo>(agentInfoStreamId);
+
 
         return base.OnActivateAsync(cancellationToken);
     }
 
-    public async Task<StreamId> Join(string nickname)
+    public async Task<StreamId> Join(AgentInfo agentInfo)
     {
-        if (_onlineMembers.Contains(nickname))
+        if (_onlineMembers.Contains(agentInfo))
         {
-            await _stream.OnNextAsync(
+            await _chatMsgStream.OnNextAsync(
                 new ChatMsg(
                     "System",
-                    $"{nickname} is already in the chat '{this.GetPrimaryKeyString()}' ..."));
-            return _stream.StreamId;
+                    $"{agentInfo} is already in the chat '{this.GetPrimaryKeyString()}' ..."));
+            return _chatMsgStream.StreamId;
         }
-        _onlineMembers.Add(nickname);
+        _onlineMembers.Add(agentInfo);
 
-        await _stream.OnNextAsync(
+        await _chatMsgStream.OnNextAsync(
             new ChatMsg(
                 "System",
-                $"{nickname} joins the chat '{this.GetPrimaryKeyString()}' ..."));
+                $"{agentInfo} joins the chat '{this.GetPrimaryKeyString()}' ..."));
 
-        return _stream.StreamId;
+        return _chatMsgStream.StreamId;
     }
 
-    public async Task<StreamId> Leave(string nickname)
+    public async Task<StreamId> Leave(AgentInfo agentInfo)
     {
-        _onlineMembers.Remove(nickname);
+        _onlineMembers.Remove(agentInfo);
 
-        await _stream.OnNextAsync(
+        await _chatMsgStream.OnNextAsync(
             new ChatMsg(
                 "System",
-                $"{nickname} leaves the chat..."));
+                $"{agentInfo} leaves the chat..."));
 
-        return _stream.StreamId;
+        return _chatMsgStream.StreamId;
     }
 
     public async Task<bool> Message(ChatMsg msg)
     {
         _messages.Add(msg);
+        var speaker = _onlineMembers.First(x => x.Name == msg.From);
 
-        await _stream.OnNextAsync(msg);
+        await _chatMsgStream.OnNextAsync(msg);
+        await GetNextAgentSpeaker();
 
         return true;
     }
 
-    public Task<string[]> GetMembers() => Task.FromResult(_onlineMembers.ToArray());
+    public Task<AgentInfo[]> GetMembers() => Task.FromResult(_onlineMembers.ToArray());
 
     public Task<ChatMsg[]> ReadHistory(int numberOfMessages)
     {
@@ -75,5 +86,46 @@ public class ChannelGrain : Grain, IChannelGrain
             .ToArray();
 
         return Task.FromResult(response);
+    }
+
+    public async Task<AgentInfo> GetNextAgentSpeaker()
+    {
+        var agents = _onlineMembers.Select(x => new DummyAgent(x)).ToArray();
+
+        // create agents
+        var AZURE_OPENAI_ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
+        var AZURE_OPENAI_KEY = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
+        var AZURE_DEPLOYMENT_NAME = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOY_NAME");
+        var OPENAI_API_KEY = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+        var OPENAI_MODEL_ID = Environment.GetEnvironmentVariable("OPENAI_MODEL_ID") ?? "gpt-3.5-turbo-0125";
+
+        OpenAIClient openaiClient;
+        bool useAzure = false;
+        if (AZURE_OPENAI_ENDPOINT is string && AZURE_OPENAI_KEY is string && AZURE_DEPLOYMENT_NAME is string)
+        {
+            openaiClient = new OpenAIClient(new Uri(AZURE_OPENAI_ENDPOINT), new Azure.AzureKeyCredential(AZURE_OPENAI_KEY));
+            useAzure = true;
+        }
+        else if (OPENAI_API_KEY is string)
+        {
+            openaiClient = new OpenAIClient(OPENAI_API_KEY);
+        }
+        else
+        {
+            throw new ArgumentException("Please provide either (AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_DEPLOYMENT_NAME) or OPENAI_API_KEY");
+        }
+
+        var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
+
+        var admin = AgentFactory.CreateGroupChatAdmin(openaiClient, modelName: "gpt-4");
+        var groupChat = new GroupChat(agents, admin);
+
+        var chatHistory = _messages.Select(x => new TextMessage(Role.Assistant, x.Text, x.From)).ToArray();
+        var nextMessage = await groupChat.CallAsync(chatHistory, maxRound: 1);
+        var lastMessage = nextMessage.Last();
+        var nextSpeaker = _onlineMembers.First(x => x.Name == lastMessage.From);
+        await _agentInfoStream.OnNextAsync(nextSpeaker);
+
+        return nextSpeaker;
     }
 }

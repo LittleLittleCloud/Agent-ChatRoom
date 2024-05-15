@@ -1,6 +1,7 @@
-﻿public readonly record struct ClientContext(
+﻿using ChatRoom;
+
+public readonly record struct ClientContext(
     IClusterClient ChannelClient,
-    IClusterClient AgentClient,
     string? UserName = null,
     string? CurrentChannel = null)
 {
@@ -8,4 +9,6 @@
     /// Check if the client is connected to a channel.
     /// </summary>
     public bool IsConnectedToChannel => CurrentChannel is not null;
+
+    public AgentInfo? AgentInfo { get => new AgentInfo(UserName!, "Dummy agent"); }
 }

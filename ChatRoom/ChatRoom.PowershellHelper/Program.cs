@@ -4,12 +4,14 @@ using ChatRoom;
 using ChatRoom.PowershellHelper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Orleans.Runtime;
 
 using var host = new HostBuilder()
     .UseOrleansClient(clientBuilder =>
     {
         clientBuilder
-            .UseLocalhostClustering();
+            .UseLocalhostClustering()
+            .AddMemoryStreams("chat");
     })
     .Build();
 
@@ -45,18 +47,20 @@ var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
 var manager = AgentFactory.CreateManagerAgent(openaiClient, modelName: deployModelName);
 var pwshDeveloper = AgentFactory.CreatePwshDeveloperAgent(openaiClient, Environment.CurrentDirectory, modelName: deployModelName);
 
-// join the General channel
+//// join the General channel
 var roomName = "General";
 var channel = client.GetGrain<IChannelGrain>(roomName);
-var streamId = await channel.Join("PowershellHelper");
-Console.WriteLine("Joined the General channel.");
+var agentInfo = new AgentInfo("powershell", "powershell developer");
+var streamId = await channel.Join(agentInfo);
+// subscribe to the chat stream
+var streamProvider = client.GetStreamProvider("chat");
+var stream = streamProvider.GetStream<AgentInfo>(
+       StreamId.Create("AgentInfo", "General"));
+Console.WriteLine("Subscribing to the agent info stream...");
+var observer = new NextAgentStreamObserver(roomName, pwshDeveloper, channel);
+await stream.SubscribeAsync(observer);
 
-await Host.CreateDefaultBuilder(args)
-    .UseOrleans(siloBuilder =>
-    {
-        siloBuilder
-            .UseLocalhostClustering(siloPort: 12345, gatewayPort: 34567)
-            .AddMemoryGrainStorage("PubSubStore");
-    })
-    .RunConsoleAsync();
+await host.WaitForShutdownAsync();
+
+await channel.Leave(agentInfo);
 
