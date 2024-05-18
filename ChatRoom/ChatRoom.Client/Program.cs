@@ -199,7 +199,7 @@ static void PrintUsage()
     }.HideHeaders();
     table.AddColumn(new TableColumn("One"));
 
-    var header2 = new FigletText("Agent Chat Room")
+    var header = new FigletText("Agent Chat Room")
     {
         Color = Color.Aqua
     };
@@ -225,7 +225,6 @@ static void PrintUsage()
         .AddColumn(new TableColumn("Content"));
 
     rightTable.AddRow(header)
-        .AddRow(header2)
         .AddEmptyRow()
         .AddEmptyRow()
         .AddRow(markup);
