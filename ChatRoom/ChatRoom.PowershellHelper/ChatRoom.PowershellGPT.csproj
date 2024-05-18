@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ToolCommandName>ps-gpt</ToolCommandName>
     <PackAsTool>true</PackAsTool>
   </PropertyGroup>
 

@@ -17,6 +17,7 @@ public record class ChatMsg : IMessage
     [Id(1)]
     public DateTimeOffset Created { get; init; } = DateTimeOffset.Now;
 
+    [Id(2)]
     public string Text { get; }
 }
 
