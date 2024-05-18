@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 
 await Host.CreateDefaultBuilder(args)
     .UseOrleans(siloBuilder =>

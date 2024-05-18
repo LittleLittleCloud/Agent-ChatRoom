@@ -3,7 +3,7 @@ using AutoGen.OpenAI;
 using AutoGen.OpenAI.Extension;
 using Azure.AI.OpenAI;
 
-namespace ChatRoom.Service;
+namespace ChatRoom.Room;
 
 internal static class AgentFactory
 {

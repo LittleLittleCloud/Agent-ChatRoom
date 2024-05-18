@@ -13,3 +13,15 @@ public record class ChatMsg(
     [Id(1)]
     public DateTimeOffset Created { get; init; } = DateTimeOffset.Now;
 }
+
+[GenerateSerializer]
+public record class ChannelInfo
+{
+    public ChannelInfo(string name)
+    {
+        Name = name;
+    }
+
+    [Id(0)]
+    public string Name { get; init; }
+}

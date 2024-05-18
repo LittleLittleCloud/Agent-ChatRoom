@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Client", "ChatRoom
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Common", "ChatRoom\ChatRoom.Common\ChatRoom.Common.csproj", "{DF1BF8E5-3F53-4A3F-BFB6-E57545145721}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Channel", "ChatRoom\ChatRoom.Service\ChatRoom.Channel.csproj", "{9235475C-82D5-4241-B735-64C27EEB5677}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Room", "ChatRoom\ChatRoom.Service\ChatRoom.Room.csproj", "{9235475C-82D5-4241-B735-64C27EEB5677}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{499C1951-DF17-41BE-957E-D91AB8CCFC91}"
 	ProjectSection(SolutionItems) = preProject

@@ -1,11 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
-using Azure.AI.OpenAI;
-using ChatRoom;
+﻿using ChatRoom;
 using ChatRoom.BingSearch;
 using ChatRoom.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.Runtime;
 
 using var host = new HostBuilder()
     .UseOrleansClient(clientBuilder =>
@@ -19,27 +16,18 @@ using var host = new HostBuilder()
 var client = host.Services.GetRequiredService<IClusterClient>();
 
 await host.StartAsync();
-Console.WriteLine("Client is connected to the server.");
 var agent = AgentFactory.CreateBingSearchAgent();
+var agentInfo = new AgentInfo(agent.Name, "I am Bing Search Agent, I am good at searching the web.", false);
+var chatPlatformClient = new ChatPlatformClient(client);
 
+await chatPlatformClient.RegisterAgentAsync(agent, agentInfo.SelfDescription);
 
-//// join the General channel
-var roomName = "General";
-var channel = client.GetGrain<IChannelGrain>(roomName);
-var agentInfo = new AgentInfo(agent.Name, "I am a Bing Search agent, I can search the web for your queries.", false);
-var streamId = await channel.Join(agentInfo);
-// subscribe to the chat stream
-var streamProvider = client.GetStreamProvider("chat");
-var stream = streamProvider.GetStream<AgentInfo>(
-       StreamId.Create("AgentInfo", "General"));
-Console.WriteLine("Subscribing to the agent info stream...");
-var observer = new NextAgentStreamObserver(agent, channel);
-await stream.SubscribeAsync(observer);
+var lifetimeManager = host.Services.GetRequiredService<IHostApplicationLifetime>();
 
-// listen for control + c to exit
-Console.CancelKeyPress += async (sender, e) =>
+lifetimeManager.ApplicationStopping.Register(async () =>
 {
-    await channel.Leave(agentInfo);
-};
+    Console.WriteLine("Unsubscribing from the agent info stream...");
+    await chatPlatformClient.UnregisterAgentAsync(agent);
+});
 
 await host.WaitForShutdownAsync();

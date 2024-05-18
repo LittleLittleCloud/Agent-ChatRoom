@@ -5,7 +5,6 @@ using ChatRoom.Common;
 using ChatRoom.PowershellHelper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.Runtime;
 
 using var host = new HostBuilder()
     .UseOrleansClient(clientBuilder =>
@@ -15,11 +14,10 @@ using var host = new HostBuilder()
             .AddMemoryStreams("chat");
     })
     .Build();
+await host.StartAsync();
 
 var client = host.Services.GetRequiredService<IClusterClient>();
-
-await host.StartAsync();
-Console.WriteLine("Client is connected to the server.");
+var lifetimeManager = host.Services.GetRequiredService<IHostApplicationLifetime>();
 
 // create agents
 var AZURE_OPENAI_ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
@@ -45,25 +43,16 @@ else
 }
 
 var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
-
-// join the General channel
-var roomName = "General";
-var channel = client.GetGrain<IChannelGrain>(roomName);
 var agentInfo = new AgentInfo("ps-gpt", "I am PowerShell GPT, I am good at writing powershell scripts.", false);
 var pwshDeveloper = AgentFactory.CreatePwshDeveloperAgent(openaiClient, Environment.CurrentDirectory, name: agentInfo.Name, modelName: deployModelName);
-var streamId = await channel.Join(agentInfo);
-// subscribe to the chat stream
-var streamProvider = client.GetStreamProvider("chat");
-var stream = streamProvider.GetStream<AgentInfo>(
-       StreamId.Create("AgentInfo", "General"));
-Console.WriteLine("Subscribing to the agent info stream...");
-var observer = new NextAgentStreamObserver(pwshDeveloper, channel);
-await stream.SubscribeAsync(observer);
 
-// listen for control + c to exit
-Console.CancelKeyPress += async (sender, e) =>
+var chatPlatformClient = new ChatPlatformClient(client);
+await chatPlatformClient.RegisterAgentAsync(pwshDeveloper, agentInfo.SelfDescription);
+
+lifetimeManager.ApplicationStopping.Register(async () =>
 {
-    await channel.Leave(agentInfo);
-};
+    Console.WriteLine("Unsubscribing from the agent info stream...");
+    await chatPlatformClient.UnregisterAgentAsync(pwshDeveloper);
+});
 
 await host.WaitForShutdownAsync();

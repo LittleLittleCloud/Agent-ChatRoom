@@ -3,11 +3,11 @@ using Spectre.Console;
 
 namespace ChatRoom;
 
-public sealed class StreamObserver : IAsyncObserver<ChatMsg>
+public sealed class ChannelMessageStreamObserver : IAsyncObserver<ChatMsg>
 {
-    private readonly string _roomName;
+    private readonly string _channelName;
 
-    public StreamObserver(string roomName) => _roomName = roomName;
+    public ChannelMessageStreamObserver(string channelName) => _channelName = channelName;
 
     public Task OnCompletedAsync() => Task.CompletedTask;
 
@@ -25,7 +25,7 @@ public sealed class StreamObserver : IAsyncObserver<ChatMsg>
         text = text.Replace("]", "]]");
         AnsiConsole.MarkupLine(
             "[[[dim]{0}[/]]][[{1}]] [bold yellow]{2}:[/] {3}",
-            item.Created.LocalDateTime, _roomName, item.From, text);
+            item.Created.LocalDateTime, _channelName, item.From, text);
 
         return Task.CompletedTask;
     }

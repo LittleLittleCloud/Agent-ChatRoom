@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Azure.AI.OpenAI;
 using ChatRoom;
+using ChatRoom.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orleans.Runtime;
@@ -18,7 +19,7 @@ using var channelHost = new HostBuilder()
 PrintUsage();
 
 var client = channelHost.Services.GetRequiredService<IClusterClient>();
-ClientContext context = new(client);
+ClientContext context = new(client, CurrentRoom: "room");
 await StartAsync(channelHost);
 context = context with
 {
@@ -54,6 +55,87 @@ async Task ProcessLoopAsync(ClientContext context)
             AnsiConsole.Confirm("Do you really want to exit?"))
         {
             break;
+        }
+
+        var firstThreeCharacters = input.Length >= 3 ? input[..3] : string.Empty;
+        if (firstThreeCharacters switch
+        {
+            "/lm" => ShowCurrentRoomMembers(context),
+            "/lc" => ShowCurrentRoomChannels(context),
+            _ => null
+        } is Task queryTask)
+        {
+            await queryTask;
+            continue;
+        }
+
+        if (firstThreeCharacters is "/rc")
+        {
+            var channelName = input.Replace("/rc", "").Trim();
+            var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+            var channels = await room.GetChannels();
+            if (channels.Any(c => c.Name == channelName) is false)
+            {
+                AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", channelName);
+                continue;
+            }
+            else
+            {
+                await room.DeleteChannel(channelName);
+                continue;
+            }
+        }
+
+        if (firstThreeCharacters is "/am")
+        {
+            var part = input.Replace("/am", "").Trim();
+            var memberName = part;
+            var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+            var channels = await room.GetChannels();
+            var members = await room.GetMembers();
+            if (channels.Any(c => c.Name == context.CurrentChannel) is false)
+            {
+                AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", context.CurrentChannel);
+                continue;
+            }
+            else if (members.Any(m => m.Name == memberName) is false)
+            {
+                AnsiConsole.MarkupLine("[bold red]Member '{0}' does not exist[/]", memberName);
+                continue;
+            }
+            else
+            {
+                var channelInfo = channels.First(c => c.Name == context.CurrentChannel);
+                var memberInfo = members.First(m => m.Name == memberName);
+                await room.AddAgentToChannel(channelInfo, memberInfo);
+                continue;
+            }
+        }
+
+        if (firstThreeCharacters is "/rm")
+        {
+            var memberName = input.Replace("/rm", "").Trim();
+            var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+            var channels = await room.GetChannels();
+            var members = await room.GetMembers();
+            if (channels.Any(c => c.Name == context.CurrentChannel) is false)
+            {
+                AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", context.CurrentChannel);
+                continue;
+            }
+            else if (members.Any(m => m.Name == memberName) is false)
+            {
+                AnsiConsole.MarkupLine("[bold red]Member '{0}' does not exist[/]", memberName);
+                continue;
+            }
+            else
+            {
+                var channelInfo = channels.First(c => c.Name == context.CurrentChannel);
+                var memberInfo = members.First(m => m.Name == memberName);
+                await room.RemoveAgentFromChannel(channelInfo, memberInfo);
+                
+                continue;
+            }
         }
 
         var firstTwoCharacters = input.Length >= 2 ? input[..2] : string.Empty;
@@ -121,7 +203,7 @@ static void PrintUsage()
     {
         Color = Color.Fuchsia
     };
-    var header2 = new FigletText("Chat Room")
+    var header2 = new FigletText("Agent Chat Room")
     {
         Color = Color.Aqua
     };
@@ -131,7 +213,12 @@ static void PrintUsage()
        + "[bold fuchsia]/n[/] [aqua]<username>[/] to set your [underline green]name[/]\n"
        + "[bold fuchsia]/l[/] to [underline green]leave[/] the current channel\n"
        + "[bold fuchsia]/h[/] to re-read channel [underline green]history[/]\n"
-       + "[bold fuchsia]/m[/] to query [underline green]members[/] in the channel\n"
+       + "[bold fuchsia]/m[/] to query [underline green]members[/] in the current channel\n"
+       + "[bold fuchsia]/lm[/] to query [underline green]members[/] in the room\n"
+       + "[bold fuchsia]/lc[/] to query [underline green]all channels[/] in the room\n"
+       + "[bold fuchsia]/rc[/] [aqua]<channel>[/] to [underline green]remove channel[/] from the room\n"
+       + "[bold fuchsia]/am[/] [aqua]<member>[/] to [underline green]add member[/] to the current channel\n"
+       + "[bold fuchsia]/rm[/] [aqua]<member>[/] to [underline green]remove member[/] from the current channel\n"
        + "[bold fuchsia]/exit[/] to exit\n"
        + "[bold aqua]<message>[/] to send a [underline green]message[/]\n");
     table.AddColumn(new TableColumn("Two"));
@@ -173,6 +260,54 @@ static async Task ShowChannelMembers(ClientContext context)
     foreach (var member in members)
     {
         AnsiConsole.MarkupLine("[bold yellow]{0}[/]", member);
+    }
+
+    AnsiConsole.Write(new Rule()
+    {
+        Justification = Justify.Center,
+        Style = Style.Parse("darkgreen")
+    });
+}
+
+static async Task ShowCurrentRoomMembers(ClientContext context)
+{
+    var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+
+    var members = await room.GetMembers();
+
+    AnsiConsole.Write(new Rule($"Members for '{context.CurrentRoom}'")
+    {
+        Justification = Justify.Center,
+        Style = Style.Parse("darkgreen")
+    });
+
+    foreach (var member in members)
+    {
+        AnsiConsole.MarkupLine("[bold yellow]{0}[/]", member);
+    }
+
+    AnsiConsole.Write(new Rule()
+    {
+        Justification = Justify.Center,
+        Style = Style.Parse("darkgreen")
+    });
+}
+
+static async Task ShowCurrentRoomChannels(ClientContext context)
+{
+    var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+
+    var channels = await room.GetChannels();
+
+    AnsiConsole.Write(new Rule($"Channels for '{context.CurrentRoom}'")
+    {
+        Justification = Justify.Center,
+        Style = Style.Parse("darkgreen")
+    });
+
+    foreach (var channel in channels)
+    {
+        AnsiConsole.MarkupLine("[bold yellow]{0}[/]", channel);
     }
 
     AnsiConsole.Write(new Rule()
@@ -249,7 +384,7 @@ static async Task<ClientContext> JoinChannel(
                 .GetStream<ChatMsg>(streamId);
 
         // Subscribe to the stream to receive furthur messages sent to the chatroom
-        await stream.SubscribeAsync(new StreamObserver(channelName));
+        await stream.SubscribeAsync(new ChannelMessageStreamObserver(channelName));
     });
     AnsiConsole.MarkupLine("[bold aqua]Joined channel [/]{0}", context.CurrentChannel!);
     return context;

@@ -3,12 +3,12 @@ using Orleans.Streams;
 
 namespace ChatRoom.Common;
 
-public class NextAgentStreamObserver : IAsyncObserver<AgentInfo>
+public class OrchestratorStreamObserver : IAsyncObserver<AgentInfo>
 {
     private readonly IAgent _agent;
     private readonly IChannelGrain _channel;
 
-    public NextAgentStreamObserver(IAgent agent, IChannelGrain channel)
+    public OrchestratorStreamObserver(IAgent agent, IChannelGrain channel)
     {
         _agent = agent;
         _channel = channel;

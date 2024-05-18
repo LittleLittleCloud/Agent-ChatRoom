@@ -1,21 +1,21 @@
 ﻿using AutoGen.Core;
 using Azure.AI.OpenAI;
-using ChatRoom.Service;
+using ChatRoom.Common;
 using Orleans.Runtime;
 using Orleans.Streams;
 
-namespace ChatRoom;
+namespace ChatRoom.Room;
 
 public class ChannelGrain : Grain, IChannelGrain
 {
     private readonly List<ChatMsg> _messages = new(100);
     private readonly List<AgentInfo> _onlineMembers = new(10);
-
     private IAsyncStream<ChatMsg> _chatMsgStream = null!;
     private IAsyncStream<AgentInfo> _agentInfoStream = null!;
-
-    public override Task OnActivateAsync(CancellationToken cancellationToken)
+    private ChannelInfo _channelInfo = null!;
+    public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
+        _channelInfo = new ChannelInfo(this.GetPrimaryKeyString());
         var streamProvider = this.GetStreamProvider("chat");
 
         var chatStreamId = StreamId.Create(
@@ -28,8 +28,9 @@ public class ChannelGrain : Grain, IChannelGrain
             chatStreamId);
         _agentInfoStream = streamProvider.GetStream<AgentInfo>(agentInfoStreamId);
 
-
-        return base.OnActivateAsync(cancellationToken);
+        await base.OnActivateAsync(cancellationToken);
+        var roomGrain = this.GrainFactory.GetGrain<IRoomGrain>("room");
+        await roomGrain.CreateChannel(_channelInfo);
     }
 
     public async Task<StreamId> Join(AgentInfo agentInfo)
@@ -42,6 +43,7 @@ public class ChannelGrain : Grain, IChannelGrain
                     $"{agentInfo} is already in the chat '{this.GetPrimaryKeyString()}' ..."));
             return _chatMsgStream.StreamId;
         }
+
         _onlineMembers.Add(agentInfo);
 
         await _chatMsgStream.OnNextAsync(
