@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.32002.185
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Client", "ChatRoom\ChatRoom.Client\ChatRoom.Client.csproj", "{5E091379-A281-46E8-B748-76954C02D691}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Common", "ChatRoom\ChatRoom.Common\ChatRoom.Common.csproj", "{DF1BF8E5-3F53-4A3F-BFB6-E57545145721}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.SDK", "ChatRoom\ChatRoom.Common\ChatRoom.SDK.csproj", "{DF1BF8E5-3F53-4A3F-BFB6-E57545145721}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Room", "ChatRoom\ChatRoom.Service\ChatRoom.Room.csproj", "{9235475C-82D5-4241-B735-64C27EEB5677}"
 EndProject

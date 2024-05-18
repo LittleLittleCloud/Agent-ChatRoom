@@ -5,14 +5,18 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <PackAsTool>true</PackAsTool>
   </PropertyGroup>
+
+  <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.SDK" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.Common.csproj" />
+    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
   </ItemGroup>
 
 </Project>

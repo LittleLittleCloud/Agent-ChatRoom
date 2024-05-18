@@ -25,7 +25,7 @@ public sealed class ChannelMessageStreamObserver : IAsyncObserver<ChatMsg>
         text = text.Replace("]", "]]");
         AnsiConsole.MarkupLine(
             "[[[dim]{0}[/]]][[{1}]] [bold yellow]{2}:[/] {3}",
-            item.Created.LocalDateTime, _channelName, item.From, text);
+            item.Created.LocalDateTime, _channelName, item.From!, text);
 
         return Task.CompletedTask;
     }

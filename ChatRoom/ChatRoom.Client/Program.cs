@@ -95,7 +95,7 @@ async Task ProcessLoopAsync(ClientContext context)
             var members = await room.GetMembers();
             if (channels.Any(c => c.Name == context.CurrentChannel) is false)
             {
-                AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", context.CurrentChannel);
+                AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", context.CurrentChannel!);
                 continue;
             }
             else if (members.Any(m => m.Name == memberName) is false)
@@ -120,7 +120,7 @@ async Task ProcessLoopAsync(ClientContext context)
             var members = await room.GetMembers();
             if (channels.Any(c => c.Name == context.CurrentChannel) is false)
             {
-                AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", context.CurrentChannel);
+                AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", context.CurrentChannel!);
                 continue;
             }
             else if (members.Any(m => m.Name == memberName) is false)
@@ -199,10 +199,6 @@ static void PrintUsage()
     }.HideHeaders();
     table.AddColumn(new TableColumn("One"));
 
-    var header = new FigletText("Orleans")
-    {
-        Color = Color.Fuchsia
-    };
     var header2 = new FigletText("Agent Chat Room")
     {
         Color = Color.Aqua
@@ -338,7 +334,7 @@ static async Task ShowCurrentChannelHistory(ClientContext context)
     foreach (var chatMsg in history)
     {
         AnsiConsole.MarkupLine("[[[dim]{0}[/]]] [bold yellow]{1}:[/] {2}",
-            chatMsg.Created.LocalDateTime, chatMsg.From, chatMsg.Text);
+            chatMsg.Created.LocalDateTime, chatMsg.From!, chatMsg.Text);
     }
 
     AnsiConsole.Write(new Rule()

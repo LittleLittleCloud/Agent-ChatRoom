@@ -3,15 +3,21 @@
 namespace ChatRoom;
 
 [GenerateSerializer]
-public record class ChatMsg(
-    string? From,
-    string Text) : IMessage
+public record class ChatMsg : IMessage
 {
+    public ChatMsg(string From, string Text)
+    {
+        this.From = From;
+        this.Text = Text;
+    }
+
     [Id(0)]
-    public string From { get; set; } = From ?? "Alexey";
+    public string? From { get; set; } = "Alexey";
 
     [Id(1)]
     public DateTimeOffset Created { get; init; } = DateTimeOffset.Now;
+
+    public string Text { get; }
 }
 
 [GenerateSerializer]

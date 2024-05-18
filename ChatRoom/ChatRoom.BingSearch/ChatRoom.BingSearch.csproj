@@ -7,7 +7,10 @@
     <OutputType>Exe</OutputType>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <NoWarn>$(NoWarn);SKEXP0050</NoWarn>
+    <PackAsTool>true</PackAsTool>
   </PropertyGroup>
+
+  <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console" />
@@ -17,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.Common.csproj" />
+    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
   </ItemGroup>
 
 </Project>

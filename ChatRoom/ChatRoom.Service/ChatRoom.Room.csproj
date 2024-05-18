@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,13 +8,15 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
+
   <ItemGroup>
     <PackageReference Include="AutoGen.OpenAI" />
     <PackageReference Include="Microsoft.Orleans.Server" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.Common.csproj" />
+    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
   </ItemGroup>
 
 </Project>

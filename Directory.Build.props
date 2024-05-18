@@ -1,8 +1,14 @@
 <Project>
+  <Import Project="./eng/MetaInfo.props" />
+  <Import Project="./eng/Sign.props" />
   <PropertyGroup>
     <!-- Enable .NET code analysis (this is necessary for projects that target 3.1 or earlier). -->
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <CSNoWarn>CS1998;CS1591</CSNoWarn>
+    <NoWarn>$(NoWarn);$(CSNoWarn);NU5104</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>

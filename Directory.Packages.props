@@ -17,6 +17,6 @@
     <PackageVersion Include="AutoGen.SourceGenerator" Version="0.0.13" />
     <PackageVersion Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.10.0-alpha"  />
     <PackageVersion Include="Microsoft.PowerShell.SDK" Version="7.4.2"  />
-
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" Version="8.0.0" />
   </ItemGroup>
 </Project>

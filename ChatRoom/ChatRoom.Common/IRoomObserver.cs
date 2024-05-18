@@ -59,6 +59,8 @@ public class RoomObserver : IRoomObserver
                 return;
             }
 
+            var streamProvider = _client.GetStreamProvider("chat");
+            var stream = streamProvider.GetStream<AgentInfo>(StreamId.Create("AgentInfo", channel.Name));
             var handlers = await stream.GetAllSubscriptionHandles();
             foreach (var handler in handlers)
             {

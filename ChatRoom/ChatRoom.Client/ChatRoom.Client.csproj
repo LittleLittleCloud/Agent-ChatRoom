@@ -6,7 +6,11 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>chatroom</ToolCommandName>
   </PropertyGroup>
+
+  <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
 
   <ItemGroup>
     <EmbeddedResource Include="logo.png" />
@@ -19,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.Common.csproj" />
+    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
   </ItemGroup>
 
 </Project>
