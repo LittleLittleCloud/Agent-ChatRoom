@@ -10,9 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoGen.OpenAI" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="Microsoft.Orleans.Server" />
-    <!--<PackageReference Include="Microsoft.PowerShell.SDK" />-->
   </ItemGroup>
 
   <ItemGroup>

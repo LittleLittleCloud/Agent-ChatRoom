@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.Sdk" />
     <PackageReference Include="Microsoft.Orleans.Streaming" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="AutoGen.Core" />
   </ItemGroup>
 

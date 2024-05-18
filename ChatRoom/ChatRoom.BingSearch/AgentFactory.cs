@@ -59,13 +59,20 @@ internal static class AgentFactory
             .RegisterMiddleware(middleware)
             .RegisterMiddleware(async (msgs, option, innerAgent, ct) =>
             {
-                var reply = await innerAgent.GenerateReplyAsync(msgs, option, ct);
-                if (reply is AggregateMessage<ToolCallMessage, ToolCallResultMessage>)
+                try
                 {
-                    return await innerAgent.GenerateReplyAsync(msgs.Append(reply), option, ct);
-                }
+                    var reply = await innerAgent.GenerateReplyAsync(msgs, option, ct);
+                    if (reply is AggregateMessage<ToolCallMessage, ToolCallResultMessage>)
+                    {
+                        return await innerAgent.GenerateReplyAsync(msgs.Append(reply), option, ct);
+                    }
 
-                return reply;
+                    return reply;
+                }
+                catch (Exception ex)
+                {
+                    return new TextMessage(Role.Assistant, ex.Message);
+                }
             })
             .RegisterPrintMessage();
             

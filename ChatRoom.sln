@@ -7,18 +7,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Client", "ChatRoom
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Common", "ChatRoom\ChatRoom.Common\ChatRoom.Common.csproj", "{DF1BF8E5-3F53-4A3F-BFB6-E57545145721}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Service", "ChatRoom\ChatRoom.Service\ChatRoom.Service.csproj", "{9235475C-82D5-4241-B735-64C27EEB5677}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Channel", "ChatRoom\ChatRoom.Service\ChatRoom.Channel.csproj", "{9235475C-82D5-4241-B735-64C27EEB5677}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{499C1951-DF17-41BE-957E-D91AB8CCFC91}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.PowershellGPT", "ChatRoom\ChatRoom.PowershellHelper\ChatRoom.PowershellGPT.csproj", "{AEF196F5-E1DF-48AE-9493-1623D26634CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.PowershellGPT", "ChatRoom\ChatRoom.PowershellHelper\ChatRoom.PowershellGPT.csproj", "{AEF196F5-E1DF-48AE-9493-1623D26634CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.BingSearch", "ChatRoom\ChatRoom.BingSearch\ChatRoom.BingSearch.csproj", "{F7430E17-06A2-4310-B270-AEA70A3E1DD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.BingSearch", "ChatRoom\ChatRoom.BingSearch\ChatRoom.BingSearch.csproj", "{F7430E17-06A2-4310-B270-AEA70A3E1DD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.Powershell", "ChatRoom\ChatRoom.Powershell\ChatRoom.Powershell.csproj", "{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Powershell", "ChatRoom\ChatRoom.Powershell\ChatRoom.Powershell.csproj", "{D7C64BB5-CCB5-4597-8DE2-1DAE05B79918}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

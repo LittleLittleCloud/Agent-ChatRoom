@@ -10,8 +10,3 @@ public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
     Task<ChatMsg[]> ReadHistory(int numberOfMessages);
     Task<AgentInfo[]> GetMembers();
 }
-
-public interface IOrchestratorGrain : IGrainWithStringKey
-{
-    Task<AgentInfo?> GetNextAgentSpeaker();
-}
