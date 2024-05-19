@@ -3,15 +3,17 @@ using Orleans.Runtime;
 
 namespace ChatRoom;
 
+[Alias("IChannelGrain")]
 public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
 {
     Task<StreamId> Join(AgentInfo nickname);
     Task<StreamId> Leave(AgentInfo nickname);
-    Task<bool> Message(ChatMsg msg);
-    Task<ChatMsg[]> ReadHistory(int numberOfMessages);
-    Task<AgentInfo[]> GetMembers();
 
     Task Subscribe(IChannelObserver observer);
 
     Task Unsubscribe(IChannelObserver observer);
+
+    internal Task<bool> Message(ChatMsg msg);
+    internal Task<ChatMsg[]> ReadHistory(int numberOfMessages);
+    internal Task<AgentInfo[]> GetMembers();
 }

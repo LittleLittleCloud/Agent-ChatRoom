@@ -11,9 +11,12 @@ public class ConsoleChatRoomService : IHostedService
     private readonly IClusterClient _clusterClient;
     private readonly ClientContext _clientContext;
     private Task? _processTask = null;
+    private readonly ConsoleRoomObserver _roomObserver;
+    private readonly Dictionary<string, IChannelObserver> _channelObservers = new();
 
     public ConsoleChatRoomService(IClusterClient clsterClient)
     {
+        _roomObserver = new ConsoleRoomObserver();
         _clusterClient = clsterClient;
         _clientContext = new ClientContext(_clusterClient, UserName: "Zhang", CurrentChannel: "General", CurrentRoom: "room");
     }
@@ -21,6 +24,9 @@ public class ConsoleChatRoomService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         PrintUsage();
+        var room = _clientContext.ChannelClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
+        var reference = _clientContext.ChannelClient.CreateObjectReference<IRoomObserver>(_roomObserver);
+        await room.Subscribe(reference);
         await JoinChannel(_clientContext, _clientContext.CurrentChannel!);
         _processTask = ProcessLoopAsync(_clientContext, cancellationToken);
     }
@@ -167,7 +173,7 @@ public class ConsoleChatRoomService : IHostedService
         } while (input is not "/exit" && !ct.IsCancellationRequested);
     }
 
-    static void PrintUsage()
+    private void PrintUsage()
     {
         AnsiConsole.WriteLine();
         using var logoStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("ChatRoom.Client.logo.png");
@@ -219,7 +225,7 @@ public class ConsoleChatRoomService : IHostedService
     }
 
 
-    static async Task ShowChannelMembers(ClientContext context)
+    private async Task ShowChannelMembers(ClientContext context)
     {
         var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
 
@@ -337,40 +343,30 @@ public class ConsoleChatRoomService : IHostedService
         await room.Message(message);
     }
 
-    static async Task<ClientContext> JoinChannel(
+    private async Task<ClientContext> JoinChannel(
         ClientContext context,
         string channelName)
     {
         if (context.CurrentChannel is not null &&
             !string.Equals(context.CurrentChannel, channelName, StringComparison.OrdinalIgnoreCase))
         {
-            AnsiConsole.MarkupLine(
-                "[bold olive]Leaving channel [/]{0}[bold olive] before joining [/]{1}",
-                context.CurrentChannel, channelName);
-
             await LeaveChannel(context);
         }
 
-        AnsiConsole.MarkupLine("[bold aqua]Joining channel [/]{0}", channelName);
         context = context with { CurrentChannel = channelName };
         await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
         {
-            var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-            await room.Join(context.AgentInfo!);
-            var streamId = StreamId.Create("ChatRoom", context.CurrentChannel!);
-            var stream =
-                context.ChannelClient
-                    .GetStreamProvider("chat")
-                    .GetStream<ChatMsg>(streamId);
-
-            // Subscribe to the stream to receive furthur messages sent to the chatroom
-            await stream.SubscribeAsync(new ChannelMessageStreamObserver(channelName));
+            var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+            var observer = new ConsoleChannelObserver(this._clientContext.UserName!, context.CurrentChannel);
+            var reference = context.ChannelClient.CreateObjectReference<IChannelObserver>(observer);
+            await channel.Join(context.AgentInfo!);
+            await channel.Subscribe(reference);
+            _channelObservers[channelName] = reference;
         });
-        AnsiConsole.MarkupLine("[bold aqua]Joined channel [/]{0}", context.CurrentChannel!);
         return context;
     }
 
-    static async Task<ClientContext> LeaveChannel(ClientContext context)
+    private async Task<ClientContext> LeaveChannel(ClientContext context)
     {
         if (!context.IsConnectedToChannel)
         {
@@ -378,30 +374,14 @@ public class ConsoleChatRoomService : IHostedService
             return context;
         }
 
-        AnsiConsole.MarkupLine(
-            "[bold olive]Leaving channel [/]{0}",
-            context.CurrentChannel!);
-
         await AnsiConsole.Status().StartAsync("Leaving channel...", async ctx =>
         {
             var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+            var reference = _channelObservers[context.CurrentChannel!];
             await room.Leave(context.AgentInfo!);
-            var streamId = StreamId.Create("ChatRoom", context.CurrentChannel!);
-            var stream =
-                context.ChannelClient
-                    .GetStreamProvider("chat")
-                    .GetStream<ChatMsg>(streamId);
-
-            // Unsubscribe from the channel/stream since client left, so that client won't
-            // receive future messages from this channel/stream.
-            var subscriptionHandles = await stream.GetAllSubscriptionHandles();
-            foreach (var handle in subscriptionHandles)
-            {
-                await handle.UnsubscribeAsync();
-            }
+            await room.Unsubscribe(reference);
+            _channelObservers.Remove(context.CurrentChannel!);
         });
-
-        AnsiConsole.MarkupLine("[bold olive]Left channel [/]{0}", context.CurrentChannel!);
 
         return context with { CurrentChannel = null };
     }

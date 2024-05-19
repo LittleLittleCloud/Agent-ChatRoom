@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-using AutoGen.Core;
-using Orleans.Runtime;
+﻿using AutoGen.Core;
+using Orleans.Concurrency;
 
 namespace ChatRoom.Common;
 
@@ -16,30 +10,38 @@ public interface INotificationObserver : IGrainObserver
 
 public interface IRoomObserver : INotificationObserver
 {
+    [OneWay]
     Task Join(AgentInfo agent);
 
+    [OneWay]
     Task Leave(AgentInfo agent);
 
+    //[OneWay]
     Task AddMemberToChannel(ChannelInfo channel, AgentInfo agent);
 
+    //[OneWay]
     Task RemoveMemberFromChannel(ChannelInfo channel, AgentInfo agent);
 }
 
 public interface IOrchestratorObserver : INotificationObserver
 {
-    Task NextSpeaker(AgentInfo agent);
 }
 
 public interface IChannelObserver : IOrchestratorObserver
 {
+    //[OneWay]
     Task Join(AgentInfo agent);
 
+    //[OneWay]
     Task Leave(AgentInfo agent);
 
+    Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] msg);
+
+    [OneWay]
     Task NewMessage(ChatMsg msg);
 }
 
-public class ChannelObserver : IChannelObserver
+internal class ChannelObserver : IChannelObserver
 {
     private readonly IAgent _agent;
     private readonly IChannelGrain _channelGrain;
@@ -68,37 +70,33 @@ public class ChannelObserver : IChannelObserver
         return Task.CompletedTask;
     }
 
-    public Task NewMessage(ChatMsg msg)
-    {
-        Console.WriteLine($"Message from {msg.From}: {msg.Text}");
-        return Task.CompletedTask;
-    }
-
-    public async Task NextSpeaker(AgentInfo agent)
-    {
+    public async Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] messages)
+    { 
         if (agent.Name != _agent.Name)
         {
-            return;
+            return null;
         }
-
-        var messages = await _channelGrain.ReadHistory(10);
-
         // convert ChatMsg to TextMessage
         var textMessages = messages.Select(msg => new TextMessage(Role.Assistant, msg.Text, from: msg.From)).ToArray();
         var reply = await _agent!.GenerateReplyAsync(textMessages);
 
         if (reply.GetContent() is string content)
         {
-            var returnMessage = new ChatMsg(_agent.Name, content);
-            await _channelGrain.Message(returnMessage);
-
-            return;
+            return new ChatMsg(_agent.Name, content);
         }
+
+        return null;
     }
 
     public Task Notification(ChatMsg msg)
     {
         Console.WriteLine($"Notification from {_channelGrain.GetPrimaryKeyString()}: {msg.Text}");
+        return Task.CompletedTask;
+    }
+
+    public Task NewMessage(ChatMsg msg)
+    {
+        Console.WriteLine($"Message from {msg.From}: {msg.Text}");
         return Task.CompletedTask;
     }
 }
@@ -120,13 +118,6 @@ public class RoomObserver : IRoomObserver
         if (agent.Name == _agent.Name)
         {
             var channelGrain = _client.GetGrain<IChannelGrain>(channel.Name);
-            var members = await channelGrain.GetMembers();
-            if (members.Any(m => m.Name == agent.Name))
-            {
-                Console.WriteLine($"Agent {agent.Name} is already in channel {channel.Name}");
-                return;
-            }
-
             var channelObserver = new ChannelObserver(_agent, channelGrain);
             var reference = _client.CreateObjectReference<IChannelObserver>(channelObserver);
             _channelObservers[channel.Name] = reference;
@@ -140,13 +131,6 @@ public class RoomObserver : IRoomObserver
         if (agent.Name == _agent.Name)
         {
             var channelGrain = _client.GetGrain<IChannelGrain>(channel.Name);
-            var members = await channelGrain.GetMembers();
-            if (!members.Any(m => m.Name == agent.Name))
-            {
-                Console.WriteLine($"Agent {agent.Name} is not in channel {channel.Name}");
-                return;
-            }
-
             var channelObserver = _channelObservers[channel.Name];
             await channelGrain.Unsubscribe(channelObserver);
             await channelGrain.Leave(agent);
