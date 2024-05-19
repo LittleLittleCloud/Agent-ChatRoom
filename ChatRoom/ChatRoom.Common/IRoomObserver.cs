@@ -5,6 +5,7 @@ namespace ChatRoom.Common;
 
 public interface INotificationObserver : IGrainObserver
 {
+    [OneWay]
     Task Notification(ChatMsg msg);
 }
 
@@ -16,10 +17,10 @@ public interface IRoomObserver : INotificationObserver
     [OneWay]
     Task Leave(AgentInfo agent);
 
-    //[OneWay]
+    [OneWay]
     Task AddMemberToChannel(ChannelInfo channel, AgentInfo agent);
 
-    //[OneWay]
+    [OneWay]
     Task RemoveMemberFromChannel(ChannelInfo channel, AgentInfo agent);
 }
 
@@ -29,10 +30,10 @@ public interface IOrchestratorObserver : INotificationObserver
 
 public interface IChannelObserver : IOrchestratorObserver
 {
-    //[OneWay]
+    [OneWay]
     Task Join(AgentInfo agent);
 
-    //[OneWay]
+    [OneWay]
     Task Leave(AgentInfo agent);
 
     Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] msg);

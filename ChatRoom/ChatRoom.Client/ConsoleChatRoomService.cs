@@ -104,6 +104,14 @@ public class ConsoleChatRoomService : IHostedService
                 {
                     var channelInfo = channels.First(c => c.Name == context.CurrentChannel);
                     var memberInfo = members.First(m => m.Name == memberName);
+                    var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+                    var channelMembers = await channel.GetMembers();
+                    if (channelMembers.Any(m => m.Name == memberName) is true)
+                    {
+                        AnsiConsole.MarkupLine("[bold red]Member '{0}' already exists in the channel[/]", memberName);
+                        continue;
+                    }
+                    
                     await room.AddAgentToChannel(channelInfo, memberInfo);
                     continue;
                 }

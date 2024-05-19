@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoGen.Core;
-using Orleans.Runtime;
+﻿using AutoGen.Core;
 
 namespace ChatRoom.Common;
 
@@ -34,15 +28,10 @@ public class ChatPlatformClient
     public async Task UnregisterAgentAsync(IAgent agent)
     {
         var room = _client.GetGrain<IRoomGrain>(_room);
-        var channels = await room.GetChannels();
-        foreach (var channel in channels)
-        {
-            await room.RemoveAgentFromChannel(channel, new AgentInfo(agent.Name, string.Empty, false));
-        }
 
         var observer = _observers[agent.Name];
-        await room.Unsubscribe(observer);
-        _observers.Remove(agent.Name);
         await room.Leave(agent.Name);
+        //await room.Unsubscribe(observer);
+        _observers.Remove(agent.Name);
     }
 }

@@ -11,7 +11,7 @@ public class RoomGrain : Grain, IRoomGrain
     private readonly ObserverManager<IRoomObserver> _roomObserver;
     private readonly List<AgentInfo> _members = new(100);
     private readonly List<ChannelInfo> _channels = new(100);
-
+    private readonly Dictionary<string, IRoomObserver> roomObservers = [];
     public RoomGrain(ILogger<RoomGrain> logger)
     {
         _roomObserver = new ObserverManager<IRoomObserver>(TimeSpan.FromMinutes(1), logger);
@@ -40,10 +40,17 @@ public class RoomGrain : Grain, IRoomGrain
             return;
         }
 
+        for (var i = 0; i < _channels.Count; i++)
+        {
+            var channel = _channels[i];
+            await this.RemoveAgentFromChannel(channel, agentInfo);
+        }
+
         _members.Remove(agentInfo);
+
+        await _roomObserver.Notify(x => x.Leave(agentInfo));
         var agentLeaveMessage = new ChatMsg("System", $"{nickname} leaves the chat room.");
         await _roomObserver.Notify(x => x.Notification(agentLeaveMessage));
-        await _roomObserver.Notify(x => x.Leave(agentInfo));
     }
 
     public Task<ChannelInfo[]> GetChannels()
