@@ -9,12 +9,10 @@ var channelHost = Host.CreateDefaultBuilder(args)
         siloBuilder
             .UseLocalhostClustering()
             .AddMemoryGrainStorage("PubSubStore")
-            .AddMemoryStreams("chat")
             .ConfigureLogging(logBuilder =>
             {
                 logBuilder
-                .ClearProviders();
-                //.AddFilter((loglevel) => loglevel > LogLevel.Information);
+                    .ClearProviders();
             });
     })
     .ConfigureServices(serviceCollection => serviceCollection.AddHostedService<ConsoleChatRoomService>())

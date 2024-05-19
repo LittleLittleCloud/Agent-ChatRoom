@@ -9,12 +9,10 @@ using Orleans.Utilities;
 
 namespace ChatRoom.Room;
 
-public class ChannelGrain : Grain, IChannelGrain
+internal class ChannelGrain : Grain, IChannelGrain
 {
     private readonly List<ChatMsg> _messages = new(100);
     private readonly List<AgentInfo> _onlineMembers = new(10);
-    private IAsyncStream<ChatMsg> _chatMsgStream = null!;
-    private IAsyncStream<AgentInfo> _agentInfoStream = null!;
     private ChannelInfo _channelInfo = null!;
     private readonly ObserverManager<IChannelObserver> _channelObserver;
 
@@ -26,41 +24,21 @@ public class ChannelGrain : Grain, IChannelGrain
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
         _channelInfo = new ChannelInfo(this.GetPrimaryKeyString());
-        var streamProvider = this.GetStreamProvider("chat");
-
-        var chatStreamId = StreamId.Create(
-            "ChatRoom", this.GetPrimaryKeyString());
-
-        var agentInfoStreamId = StreamId.Create(
-            "AgentInfo", this.GetPrimaryKeyString());
-
-        _chatMsgStream = streamProvider.GetStream<ChatMsg>(
-            chatStreamId);
-        _agentInfoStream = streamProvider.GetStream<AgentInfo>(agentInfoStreamId);
-
         await base.OnActivateAsync(cancellationToken);
         var roomGrain = this.GrainFactory.GetGrain<IRoomGrain>("room");
         await roomGrain.CreateChannel(_channelInfo);
     }
 
-    public async Task<StreamId> Join(AgentInfo agentInfo)
+    public async Task Join(AgentInfo agentInfo)
     {
-        if (_onlineMembers.Contains(agentInfo))
-        {
-            return _chatMsgStream.StreamId;
-        }
-
         _onlineMembers.Add(agentInfo);
         await _channelObserver.Notify(x => x.Join(agentInfo));
-        return _chatMsgStream.StreamId;
     }
 
-    public async Task<StreamId> Leave(AgentInfo agentInfo)
+    public async Task Leave(AgentInfo agentInfo)
     {
         _onlineMembers.Remove(agentInfo);
         await _channelObserver.Notify(x => x.Leave(agentInfo));
-
-        return _chatMsgStream.StreamId;
     }
 
     public async Task<bool> Message(ChatMsg msg)

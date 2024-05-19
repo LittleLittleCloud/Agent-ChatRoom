@@ -176,7 +176,6 @@ public sealed class TestSiloConfigurator : ISiloConfigurator
     public void Configure(ISiloBuilder hostBuilder)
     {
         hostBuilder.UseLocalhostClustering()
-            .AddMemoryGrainStorage("PubSubStore")
-            .AddMemoryStreams("chat");
+            .AddMemoryGrainStorage("PubSubStore");
     }
 }

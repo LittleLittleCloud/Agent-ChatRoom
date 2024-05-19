@@ -6,8 +6,8 @@ namespace ChatRoom;
 [Alias("IChannelGrain")]
 public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
 {
-    Task<StreamId> Join(AgentInfo nickname);
-    Task<StreamId> Leave(AgentInfo nickname);
+    Task Join(AgentInfo nickname);
+    Task Leave(AgentInfo nickname);
 
     Task Subscribe(IChannelObserver observer);
 

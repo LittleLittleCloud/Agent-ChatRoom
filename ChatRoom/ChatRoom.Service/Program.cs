@@ -5,7 +5,6 @@ await Host.CreateDefaultBuilder(args)
     {
         siloBuilder
             .UseLocalhostClustering()
-            .AddMemoryGrainStorage("PubSubStore")
-            .AddMemoryStreams("chat");
+            .AddMemoryGrainStorage("PubSubStore");
     })
     .RunConsoleAsync();
