@@ -49,6 +49,7 @@ public class RoomGrain : Grain, IRoomGrain
         await _addAgentStream.OnNextAsync(nickname);
         var agentJoinMessage = new ChatMsg("System", $"{nickname.Name} joins the chat room.");
         await _roomObserver.Notify(x => x.Notification(agentJoinMessage));
+        await _roomObserver.Notify(x => x.Join(nickname));
 
         return _addAgentStream.StreamId;
     }
@@ -65,6 +66,8 @@ public class RoomGrain : Grain, IRoomGrain
         await _removeAgentStream.OnNextAsync(agentInfo);
         var agentLeaveMessage = new ChatMsg("System", $"{nickname} leaves the chat room.");
         await _roomObserver.Notify(x => x.Notification(agentLeaveMessage));
+        await _roomObserver.Notify(x => x.Leave(agentInfo));
+
         return _removeAgentStream.StreamId;
     }
 
@@ -103,6 +106,7 @@ public class RoomGrain : Grain, IRoomGrain
 
         return Task.CompletedTask;
     }
+
     public Task Unsubscribe(IRoomObserver observer)
     {
         _roomObserver.Unsubscribe(observer);
@@ -131,12 +135,12 @@ public class RoomGrain : Grain, IRoomGrain
         await _roomObserver.Notify(x => x.AddMemberToChannel(channel, agent));
     }
 
-    public Task RemoveAgentFromChannel(ChannelInfo channelInfo, AgentInfo agentInfo)
+    public async Task RemoveAgentFromChannel(ChannelInfo channelInfo, AgentInfo agentInfo)
     {
         if (_channels.All(x => x.Name != channelInfo.Name))
         {
             var channelNotFoundMessage = new ChatMsg("System", $"Channel '{channelInfo.Name}' not found.");
-            return _roomObserver.Notify(x => x.Notification(channelNotFoundMessage));
+            await _roomObserver.Notify(x => x.Notification(channelNotFoundMessage));
         }
 
         var channel = _channels.First(x => x.Name == channelInfo.Name);
@@ -144,11 +148,11 @@ public class RoomGrain : Grain, IRoomGrain
         if (_members.All(x => x.Name != agentInfo.Name))
         {
             var agentNotFoundMessage = new ChatMsg("System", $"Agent '{agentInfo.Name}' not found.");
-            return _roomObserver.Notify(x => x.Notification(agentNotFoundMessage));
+            await _roomObserver.Notify(x => x.Notification(agentNotFoundMessage));
         }
 
         var agent = _members.First(x => x.Name == agentInfo.Name);
 
-        return _roomObserver.Notify(x => x.RemoveMemberFromChannel(channel, agent));
+        await _roomObserver.Notify(x => x.RemoveMemberFromChannel(channel, agent));
     }
 }

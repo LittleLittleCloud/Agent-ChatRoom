@@ -27,16 +27,22 @@ public class ChatPlatformClient
         await room.Join(agentInfo);
         var observer = new RoomObserver(agent, _client);
         var reference = _client.CreateObjectReference<IRoomObserver>(observer);
-        _observers[agent.Name] = observer;
+        _observers[agent.Name] = reference;
         await room.Subscribe(reference);
     }
 
-    public Task UnregisterAgentAsync(IAgent agent)
+    public async Task UnregisterAgentAsync(IAgent agent)
     {
         var room = _client.GetGrain<IRoomGrain>(_room);
+        var channels = await room.GetChannels();
+        foreach (var channel in channels)
+        {
+            await room.RemoveAgentFromChannel(channel, new AgentInfo(agent.Name, string.Empty, false));
+        }
+
         var observer = _observers[agent.Name];
-        room.Unsubscribe(observer);
+        await room.Unsubscribe(observer);
         _observers.Remove(agent.Name);
-        return room.Leave(agent.Name);
+        await room.Leave(agent.Name);
     }
 }

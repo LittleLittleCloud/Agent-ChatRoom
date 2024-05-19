@@ -1,8 +1,10 @@
 ﻿using AutoGen.Core;
 using Azure.AI.OpenAI;
 using ChatRoom.Common;
+using Microsoft.Extensions.Logging;
 using Orleans.Runtime;
 using Orleans.Streams;
+using Orleans.Utilities;
 
 namespace ChatRoom.Room;
 
@@ -13,6 +15,13 @@ public class ChannelGrain : Grain, IChannelGrain
     private IAsyncStream<ChatMsg> _chatMsgStream = null!;
     private IAsyncStream<AgentInfo> _agentInfoStream = null!;
     private ChannelInfo _channelInfo = null!;
+    private readonly ObserverManager<IChannelObserver> _channelObserver;
+
+    public ChannelGrain(ILogger<RoomGrain> logger)
+    {
+        _channelObserver = new ObserverManager<IChannelObserver>(TimeSpan.FromMinutes(1), logger);
+    }
+
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
         _channelInfo = new ChannelInfo(this.GetPrimaryKeyString());
@@ -51,6 +60,7 @@ public class ChannelGrain : Grain, IChannelGrain
                 "System",
                 $"{agentInfo} joins the chat '{this.GetPrimaryKeyString()}' ..."));
 
+        await _channelObserver.Notify(x => x.Join(agentInfo));
         return _chatMsgStream.StreamId;
     }
 
@@ -63,12 +73,15 @@ public class ChannelGrain : Grain, IChannelGrain
                 "System",
                 $"{agentInfo} leaves the chat..."));
 
+        await _channelObserver.Notify(x => x.Leave(agentInfo));
+
         return _chatMsgStream.StreamId;
     }
 
     public async Task<bool> Message(ChatMsg msg)
     {
         await _chatMsgStream.OnNextAsync(msg);
+        await _channelObserver.Notify(x => x.NewMessage(msg));
         if (msg.From != "System")
         {
             _messages.Add(msg);
@@ -144,7 +157,8 @@ public class ChannelGrain : Grain, IChannelGrain
             var nextSpeaker = _onlineMembers.First(x => x.Name == nextAvailableAgents.First().Name);
 
             await _agentInfoStream.OnNextAsync(nextSpeaker);
-
+            await this._channelObserver.Notify(x => x.Notification(new ChatMsg("System", $"Next speaker is {nextSpeaker.Name}")));
+            await this._channelObserver.Notify(x => x.NextSpeaker(nextSpeaker));
             return nextSpeaker;
         }
         else if (nextAvailableAgents.Count() > 1)
@@ -167,16 +181,26 @@ public class ChannelGrain : Grain, IChannelGrain
             if (nextAvailableAgents.Any(x => x.Name == nextSpeaker.Name))
             {
                 await _agentInfoStream.OnNextAsync(nextSpeaker);
-
+                await this._channelObserver.Notify(x => x.Notification(new ChatMsg("System", $"Next speaker is {nextSpeaker.Name}")));
+                await this._channelObserver.Notify(x => x.NextSpeaker(nextSpeaker));
                 return nextSpeaker;
             }
 
             return null;
-
         }
         else
         {
             return null;
         }
+    }
+
+    public async Task Subscribe(IChannelObserver observer)
+    {
+        this._channelObserver.Subscribe(observer, observer);
+    }
+
+    public async Task Unsubscribe(IChannelObserver observer)
+    {
+        this._channelObserver.Unsubscribe(observer);
     }
 }

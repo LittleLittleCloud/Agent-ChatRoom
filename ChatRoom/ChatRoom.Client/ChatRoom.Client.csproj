@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
+    <ProjectReference Include="..\ChatRoom.Service\ChatRoom.Room.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using Orleans.Runtime;
+﻿using ChatRoom.Common;
+using Orleans.Runtime;
 
 namespace ChatRoom;
 
@@ -9,4 +10,8 @@ public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
     Task<bool> Message(ChatMsg msg);
     Task<ChatMsg[]> ReadHistory(int numberOfMessages);
     Task<AgentInfo[]> GetMembers();
+
+    Task Subscribe(IChannelObserver observer);
+
+    Task Unsubscribe(IChannelObserver observer);
 }
