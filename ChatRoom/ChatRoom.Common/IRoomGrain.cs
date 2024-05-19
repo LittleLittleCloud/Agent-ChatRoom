@@ -4,8 +4,8 @@ namespace ChatRoom.Common;
 
 public interface IRoomGrain : IGrainWithStringKey
 {
-    Task<StreamId> Join(AgentInfo nickname);
-    Task<StreamId> Leave(string nickname);
+    Task Join(AgentInfo nickname);
+    Task Leave(string nickname);
     Task<AgentInfo[]> GetMembers();
     Task<ChannelInfo[]> GetChannels();
     Task CreateChannel(ChannelInfo channelInfo);

@@ -13,4 +13,9 @@
     <PackageReference Include="AutoGen.Core" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChatRoom.Room"/>
+    <InternalsVisibleTo Include="ChatRoom.Client"/>
+  </ItemGroup>
+
 </Project>
