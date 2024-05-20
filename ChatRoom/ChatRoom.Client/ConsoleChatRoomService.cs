@@ -12,11 +12,13 @@ public class ConsoleChatRoomService : IHostedService
     private readonly ClientContext _clientContext;
     private Task? _processTask = null;
     private readonly ConsoleRoomObserver _roomObserver;
+    private readonly IRoomObserver _roomObserverRef;
     private readonly Dictionary<string, IChannelObserver> _channelObservers = new();
 
     public ConsoleChatRoomService(IClusterClient clsterClient)
     {
         _roomObserver = new ConsoleRoomObserver();
+        _roomObserverRef = clsterClient.CreateObjectReference<IRoomObserver>(_roomObserver);
         _clusterClient = clsterClient;
         _clientContext = new ClientContext(_clusterClient, UserName: "Zhang", CurrentChannel: "General", CurrentRoom: "room");
     }
@@ -25,8 +27,7 @@ public class ConsoleChatRoomService : IHostedService
     {
         PrintUsage();
         var room = _clientContext.ChannelClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        var reference = _clientContext.ChannelClient.CreateObjectReference<IRoomObserver>(_roomObserver);
-        await room.Subscribe(reference);
+        await room.Join(_clientContext.AgentInfo!, _roomObserverRef);
         await JoinChannel(_clientContext, _clientContext.CurrentChannel!);
         _processTask = ProcessLoopAsync(_clientContext, cancellationToken);
     }
@@ -365,11 +366,7 @@ public class ConsoleChatRoomService : IHostedService
         await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
         {
             var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-            var observer = new ConsoleChannelObserver(this._clientContext.UserName!, context.CurrentChannel);
-            var reference = context.ChannelClient.CreateObjectReference<IChannelObserver>(observer);
-            await channel.Join(context.AgentInfo!);
-            await channel.Subscribe(reference);
-            _channelObservers[channelName] = reference;
+            await channel.Join(context.AgentInfo!, _roomObserverRef);
         });
         return context;
     }
@@ -387,7 +384,6 @@ public class ConsoleChatRoomService : IHostedService
             var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
             var reference = _channelObservers[context.CurrentChannel!];
             await room.Leave(context.AgentInfo!);
-            await room.Unsubscribe(reference);
             _channelObservers.Remove(context.CurrentChannel!);
         });
 

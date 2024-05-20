@@ -12,13 +12,13 @@ namespace ChatRoom.Room;
 internal class ChannelGrain : Grain, IChannelGrain
 {
     private readonly List<ChatMsg> _messages = new(100);
-    private readonly List<AgentInfo> _onlineMembers = new(10);
     private ChannelInfo _channelInfo = null!;
-    private readonly ObserverManager<IChannelObserver> _channelObserver;
+    private readonly ILogger _logger;
+    private readonly Dictionary<AgentInfo, ObserverManager<IChannelObserver>> _agents = new();
 
     public ChannelGrain(ILogger<RoomGrain> logger)
     {
-        _channelObserver = new ObserverManager<IChannelObserver>(TimeSpan.FromMinutes(1), logger);
+        _logger = logger;
     }
 
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
@@ -29,21 +29,46 @@ internal class ChannelGrain : Grain, IChannelGrain
         await roomGrain.CreateChannel(_channelInfo);
     }
 
-    public async Task Join(AgentInfo agentInfo)
+    public async Task Join(AgentInfo agentInfo, IChannelObserver callBack)
     {
-        _onlineMembers.Add(agentInfo);
-        await _channelObserver.Notify(x => x.Join(agentInfo));
+        // check if agent is already in _agents
+        if (_agents.ContainsKey(agentInfo))
+        {
+            return;
+        }
+
+        var agentObserver = new ObserverManager<IChannelObserver>(TimeSpan.FromMinutes(1), _logger);
+        agentObserver.Subscribe(callBack, callBack);
+        _agents[agentInfo] = agentObserver;
+
+        foreach (var observer in _agents.Values)
+        {
+            await observer.Notify(x => x.Join(agentInfo, _channelInfo));
+        }
     }
 
     public async Task Leave(AgentInfo agentInfo)
     {
-        _onlineMembers.Remove(agentInfo);
-        await _channelObserver.Notify(x => x.Leave(agentInfo));
+        if (!_agents.ContainsKey(agentInfo))
+        {
+            return;
+        }
+
+        _agents.Remove(agentInfo);
+
+        foreach (var observer in _agents.Values)
+        {
+            await observer.Notify(x => x.Leave(agentInfo, _channelInfo));
+        }
     }
 
     public async Task<bool> Message(ChatMsg msg)
     {
-        await _channelObserver.Notify(x => x.NewMessage(msg));
+        foreach (var observer in _agents.Values)
+        {
+            await observer.Notify(x => x.NewMessage(msg));
+        }
+
         if (msg.From != "System")
         {
             _messages.Add(msg);
@@ -53,7 +78,7 @@ internal class ChannelGrain : Grain, IChannelGrain
         return true;
     }
 
-    public Task<AgentInfo[]> GetMembers() => Task.FromResult(_onlineMembers.ToArray());
+    public Task<AgentInfo[]> GetMembers() => Task.FromResult(_agents.Keys.ToArray());
 
     public Task<ChatMsg[]> ReadHistory(int numberOfMessages)
     {
@@ -66,10 +91,27 @@ internal class ChannelGrain : Grain, IChannelGrain
         return Task.FromResult(response);
     }
 
+    public async Task<AgentInfo[]> GetOnlineMembers()
+    {
+        var agents = new List<AgentInfo>();
+        foreach (var agent in _agents.Keys)
+        {
+            var observer = _agents[agent].Observers.First().Value;
+            var ping = await observer.Ping();
+            if (ping)
+            {
+                agents.Add(agent);
+            }
+        }
+
+        return agents.ToArray();
+    }
+
     public async Task<AgentInfo?> GetNextAgentSpeaker()
     {
-        var humanMembers = _onlineMembers.Where(x => x.IsHuman).ToArray();
-        var notHumanMembers = _onlineMembers.Where(x => !x.IsHuman).ToArray();
+        var onlineMembers = await GetOnlineMembers();
+        var humanMembers = onlineMembers.Where(x => x.IsHuman).ToArray();
+        var notHumanMembers = onlineMembers.Where(x => !x.IsHuman).ToArray();
         var humanAgents = humanMembers.Select(x => new DummyAgent(x)).ToArray();
         var notHumanAgents = notHumanMembers.Select(x => new DummyAgent(x)).ToArray();
         var agents = humanAgents.Concat(notHumanAgents).ToArray();
@@ -114,10 +156,11 @@ internal class ChannelGrain : Grain, IChannelGrain
         var chatHistory = _messages.Select(x => new TextMessage(Role.Assistant, x.Text, x.From)).ToArray();
         var lastSpeaker = agents.First(x => x.Name == _messages.Last().From);
         var nextAvailableAgents = await graph.TransitToNextAvailableAgentsAsync(lastSpeaker, _messages);
-        if (nextAvailableAgents.Count() == 1 && _onlineMembers.Any(x => x.Name == nextAvailableAgents.First().Name))
+        if (nextAvailableAgents.Count() == 1 && onlineMembers.Any(x => x.Name == nextAvailableAgents.First().Name))
         {
-            var nextSpeaker = _onlineMembers.First(x => x.Name == nextAvailableAgents.First().Name);
-            await _channelObserver.Notify(x => GenerateNextReply(x, nextSpeaker, _messages.ToArray()));
+            var nextSpeaker = onlineMembers.First(x => x.Name == nextAvailableAgents.First().Name);
+            var agentObserver = _agents[nextSpeaker];
+            await agentObserver.Notify(x => GenerateNextReply(x, nextSpeaker, _messages.ToArray()));
             return nextSpeaker;
         }
         else if (nextAvailableAgents.Count() > 1)
@@ -136,10 +179,11 @@ internal class ChannelGrain : Grain, IChannelGrain
 
             var nextMessage = await groupChat.CallAsync(chatHistory, maxRound: 1);
             var lastMessage = nextMessage.Last();
-            var nextSpeaker = _onlineMembers.First(x => x.Name == lastMessage.From);
+            var nextSpeaker = onlineMembers.First(x => x.Name == lastMessage.From);
             if (nextAvailableAgents.Any(x => x.Name == nextSpeaker.Name))
             {
-                await _channelObserver.Notify(x => GenerateNextReply(x, nextSpeaker, _messages.ToArray()));
+                var agentObserver = _agents[nextSpeaker];
+                await agentObserver.Notify(x => GenerateNextReply(x, nextSpeaker, _messages.ToArray()));
                 return nextSpeaker;
             }
 
@@ -149,16 +193,6 @@ internal class ChannelGrain : Grain, IChannelGrain
         {
             return null;
         }
-    }
-
-    public async Task Subscribe(IChannelObserver observer)
-    {
-        this._channelObserver.Subscribe(observer, observer);
-    }
-
-    public async Task Unsubscribe(IChannelObserver observer)
-    {
-        this._channelObserver.Unsubscribe(observer);
     }
 
     [OneWay]

@@ -8,49 +8,55 @@ namespace ChatRoom.Room;
 
 public class RoomGrain : Grain, IRoomGrain
 {
-    private readonly ObserverManager<IRoomObserver> _roomObserver;
-    private readonly List<AgentInfo> _members = new(100);
     private readonly List<ChannelInfo> _channels = new(100);
-    private readonly Dictionary<string, IRoomObserver> roomObservers = [];
+    private readonly Dictionary<AgentInfo, IRoomObserver> _agents = [];
+    private readonly ILogger<RoomGrain> _logger;
+
     public RoomGrain(ILogger<RoomGrain> logger)
     {
-        _roomObserver = new ObserverManager<IRoomObserver>(TimeSpan.FromMinutes(1), logger);
+        _logger = logger;
     }
 
-    public Task<AgentInfo[]> GetMembers() => Task.FromResult(_members.ToArray());
+    public Task<AgentInfo[]> GetMembers() => Task.FromResult(_agents.Keys.ToArray());
 
-    public async Task Join(AgentInfo nickname)
+    public async Task Join(AgentInfo nickname, IRoomObserver observer)
     {
-        if (_members.Any(x => x.Name == nickname.Name))
+        if (_agents.ContainsKey(nickname))
         {
             return;
         }
 
-        _members.Add(nickname);
-        var agentJoinMessage = new ChatMsg("System", $"{nickname.Name} joins the chat room.");
-        await _roomObserver.Notify(x => x.Notification(agentJoinMessage));
-        await _roomObserver.Notify(x => x.Join(nickname));
+        var agentObserver = new ObserverManager<IRoomObserver>(TimeSpan.FromMinutes(1), _logger);
+        agentObserver.Subscribe(observer, observer);
+        _agents[nickname] = observer;
+
+        foreach (var ob in _agents.Values)
+        {
+            await ob.Join(nickname, this.GetPrimaryKeyString());
+        }
     }
 
     public async Task Leave(string nickname)
     {
-        var agentInfo = _members.FirstOrDefault(x => x.Name == nickname);
-        if (agentInfo is null)
+        if (!_agents.Any(kv => kv.Key.Name == nickname))
         {
             return;
         }
 
-        for (var i = 0; i < _channels.Count; i++)
+        var agent = _agents.First(kv => kv.Key.Name == nickname).Key;
+        _agents.Remove(agent);
+
+        foreach (var ob in _agents.Values)
         {
-            var channel = _channels[i];
-            await this.RemoveAgentFromChannel(channel, agentInfo);
+            await ob.Leave(agent, this.GetPrimaryKeyString());
         }
 
-        _members.Remove(agentInfo);
-
-        await _roomObserver.Notify(x => x.Leave(agentInfo));
-        var agentLeaveMessage = new ChatMsg("System", $"{nickname} leaves the chat room.");
-        await _roomObserver.Notify(x => x.Notification(agentLeaveMessage));
+        // remove agent from all channels
+        foreach (var channel in _channels)
+        {
+            var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
+            await channelGrain.Leave(agent);
+        }
     }
 
     public Task<ChannelInfo[]> GetChannels()
@@ -79,59 +85,21 @@ public class RoomGrain : Grain, IRoomGrain
         _channels.Remove(channel);
     }
 
-    public Task Subscribe(IRoomObserver observer)
-    {
-        _roomObserver.Subscribe(observer, observer);
-
-        return Task.CompletedTask;
-    }
-
-    public Task Unsubscribe(IRoomObserver observer)
-    {
-        _roomObserver.Unsubscribe(observer);
-
-        return Task.CompletedTask;
-    }
-
     public async Task AddAgentToChannel(ChannelInfo channelInfo, AgentInfo agentInfo)
     {
-        if (_channels.All(x => x.Name != channelInfo.Name))
-        {
-            var channelNotFoundMessage = new ChatMsg("System", $"Channel '{channelInfo.Name}' not found.");
-            await _roomObserver.Notify(x => x.Notification(channelNotFoundMessage));
-        }
-
         var channel = _channels.First(x => x.Name == channelInfo.Name);
+        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
+        var agent = _agents.First(x => x.Key.Name == agentInfo.Name).Key;
 
-        if (_members.All(x => x.Name != agentInfo.Name))
-        {
-            var agentNotFoundMessage = new ChatMsg("System", $"Agent '{agentInfo.Name}' not found.");
-            await _roomObserver.Notify(x => x.Notification(agentNotFoundMessage));
-        }
-
-        var agent = _members.First(x => x.Name == agentInfo.Name);
-
-        await _roomObserver.Notify(x => x.AddMemberToChannel(channel, agent));
+        await channelGrain.Join(agent, _agents[agent]);
     }
 
     public async Task RemoveAgentFromChannel(ChannelInfo channelInfo, AgentInfo agentInfo)
     {
-        if (_channels.All(x => x.Name != channelInfo.Name))
-        {
-            var channelNotFoundMessage = new ChatMsg("System", $"Channel '{channelInfo.Name}' not found.");
-            await _roomObserver.Notify(x => x.Notification(channelNotFoundMessage));
-        }
-
         var channel = _channels.First(x => x.Name == channelInfo.Name);
+        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
+        var agent = _agents.First(x => x.Key.Name == agentInfo.Name).Key;
 
-        if (_members.All(x => x.Name != agentInfo.Name))
-        {
-            var agentNotFoundMessage = new ChatMsg("System", $"Agent '{agentInfo.Name}' not found.");
-            await _roomObserver.Notify(x => x.Notification(agentNotFoundMessage));
-        }
-
-        var agent = _members.First(x => x.Name == agentInfo.Name);
-
-        await _roomObserver.Notify(x => x.RemoveMemberFromChannel(channel, agent));
+        await channelGrain.Leave(agent);
     }
 }

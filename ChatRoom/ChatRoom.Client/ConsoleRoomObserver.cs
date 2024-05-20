@@ -15,15 +15,45 @@ internal class ConsoleRoomObserver : IRoomObserver
         return Task.CompletedTask;
     }
 
-    public Task Join(AgentInfo agent)
+    public Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] msg)
     {
-        AnsiConsole.MarkupLine($"[green]{agent.Name}[/] joins the chat room.");
+        return Task.FromResult<ChatMsg?>(null);
+    }
+
+    public Task Join(AgentInfo agent, string room)
+    {
+        AnsiConsole.MarkupLine($"[green]{agent.Name}[/] joins the [yellow]{room}[/] room.");
+        return Task.CompletedTask;
+    }
+
+    public Task Join(AgentInfo agent, ChannelInfo channelInfo)
+    {
+        AnsiConsole.MarkupLine($"[green]{agent.Name}[/] joins the [yellow]{channelInfo.Name}[/] channel.");
+        return Task.CompletedTask;
+    }
+
+    public Task Leave(AgentInfo agent, string room)
+    {
+        AnsiConsole.MarkupLine($"[green]{agent.Name}[/] leaves the [yellow]{room}[/] room.");
 
         return Task.CompletedTask;
     }
-    public Task Leave(AgentInfo agent)
+
+    public Task Leave(AgentInfo agent, ChannelInfo channelInfo)
     {
-        AnsiConsole.MarkupLine($"[green]{agent.Name}[/] leaves the chat room.");
+        AnsiConsole.MarkupLine($"[green]{agent.Name}[/] leaves the [yellow]{channelInfo.Name}[/] channel.");
+
+        return Task.CompletedTask;
+    }
+
+    public Task NewMessage(ChatMsg msg)
+    {
+        var text = msg.Text;
+        text = text.Replace("[", "[[");
+        text = text.Replace("]", "]]");
+        AnsiConsole.MarkupLine(
+            "[[[dim]{0}[/]]] [bold yellow]{1}:[/] {2}",
+            msg.Created.LocalDateTime, msg.From!, text);
 
         return Task.CompletedTask;
     }
@@ -35,8 +65,5 @@ internal class ConsoleRoomObserver : IRoomObserver
         return Task.CompletedTask;
     }
 
-    public Task RemoveMemberFromChannel(ChannelInfo channel, AgentInfo agent)
-    {
-        return Task.CompletedTask;
-    }
+    public Task<bool> Ping() => Task.FromResult(true);
 }

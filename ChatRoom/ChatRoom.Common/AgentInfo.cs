@@ -28,4 +28,10 @@ public record class AgentInfo
 
         return Name;
     }
+
+    public override int GetHashCode()
+    {
+        // name + description should be unique
+        return Name.GetHashCode() ^ SelfDescription.GetHashCode();
+    }
 }
