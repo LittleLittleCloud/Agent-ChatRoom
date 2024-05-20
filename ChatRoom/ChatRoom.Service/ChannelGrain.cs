@@ -14,7 +14,7 @@ internal class ChannelGrain : Grain, IChannelGrain
     private readonly List<ChatMsg> _messages = new(100);
     private ChannelInfo _channelInfo = null!;
     private readonly ILogger _logger;
-    private readonly Dictionary<AgentInfo, ObserverManager<IChannelObserver>> _agents = new();
+    private readonly Dictionary<AgentInfo, IChannelObserver> _agents = new();
 
     public ChannelGrain(ILogger<RoomGrain> logger)
     {
