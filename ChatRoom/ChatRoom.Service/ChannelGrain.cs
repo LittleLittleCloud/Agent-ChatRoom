@@ -37,13 +37,11 @@ internal class ChannelGrain : Grain, IChannelGrain
             return;
         }
 
-        var agentObserver = new ObserverManager<IChannelObserver>(TimeSpan.FromMinutes(1), _logger);
-        agentObserver.Subscribe(callBack, callBack);
-        _agents[agentInfo] = agentObserver;
+        _agents[agentInfo] = callBack;
 
-        foreach (var observer in _agents.Values)
+        foreach (var cb in _agents.Values)
         {
-            await observer.Notify(x => x.Join(agentInfo, _channelInfo));
+            await cb.Join(agentInfo, _channelInfo);
         }
     }
 
@@ -56,17 +54,17 @@ internal class ChannelGrain : Grain, IChannelGrain
 
         _agents.Remove(agentInfo);
 
-        foreach (var observer in _agents.Values)
+        foreach (var cb in _agents.Values)
         {
-            await observer.Notify(x => x.Leave(agentInfo, _channelInfo));
+            await cb.Leave(agentInfo, _channelInfo);
         }
     }
 
     public async Task<bool> Message(ChatMsg msg)
     {
-        foreach (var observer in _agents.Values)
+        foreach (var cb in _agents.Values)
         {
-            await observer.Notify(x => x.NewMessage(msg));
+            await cb.NewMessage(msg);
         }
 
         if (msg.From != "System")
@@ -96,7 +94,7 @@ internal class ChannelGrain : Grain, IChannelGrain
         var agents = new List<AgentInfo>();
         foreach (var agent in _agents.Keys)
         {
-            var observer = _agents[agent].Observers.First().Value;
+            var observer = _agents[agent];
             var ping = await observer.Ping();
             if (ping)
             {
@@ -159,8 +157,8 @@ internal class ChannelGrain : Grain, IChannelGrain
         if (nextAvailableAgents.Count() == 1 && onlineMembers.Any(x => x.Name == nextAvailableAgents.First().Name))
         {
             var nextSpeaker = onlineMembers.First(x => x.Name == nextAvailableAgents.First().Name);
-            var agentObserver = _agents[nextSpeaker];
-            await agentObserver.Notify(x => GenerateNextReply(x, nextSpeaker, _messages.ToArray()));
+            var cb = _agents[nextSpeaker];
+            var _ = GenerateNextReply(cb, nextSpeaker, _messages.ToArray());
             return nextSpeaker;
         }
         else if (nextAvailableAgents.Count() > 1)
@@ -182,8 +180,8 @@ internal class ChannelGrain : Grain, IChannelGrain
             var nextSpeaker = onlineMembers.First(x => x.Name == lastMessage.From);
             if (nextAvailableAgents.Any(x => x.Name == nextSpeaker.Name))
             {
-                var agentObserver = _agents[nextSpeaker];
-                await agentObserver.Notify(x => GenerateNextReply(x, nextSpeaker, _messages.ToArray()));
+                var cb = _agents[nextSpeaker];
+                var _ = GenerateNextReply(cb, nextSpeaker, _messages.ToArray());
                 return nextSpeaker;
             }
 
