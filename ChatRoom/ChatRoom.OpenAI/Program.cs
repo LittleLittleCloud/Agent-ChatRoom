@@ -1,14 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using AutoGen.Core;
+using AutoGen.OpenAI;
+using AutoGen.OpenAI.Extension;
 using Azure.AI.OpenAI;
-using ChatRoom;
-using ChatRoom.Common;
-using ChatRoom.PowershellHelper;
 using ChatRoom.SDK;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-
-// create agents
 var AZURE_OPENAI_ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
 var AZURE_OPENAI_KEY = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
 var AZURE_DEPLOYMENT_NAME = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOY_NAME");
@@ -32,13 +29,18 @@ else
 }
 
 var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
-var agentInfo = new AgentInfo("ps-gpt", "I am PowerShell GPT, I am good at writing powershell scripts.", false);
-var pwshDeveloper = AgentFactory.CreatePwshDeveloperAgent(openaiClient, Environment.CurrentDirectory, name: agentInfo.Name, modelName: deployModelName);
 
-using var host = new HostBuilder()
+var agent = new OpenAIChatAgent(
+    openAIClient: openaiClient,
+    name: "gpt",
+    modelName: deployModelName,
+    systemMessage: "You are a helpful AI assistant")
+    .RegisterMessageConnector();
+
+var host = Host.CreateDefaultBuilder(args)
     .UseChatRoom()
     .Build();
 
 await host.StartAsync();
-await host.JoinRoomAsync(pwshDeveloper, agentInfo.SelfDescription);
+await host.JoinRoomAsync(agent);
 await host.WaitForShutdownAsync();
