@@ -3,9 +3,6 @@ using Azure.AI.OpenAI;
 using ChatRoom.Common;
 using Microsoft.Extensions.Logging;
 using Orleans.Concurrency;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.Utilities;
 
 namespace ChatRoom.Room;
 
@@ -15,17 +12,19 @@ internal class ChannelGrain : Grain, IChannelGrain
     private ChannelInfo _channelInfo = null!;
     private readonly ILogger _logger;
     private readonly Dictionary<AgentInfo, IChannelObserver> _agents = new();
+    private readonly ChannelConfiguration _config;
 
-    public ChannelGrain(ILogger<RoomGrain> logger)
+    public ChannelGrain(ChannelConfiguration config, ILogger<RoomGrain> logger)
     {
         _logger = logger;
+        _config = config;
     }
 
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
         _channelInfo = new ChannelInfo(this.GetPrimaryKeyString());
         await base.OnActivateAsync(cancellationToken);
-        var roomGrain = this.GrainFactory.GetGrain<IRoomGrain>("room");
+        var roomGrain = this.GrainFactory.GetGrain<IRoomGrain>(_config.RoomConfig.Room);
         await roomGrain.CreateChannel(_channelInfo);
     }
 
@@ -114,11 +113,11 @@ internal class ChannelGrain : Grain, IChannelGrain
         var notHumanAgents = notHumanMembers.Select(x => new DummyAgent(x)).ToArray();
         var agents = humanAgents.Concat(notHumanAgents).ToArray();
         // create agents
-        var AZURE_OPENAI_ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
-        var AZURE_OPENAI_KEY = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
-        var AZURE_DEPLOYMENT_NAME = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOY_NAME");
-        var OPENAI_API_KEY = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-        var OPENAI_MODEL_ID = Environment.GetEnvironmentVariable("OPENAI_MODEL_ID") ?? "gpt-3.5-turbo-0125";
+        var AZURE_OPENAI_ENDPOINT = _config.AzureOpenAIEndpoint;
+        var AZURE_OPENAI_KEY = _config.AzureOpenAIKey;
+        var AZURE_DEPLOYMENT_NAME = _config.AzureOpenAIDeployName;
+        var OPENAI_API_KEY = _config.OpenAIApiKey;
+        var OPENAI_MODEL_ID = _config.OpenAIModelId;
 
         OpenAIClient openaiClient;
         bool useAzure = false;

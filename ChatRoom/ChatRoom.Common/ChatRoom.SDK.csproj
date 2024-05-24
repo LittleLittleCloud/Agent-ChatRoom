@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Orleans.Sdk" />
     <PackageReference Include="Microsoft.Orleans.Streaming" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="AutoGen.Core" />
   </ItemGroup>
 

@@ -8,31 +8,25 @@ using Spectre.Console.Cli;
 
 namespace ChatRoom.OpenAI;
 
-public class OpenAICommandSettings : CommandSettings
+public class OpenAIAgentConfiguration
 {
     [JsonPropertyName("use_aoai")]
-    public bool UseAOAI { get; set; } = false;
+    public bool UseAOAI { get; set; } = true;
 
     [JsonPropertyName("openai_api_key")]
-    public string? OpenAIApiKey { get; set; }
+    public string? OpenAIApiKey { get; set; } = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
 
     [JsonPropertyName("openai_model_id")]
-    public string? OpenAIModelId { get; set; }
+    public string? OpenAIModelId { get; set; } = "gpt-3.5-turbo";
 
     [JsonPropertyName("azure_openai_endpoint")]
-    public string? AzureOpenAIEndpoint { get; set; }
+    public string? AzureOpenAIEndpoint { get; set; } = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
 
     [JsonPropertyName("azure_openai_key")]
-    public string? AzureOpenAIKey { get; set; }
+    public string? AzureOpenAIKey { get; set; } = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
 
     [JsonPropertyName("azure_openai_deploy_name")]
-    public string? AzureOpenAIDeployName { get; set; }
-
-    [JsonPropertyName("room")]
-    public string Room { get; init; } = null!;
-
-    [JsonPropertyName("port")]
-    public int Port { get; init; } = 30000;
+    public string? AzureOpenAIDeployName { get; set; } = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOY_NAME");
 
     [JsonPropertyName("system_message")]
     public string SystemMessage { get; init; } = "You are a helpful AI assistant";

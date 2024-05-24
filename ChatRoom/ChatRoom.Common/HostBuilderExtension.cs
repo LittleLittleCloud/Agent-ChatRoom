@@ -53,8 +53,6 @@ public static class HostBuilderExtension
                 var configuration = ctx.Configuration;
                 var port = configuration.GetValue<int?>("Port") ?? 30000;
                 var roomName = configuration.GetValue<string?>("Room") ?? "room";
-
-                serviceCollections.AddSingleton<AgentCollectionService>();
                 serviceCollections.UseChatRoom(roomName, port);
             });
     }
@@ -69,7 +67,6 @@ public static class HostBuilderExtension
             {
                 serviceCollections.AddSingleton<IAgent>(sp =>
                 {
-                    var agentCollection = sp.GetRequiredService<AgentCollectionService>();
                     var agent = agentFactory(sp).Result;
 
                     return agent;

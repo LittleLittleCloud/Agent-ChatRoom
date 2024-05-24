@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
+    <ProjectReference Include="..\ChatRoom.OpenAI\ChatRoom.OpenAI.csproj" />
     <ProjectReference Include="..\ChatRoom.Service\ChatRoom.Room.csproj" />
   </ItemGroup>
 
