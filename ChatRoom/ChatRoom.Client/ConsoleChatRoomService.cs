@@ -381,10 +381,8 @@ public class ConsoleChatRoomService : IHostedService
 
         await AnsiConsole.Status().StartAsync("Leaving channel...", async ctx =>
         {
-            var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-            var reference = _channelObservers[context.CurrentChannel!];
-            await room.Leave(context.AgentInfo!);
-            _channelObservers.Remove(context.CurrentChannel!);
+            var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+            await channel.Leave(context.AgentInfo!);
         });
 
         return context with { CurrentChannel = null };

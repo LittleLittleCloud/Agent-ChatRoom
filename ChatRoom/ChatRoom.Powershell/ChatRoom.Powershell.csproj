@@ -13,6 +13,7 @@
 
 
   <ItemGroup>
+    <PackageReference Include="AutoGen.OpenAI" />
     <PackageReference Include="Microsoft.PowerShell.SDK" />
   </ItemGroup>
 
