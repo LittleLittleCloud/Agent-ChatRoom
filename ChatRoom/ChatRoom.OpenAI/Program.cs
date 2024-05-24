@@ -3,44 +3,55 @@ using AutoGen.Core;
 using AutoGen.OpenAI;
 using AutoGen.OpenAI.Extension;
 using Azure.AI.OpenAI;
+using ChatRoom.OpenAI;
 using ChatRoom.SDK;
 using Microsoft.Extensions.Hosting;
-
-var AZURE_OPENAI_ENDPOINT = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
-var AZURE_OPENAI_KEY = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
-var AZURE_DEPLOYMENT_NAME = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOY_NAME");
-var OPENAI_API_KEY = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-var OPENAI_MODEL_ID = Environment.GetEnvironmentVariable("OPENAI_MODEL_ID") ?? "gpt-3.5-turbo-0125";
-
-OpenAIClient openaiClient;
-bool useAzure = false;
-if (AZURE_OPENAI_ENDPOINT is string && AZURE_OPENAI_KEY is string && AZURE_DEPLOYMENT_NAME is string)
-{
-    openaiClient = new OpenAIClient(new Uri(AZURE_OPENAI_ENDPOINT), new Azure.AzureKeyCredential(AZURE_OPENAI_KEY));
-    useAzure = true;
-}
-else if (OPENAI_API_KEY is string)
-{
-    openaiClient = new OpenAIClient(OPENAI_API_KEY);
-}
-else
-{
-    throw new ArgumentException("Please provide either (AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_DEPLOYMENT_NAME) or OPENAI_API_KEY");
-}
-
-var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
-
-var agent = new OpenAIChatAgent(
-    openAIClient: openaiClient,
-    name: "gpt",
-    modelName: deployModelName,
-    systemMessage: "You are a helpful AI assistant")
-    .RegisterMessageConnector();
-
 var host = Host.CreateDefaultBuilder(args)
+    .AddAgentAsync<OpenAIConfiguration, IAgent>(async (_, setting) =>
+    {
+        IAgent agent;
+        OpenAIClient openaiClient;
+        string deployModelName;
+        bool useAzure = setting.UseAOAI;
+        if (setting.UseAOAI)
+        {
+            if (setting.AzureOpenAIDeployName is string
+            && setting.AzureOpenAIKey is string
+            && setting.AzureOpenAIEndpoint is string)
+            {
+                openaiClient = new OpenAIClient(new Uri(setting.AzureOpenAIEndpoint), new Azure.AzureKeyCredential(setting.AzureOpenAIKey));
+                deployModelName = setting.AzureOpenAIDeployName;
+            }
+            else
+            {
+                throw new ArgumentException("Please provide either (AzureOpenAIEndpoint, AzureOpenAIKey, AzureOpenAIDeployName)");
+            }
+        }
+        else
+        {
+            if (setting.OpenAIApiKey is string && setting.OpenAIModelId is string)
+            {
+                openaiClient = new OpenAIClient(setting.OpenAIApiKey);
+                deployModelName = setting.OpenAIModelId;
+            }
+            else
+            {
+                throw new ArgumentException("Please provide OpenAIApiKey");
+            }
+        }
+
+        agent = new OpenAIChatAgent(
+            openAIClient: openaiClient,
+            name: setting.Name,
+            modelName: deployModelName,
+            systemMessage: setting.SystemMessage)
+            .RegisterMessageConnector();
+
+        return agent;
+    })
     .UseChatRoom()
     .Build();
 
 await host.StartAsync();
-await host.JoinRoomAsync(agent);
+await host.WaitForAgentsJoinRoomAsync();
 await host.WaitForShutdownAsync();
