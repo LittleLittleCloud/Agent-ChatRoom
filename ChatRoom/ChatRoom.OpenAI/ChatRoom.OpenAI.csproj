@@ -13,7 +13,9 @@
   <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
 
   <ItemGroup>
+    <PackageReference Include="Spectre.Console" />
     <PackageReference Include="AutoGen.OpenAI" />
+    <PackageReference Include="Spectre.Console.Cli" />
   </ItemGroup>
 
   <ItemGroup>

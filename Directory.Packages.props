@@ -7,6 +7,7 @@
     <PackageVersion Include="Moq" Version="4.20.70" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="Spectre.Console" Version="0.48.0" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.48.0" />
     <PackageVersion Include="Spectre.Console.ImageSharp" Version="0.48.0" />
     <PackageVersion Include="Microsoft.Orleans.Sdk" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Orleans.Streaming" Version="8.0.0" />

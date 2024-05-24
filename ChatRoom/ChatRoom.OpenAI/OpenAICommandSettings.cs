@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Spectre.Console.Cli;
 
 namespace ChatRoom.OpenAI;
 
-public class OpenAIConfiguration
+public class OpenAICommandSettings : CommandSettings
 {
     [JsonPropertyName("use_aoai")]
     public bool UseAOAI { get; set; } = false;
