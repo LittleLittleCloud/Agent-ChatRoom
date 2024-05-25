@@ -44,33 +44,33 @@ jobs:
 
     - name: insert clarity snippet to website/_site/index.html
       run: |
-        # import os
-        # clarity_script = """
-        # <script type="text/javascript">
-        #     (function(c,l,a,r,i,t,y){
-        #         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        #         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        #         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        #     })(window, document, "clarity", "script", "lnypewntq4");
-        # </script>
-        # """
+        import os
+        clarity_script = """
+        <script type="text/javascript">
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "mhebc4y6ms");
+        </script>
+        """
 
-        # site_folder = 'website/_site/'
+        site_folder = 'website/_site/'
 
-        # for root, dirs, files in os.walk(site_folder):
-        #     for file in files:
-        #         if file.endswith('.html'):
-        #             html_path = os.path.join(root, file)
+        for root, dirs, files in os.walk(site_folder):
+            for file in files:
+                if file.endswith('.html'):
+                    html_path = os.path.join(root, file)
 
-        #             # insert the script into the html's head section
-        #             with open(html_path, 'r') as file:
-        #                 html = file.read()
-        #                 html = html.replace('</head>', clarity_script + '</head>')
+                    # insert the script into the html's head section
+                    with open(html_path, 'r') as file:
+                        html = file.read()
+                        html = html.replace('</head>', clarity_script + '</head>')
 
-        #             with open(html_path, 'w') as file:
-        #                 file.write(html)
+                    with open(html_path, 'w') as file:
+                        file.write(html)
 
-        #             print(f'Clarity script inserted into {html_path}')
+                    print(f'Clarity script inserted into {html_path}')
       shell: python
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3

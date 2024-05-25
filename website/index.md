@@ -1,14 +1,4 @@
-<h1 align="center">
- <br>Agent Chatroom<br>
-</h1>
-
-<p align="center">
-  <img src="./images/preface.png" alt="Agent Chatroom" style="width: 50%;">
-</p>
-
-<p align="center">
-  <b>An extensible multi-agent platform built on top of AutoGen.Net and Orleans.</b>
-</p>
+## Agent Chatroom: An extensible multi-agent platform built on top of AutoGen.Net and Orleans.
 
 ---
 
@@ -23,13 +13,13 @@
 - 🛠️ Install the Client
 To install the client, run the following command:
 ```bash
-dotnet tool install --global ChatRoom.Client --version 0.0.7
+dotnet tool install --global ChatRoom.Client
 ```
 
 - 🧩 Install the Agent
 To install the OpenAI agent, run the following command:
 ```bash
-dotnet tool install --global ChatRoom.OpenAI --version 0.0.7
+dotnet tool install --global ChatRoom.OpenAI
 ```
 
 > [!Note]
