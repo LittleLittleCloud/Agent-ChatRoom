@@ -1,3 +1,6 @@
+## Introduction
+`ChatRoom.OpenAI` provides a gpt agent that connects to the OpenAI API to generate responses to the user's queries. The agent uses the OpenAI API to generate responses based on the user's input and returns the response to the user.
+
 ## Installation
 To install `ChatRoom.OpenAI` agent, run the following command:
 ```bash

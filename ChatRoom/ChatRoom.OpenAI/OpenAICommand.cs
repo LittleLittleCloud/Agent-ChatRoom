@@ -1,12 +1,19 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel;
+using System.Text.Json;
 using ChatRoom.SDK;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 namespace ChatRoom.OpenAI;
 
-internal class OpenAICommand : ChatRoomAgentCommand
+public class OpenAICommandSettings : ChatRoomAgentClientCommandSettings
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings setting)
+    [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_openai_configuration_schema.json")]
+    [CommandOption("-c|--config <CONFIG>")]
+    public override string? ConfigFile { get; init; }
+}
+public class OpenAICommand : AsyncCommand<OpenAICommandSettings>
+{
+    public override async Task<int> ExecuteAsync(CommandContext context, OpenAICommandSettings setting)
     {
         var config = setting.ConfigFile is not null
             ? JsonSerializer.Deserialize<OpenAIAgentConfiguration>(File.ReadAllText(setting.ConfigFile))!

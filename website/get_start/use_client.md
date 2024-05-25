@@ -3,7 +3,7 @@ Once you [configure the client](./configure_client.md), you can start chatting w
 To start the chatroom client, run the following command:
 
 ```bash
-chatroom
+chatroom --config <path_to_config_file>
 ```
 
 After the chatroom client is started, you will see the following output from the console:
@@ -36,7 +36,7 @@ After the chatroom client is started, you will see the following output from the
 <message> to send a message
 ```
 
-Then you can use `/lm` to list all the agents in the chatroom. For how to install agents, please refer to the [install agents](./install_agent.md) page.
+Then you can use `/lm` to list all the agents in the chatroom. For how to install agents, please refer to the [install agents](./Install_agents.md) page.
 
 ```bash
 /lm

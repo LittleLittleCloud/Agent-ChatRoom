@@ -6,7 +6,7 @@
     <OutputType>Exe</OutputType>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>ps-runner</ToolCommandName>
+    <ToolCommandName>chatroom-powershell</ToolCommandName>
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
