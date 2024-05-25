@@ -2,6 +2,9 @@
 # Trigger the action on push to main
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron:  '30 5,17 * * *'
