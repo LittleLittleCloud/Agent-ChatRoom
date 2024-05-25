@@ -1,0 +1,44 @@
+{
+    "build": {
+      "content": [
+        {
+          "files": [
+            "articles/**.md",
+            "articles/**/toc.yml",
+            "toc.yml",
+            "**/toc.yml",
+            "get_start/**.md",
+            "release_notes/**.md",
+            "*.md"
+          ]
+        }
+      ],
+      "resource": [
+        {
+          "files": [
+            "images/**"
+          ]
+        }
+      ],
+      "output": "_site",
+      "globalMetadataFiles": [],
+      "fileMetadataFiles": [],
+      "template": [
+        "default",
+        "modern",
+        "template"
+      ],
+      "globalMetadata":{
+        "_appTitle": "Agent Chatroom",
+        "_appName": "Agent Chatroom",
+        "_appFooter": "Powered by AutoGen.Net and Orleans",
+        "_gitContribute": {
+          "repo": "https://github.com/microsoft/autogen.git",
+          "branch": "main"
+        }
+      },
+      "postProcessors": [],
+      "keepFileLink": false,
+      "disableGitFeatures": false
+    }
+  }

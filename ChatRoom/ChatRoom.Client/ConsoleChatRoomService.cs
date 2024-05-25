@@ -192,7 +192,11 @@ public class ConsoleChatRoomService : IHostedService
         }.HideHeaders();
         table.AddColumn(new TableColumn("One"));
 
-        var header = new FigletText("Agent Chat Room")
+        var header = new FigletText("Agent")
+        {
+            Color = Color.Aqua
+        };
+        var header2 = new FigletText("ChatRoom")
         {
             Color = Color.Aqua
         };
@@ -217,10 +221,11 @@ public class ConsoleChatRoomService : IHostedService
             .AddColumn(new TableColumn("Content"));
 
         rightTable.AddRow(header)
+            .AddRow(header2)
             .AddEmptyRow()
             .AddEmptyRow()
             .AddRow(markup);
-        table.AddRow(logo, rightTable);
+        table.AddRow(rightTable);
 
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
