@@ -1,0 +1,14 @@
+- name: 0.0.8-0.1.0
+  href: 0_0_8-0_1_0.md
+
+- name: Configure client
+  href: configure_client.md
+
+- name: Use client
+  href: use_client.md
+
+- name: Install agents
+  href: Install_agents.md
+
+- name: Install OpenAI agent
+  href: install_openai_agent.md
