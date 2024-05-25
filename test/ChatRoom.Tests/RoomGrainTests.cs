@@ -9,6 +9,8 @@ using Orleans.TestingHost;
 using ChatRoom.Common;
 using FluentAssertions;
 using Moq;
+using Microsoft.Extensions.DependencyInjection;
+using ChatRoom.Room;
 
 namespace ChatRoom.Tests;
 
@@ -221,6 +223,9 @@ public sealed class TestSiloConfigurator : ISiloConfigurator
     public void Configure(ISiloBuilder hostBuilder)
     {
         hostBuilder.UseLocalhostClustering()
-            .AddMemoryGrainStorage("PubSubStore");
+            .AddMemoryGrainStorage("PubSubStore")
+            .Services.AddSingleton(new ChannelConfiguration()
+            {
+            });
     }
 }

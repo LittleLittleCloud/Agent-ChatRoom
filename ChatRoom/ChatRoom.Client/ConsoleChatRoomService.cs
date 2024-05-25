@@ -363,6 +363,8 @@ public class ConsoleChatRoomService : IHostedService
         context = context with { CurrentChannel = channelName };
         await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
         {
+            var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+            await room.CreateChannel(new ChannelInfo(channelName));
             var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
             await channel.Join(context.AgentInfo!, _roomObserverRef);
         });

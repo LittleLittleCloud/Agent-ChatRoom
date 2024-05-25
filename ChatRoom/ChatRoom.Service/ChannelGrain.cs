@@ -13,10 +13,8 @@ internal class ChannelGrain : Grain, IChannelGrain
     private readonly ILogger _logger;
     private readonly Dictionary<AgentInfo, IChannelObserver> _agents = new();
     private readonly ChannelConfiguration _config;
-    private readonly RoomConfiguration _roomConfig;
-    public ChannelGrain(RoomConfiguration roomConfig, ChannelConfiguration config, ILogger<RoomGrain> logger)
+    public ChannelGrain(ChannelConfiguration config, ILogger<RoomGrain> logger)
     {
-        _roomConfig = roomConfig;
         _logger = logger;
         _config = config;
     }
@@ -25,8 +23,6 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         _channelInfo = new ChannelInfo(this.GetPrimaryKeyString());
         await base.OnActivateAsync(cancellationToken);
-        var roomGrain = this.GrainFactory.GetGrain<IRoomGrain>(_roomConfig.Room);
-        await roomGrain.CreateChannel(_channelInfo);
     }
 
     public async Task Join(AgentInfo agentInfo, IChannelObserver callBack)
