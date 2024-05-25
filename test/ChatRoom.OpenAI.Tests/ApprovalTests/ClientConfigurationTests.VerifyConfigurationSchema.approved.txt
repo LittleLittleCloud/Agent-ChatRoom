@@ -1,0 +1,37 @@
+﻿{
+  "type": "object",
+  "properties": {
+    "use_aoai": {
+      "type": "boolean",
+      "description": "Use AOAI, default is true"
+    },
+    "openai_api_key": {
+      "type": "string",
+      "description": "OpenAI API key, default is $env:OPENAI_API_KEY"
+    },
+    "openai_model_id": {
+      "type": "string",
+      "description": "OpenAI model ID, default is gpt-3.5-turbo"
+    },
+    "azure_openai_endpoint": {
+      "type": "string",
+      "description": "Azure OpenAI endpoint, default is $env:AZURE_OPENAI_ENDPOINT"
+    },
+    "azure_openai_key": {
+      "type": "string",
+      "description": "Azure OpenAI key, default is $env:AZURE_OPENAI_API_KEY"
+    },
+    "azure_openai_deploy_name": {
+      "type": "string",
+      "description": "Azure OpenAI deploy name, default is $env:AZURE_OPENAI_DEPLOY_NAME"
+    },
+    "system_message": {
+      "type": "string",
+      "description": "System message used in gpt agent, default is \u0027You are a helpful AI assistant\u0027"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the agent, default is \u0027gpt\u0027"
+    }
+  }
+}

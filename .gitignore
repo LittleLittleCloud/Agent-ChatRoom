@@ -403,3 +403,6 @@ FodyWeavers.xsd
 # bin
 bin
 obj
+
+# website
+_site

@@ -1,0 +1,13 @@
+{
+    "$schema": "./../schema/client_configuration_schema.json",
+    "name": "Alice",
+    "room_config": {
+        "room": "room",
+        "port": 30000
+    },
+    "channel_config": {
+        "use_aoai": false,
+        "openai_api_key": "your-api-key",
+        "openai_model_id": "gpt-3.5-turbo"
+    }
+}

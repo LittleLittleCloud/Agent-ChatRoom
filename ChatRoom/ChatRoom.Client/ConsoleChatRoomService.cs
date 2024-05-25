@@ -13,14 +13,15 @@ public class ConsoleChatRoomService : IHostedService
     private Task? _processTask = null;
     private readonly ConsoleRoomObserver _roomObserver;
     private readonly IRoomObserver _roomObserverRef;
-    private readonly Dictionary<string, IChannelObserver> _channelObservers = new();
+    private readonly ChatRoomClientConfiguration _configuration;
 
-    public ConsoleChatRoomService(IClusterClient clsterClient)
+    public ConsoleChatRoomService(ChatRoomClientConfiguration configuration, IClusterClient clsterClient)
     {
+        _configuration = configuration;
         _roomObserver = new ConsoleRoomObserver();
         _roomObserverRef = clsterClient.CreateObjectReference<IRoomObserver>(_roomObserver);
         _clusterClient = clsterClient;
-        _clientContext = new ClientContext(_clusterClient, UserName: "Zhang", CurrentChannel: "General", CurrentRoom: "room");
+        _clientContext = new ClientContext(_clusterClient, UserName: configuration.YourName, CurrentChannel: "General", CurrentRoom: configuration.RoomConfig.Room);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -145,13 +146,6 @@ public class ConsoleChatRoomService : IHostedService
             }
 
             var firstTwoCharacters = input.Length >= 2 ? input[..2] : string.Empty;
-            if (firstTwoCharacters is "/n")
-            {
-                context = context with { UserName = input.Replace("/n", "").Trim() };
-                AnsiConsole.MarkupLine(
-                    "[dim][[STATUS]][/] Set username to [lime]{0}[/]", context.UserName);
-                continue;
-            }
 
             if (firstTwoCharacters switch
             {
@@ -198,14 +192,17 @@ public class ConsoleChatRoomService : IHostedService
         }.HideHeaders();
         table.AddColumn(new TableColumn("One"));
 
-        var header = new FigletText("Agent Chat Room")
+        var header = new FigletText("Agent")
+        {
+            Color = Color.Aqua
+        };
+        var header2 = new FigletText("ChatRoom")
         {
             Color = Color.Aqua
         };
 
         var markup = new Markup(
            "[bold fuchsia]/j[/] [aqua]<channel>[/] to [underline green]join[/] a specific channel\n"
-           + "[bold fuchsia]/n[/] [aqua]<username>[/] to set your [underline green]name[/]\n"
            + "[bold fuchsia]/l[/] to [underline green]leave[/] the current channel\n"
            + "[bold fuchsia]/h[/] to re-read channel [underline green]history[/]\n"
            + "[bold fuchsia]/m[/] to query [underline green]members[/] in the current channel\n"
@@ -224,10 +221,11 @@ public class ConsoleChatRoomService : IHostedService
             .AddColumn(new TableColumn("Content"));
 
         rightTable.AddRow(header)
+            .AddRow(header2)
             .AddEmptyRow()
             .AddEmptyRow()
             .AddRow(markup);
-        table.AddRow(logo, rightTable);
+        table.AddRow(rightTable);
 
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();

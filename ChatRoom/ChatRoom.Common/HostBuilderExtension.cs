@@ -53,9 +53,34 @@ public static class HostBuilderExtension
                 var configuration = ctx.Configuration;
                 var port = configuration.GetValue<int?>("Port") ?? 30000;
                 var roomName = configuration.GetValue<string?>("Room") ?? "room";
-
                 serviceCollections.UseChatRoom(roomName, port);
             });
+    }
+
+    public static IHostBuilder AddAgentAsync<TAgent>(
+        this IHostBuilder hostBuilder,
+        Func<IServiceProvider, Task<TAgent>> agentFactory)
+        where TAgent : IAgent
+    {
+        return hostBuilder
+            .ConfigureServices(async (ctx, serviceCollections) =>
+            {
+                serviceCollections.AddSingleton<IAgent>(sp =>
+                {
+                    var agent = agentFactory(sp).Result;
+
+                    return agent;
+                });
+            });
+    }
+
+    public static async Task WaitForAgentsJoinRoomAsync(this IHost host)
+    {
+        var agentCollection = host.Services.GetServices<IAgent>();
+        foreach (var agent in agentCollection)
+        {
+            await host.JoinRoomAsync(agent);
+        }
     }
 
     public static async Task JoinRoomAsync(
