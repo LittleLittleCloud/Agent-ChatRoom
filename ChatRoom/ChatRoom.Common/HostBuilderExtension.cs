@@ -59,27 +59,30 @@ public static class HostBuilderExtension
 
     public static IHostBuilder AddAgentAsync<TAgent>(
         this IHostBuilder hostBuilder,
-        Func<IServiceProvider, Task<TAgent>> agentFactory)
+        Func<IServiceProvider, Task<TAgent>> agentFactory,
+        string selfDescription)
         where TAgent : IAgent
     {
         return hostBuilder
             .ConfigureServices(async (ctx, serviceCollections) =>
             {
-                serviceCollections.AddSingleton<IAgent>(sp =>
+                serviceCollections.AddSingleton(sp =>
                 {
                     var agent = agentFactory(sp).Result;
-
-                    return agent;
+                    var agentInfo = new AgentInfo(agent.Name, selfDescription);
+                    return new AgentInfoAgent(agent, agentInfo);
                 });
             });
     }
 
     public static async Task WaitForAgentsJoinRoomAsync(this IHost host)
     {
-        var agentCollection = host.Services.GetServices<IAgent>();
-        foreach (var agent in agentCollection)
+        var collections = host.Services.GetServices<AgentInfoAgent>();
+        foreach (var item in collections)
         {
-            await host.JoinRoomAsync(agent);
+            var agentInfo = item.Info;
+            var agent = item.Agent;
+            await host.JoinRoomAsync(agent, agentInfo.SelfDescription);
         }
     }
 

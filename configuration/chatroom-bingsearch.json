@@ -1,0 +1,8 @@
+{
+    "$schema": "../schema/chatroom_bing_search_configuration_schema.json",
+    "name": "Alice",
+    "llm_type": "AOAI",
+    "azure_deployment_name": "gpt-3.5-turbo-azure",
+    "azure_openai_endpoint": "your-endpoint",
+    "azure_openai_key": "your-key"
+}

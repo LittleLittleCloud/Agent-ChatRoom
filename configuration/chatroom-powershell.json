@@ -1,0 +1,12 @@
+{
+    "$schema": "../schema/chatroom_powershell_configuration_schema.json",
+    "gpt": {
+        "llm_type": "AOAI",
+        "azure_deployment_name": "your-deployment-name",
+        "azure_openai_endpoint": "your-openai-endpoint",
+        "azure_openai_key": "your-openai-key"
+    },
+    "runner": {
+        "last_n_message": 10
+    }
+}
