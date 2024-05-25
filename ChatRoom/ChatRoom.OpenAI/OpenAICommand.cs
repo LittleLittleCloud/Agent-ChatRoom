@@ -8,7 +8,6 @@ namespace ChatRoom.OpenAI;
 public class OpenAICommandSettings : ChatRoomAgentClientCommandSettings
 {
     [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_openai_configuration_schema.json")]
-    [CommandOption("-c|--config <CONFIG>")]
     public override string? ConfigFile { get; init; }
 }
 public class OpenAICommand : AsyncCommand<OpenAICommandSettings>
