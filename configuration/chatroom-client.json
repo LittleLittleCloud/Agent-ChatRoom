@@ -1,5 +1,5 @@
 {
-    "$schema": "./../schema/client_configuration_schema.json",
+    "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json",
     "name": "Alice",
     "room_config": {
         "room": "room",

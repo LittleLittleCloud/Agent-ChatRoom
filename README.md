@@ -1,25 +1,65 @@
-# Project
+<h1 align="center">
+ <br>Agent Chatroom<br>
+</h1>
 
-LLM-Chatroom: Use AutoGen.Net + Orlean to build a basic chatroom application
+<p align="center">
+  <img src="./images/preface.png" alt="Agent Chatroom" style="width: 50%;">
+</p>
 
-## Contributing
+<p align="center">
+  <b>An extensible multi-agent platform built on top of AutoGen.Net and Orleans.</b>
+</p>
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+---
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+## 🌟 Highlights
+- **Multi-Agent Chat**: Chat with multiple agents simultaneously.
+- **Extensible**: Create your own agents and integrate them into the chatroom.
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+---
 
-## Trademarks
+## 🚀 Quick Start
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
-trademarks or logos is subject to and must follow 
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+- 🛠️ Install the Client
+To install the client, run the following command:
+```bash
+dotnet tool install --global ChatRoom.Client --version 0.0.7
+```
+
+- 🧩 Install the Agent
+To install the OpenAI agent, run the following command:
+```bash
+dotnet tool install --global ChatRoom.OpenAI --version 0.0.7
+```
+
+> [!Note]
+> As of 2024/05/24, the following agents are available as dotnet tools from NuGet:
+> - `ChatRoom.OpenAI`: OpenAI agent.
+> - `ChatRoom.Powershell`: Powershell GPT agent and Powershell executor agent.
+> - `ChatRoom.BingSearch`: Bing search agent.
+
+You can search for and install these agents from [nuget.org](https://www.nuget.org/).
+
+- 🚪 Start the Chatroom
+To start the chatroom service as an Orleans silo, run:
+```bash
+chatroom
+```
+
+- 🤖 Start the OpenAI Agent and Join the Chatroom
+To start the OpenAI agent, run:
+```bash
+chatroom-openai
+```
+
+After the OpenAI agent is started, you will see the following message in the chatroom:
+```bash
+gpt joined the chatroom.
+```
+
+- 💬 Add the OpenAI Agent to the Current Channel and Start Chatting
+Once the GPT agent is in the chatroom, you can add it to the current channel and start chatting with it using the following command:
+```bash
+/am gpt
+Hey, tell me a joke.
+```
