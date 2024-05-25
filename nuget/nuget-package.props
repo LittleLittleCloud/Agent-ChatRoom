@@ -11,7 +11,7 @@
 
     <!-- Required license, copyright, and repo information. Packages can override. -->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://microsoft.github.io/autogen-for-net</PackageProjectUrl>
+    <PackageProjectUrl>https://littlelittlecloud.github.io/Agent-ChatRoom/</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
     <!-- Use icon and NUGET readme from dotnet/nuget folder -->
