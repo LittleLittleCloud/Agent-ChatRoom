@@ -14,18 +14,6 @@ namespace ChatRoom.Client;
 
 public class ChatRoomClientCommandSettings : CommandSettings
 {
-    [Description("The room name to create.")]
-    [CommandOption("-r|--room <ROOM>")]
-    public string? Room { get; init; } = null;
-
-    [Description("The port to listen.")]
-    [CommandOption("-p|--port <PORT>")]
-    public int? Port { get; init; } = null;
-
-    [Description("Your name in the room")]
-    [CommandOption("-n|--name <NAME>")]
-    public string YourName { get; init; } = "User";
-
     [Description("Configuration file")]
     [CommandOption("-c|--config <CONFIG>")]
     public string? ConfigFile { get; init; } = null;
@@ -39,15 +27,11 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             ? JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(command.ConfigFile))!
             : new ChatRoomClientConfiguration();
 
-        config.RoomConfig.Room = command.Room ?? config.RoomConfig.Room;
-        config.RoomConfig.Port = command.Port ?? config.RoomConfig.Port;
-        config.YourName = command.YourName;
-
         var host = Host.CreateDefaultBuilder()
             .UseOrleans(siloBuilder =>
             {
                 siloBuilder
-                    .UseLocalhostClustering(config.RoomConfig.Port)
+                    .UseLocalhostClustering(gatewayPort: config.RoomConfig.Port)
                     .AddMemoryGrainStorage("PubSubStore")
                     .ConfigureLogging(logBuilder =>
                     {

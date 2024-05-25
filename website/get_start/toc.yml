@@ -8,7 +8,7 @@
   href: use_client.md
 
 - name: Install agents
-  href: install_agents.md
+  href: Install_agents.md
 
 - name: Install OpenAI agent
   href: install_openai_agent.md
