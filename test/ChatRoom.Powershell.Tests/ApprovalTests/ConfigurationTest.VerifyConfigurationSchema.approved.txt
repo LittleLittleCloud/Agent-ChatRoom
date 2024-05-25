@@ -1,0 +1,113 @@
+﻿{
+  "type": "object",
+  "properties": {
+    "runner": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string"
+        },
+        "description": {
+          "$ref": "#/$defs/string1"
+        },
+        "last_n_message": {
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "description": "Powershell runner configuration"
+    },
+    "gpt": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string2"
+        },
+        "CurrentWorkingDirectory": {
+          "$ref": "#/$defs/string3"
+        },
+        "system_message": {
+          "$ref": "#/$defs/string4"
+        },
+        "description": {
+          "$ref": "#/$defs/string5"
+        },
+        "llm_type": {
+          "$ref": "#/$defs/lLMType"
+        },
+        "azure_openai_endpoint": {
+          "$ref": "#/$defs/string6"
+        },
+        "azure_openai_key": {
+          "$ref": "#/$defs/string7"
+        },
+        "azure_deployment_name": {
+          "$ref": "#/$defs/string8"
+        },
+        "openai_api_key": {
+          "$ref": "#/$defs/string9"
+        },
+        "openai_model_id": {
+          "$ref": "#/$defs/string10"
+        }
+      },
+      "description": "Powershell GPT configuration"
+    }
+  },
+  "$defs": {
+    "string": {
+      "type": "string",
+      "description": "Name of the powershell runner agent, default is \u0027ps-runner\u0027"
+    },
+    "string1": {
+      "type": "string",
+      "description": "Agent description of the powershell runner agent, default is \u0027A powershell script runner\u0027"
+    },
+    "integer": {
+      "type": "integer",
+      "description": "Number of last message to look for powershell script, default is 10"
+    },
+    "string2": {
+      "type": "string",
+      "description": "Name of the powershell gpt agent, default is \u0027ps-gpt\u0027"
+    },
+    "string3": {
+      "type": "string",
+      "description": "Current working directory, default is current directory of where the program is running"
+    },
+    "string4": {
+      "type": "string",
+      "description": "System message, default is \u0027$\u0022\u0022\u0022\r\n            You are a powershell developer. You need to convert the task assigned to you to a powershell script.\r\n            \r\n            If there is bug in the script, you need to fix it.\r\n\r\n            The current working directory is {cwd}\r\n\r\n            You need to write powershell script to resolve task. Put the script between \u0060\u0060\u0060pwsh and \u0060\u0060\u0060.\r\n            The script should always write the result to the output stream using Write-Host command.\r\n\r\n            e.g.\r\n            \u0060\u0060\u0060pwsh\r\n            # This is a powershell script\r\n            Write-Host \u0022Hello, World!\u0022\r\n            \u0060\u0060\u0060\r\n            \u0022\u0022\u0022\u0027"
+    },
+    "string5": {
+      "type": "string",
+      "description": "Agent description, default is \u0027I am PowerShell GPT, I am good at writing powershell scripts.\u0027"
+    },
+    "lLMType": {
+      "enum": [
+        "AOAI",
+        "OpenAI"
+      ],
+      "description": "Language model type, will use Azure OpenAI if not provided"
+    },
+    "string6": {
+      "type": "string",
+      "description": "Azure OpenAI endpoint, will use $env:AZURE_OPENAI_ENDPOINT if not provided"
+    },
+    "string7": {
+      "type": "string",
+      "description": "Azure OpenAI key, will use $env:AZURE_OPENAI_API_KEY if not provided"
+    },
+    "string8": {
+      "type": "string",
+      "description": "Azure OpenAI deployment name, will use $env:AZURE_OPENAI_DEPLOY_NAME if not provided"
+    },
+    "string9": {
+      "type": "string",
+      "description": "OpenAI API key, will use $env:OPENAI_API_KEY if not provided"
+    },
+    "string10": {
+      "type": "string",
+      "description": "OpenAI model ID, will use gpt-3.5-turbo if not provided"
+    }
+  }
+}

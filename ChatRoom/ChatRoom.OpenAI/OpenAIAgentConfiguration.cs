@@ -39,6 +39,10 @@ public class OpenAIAgentConfiguration
     [JsonPropertyName("system_message")]
     public string SystemMessage { get; init; } = "You are a helpful AI assistant";
 
+    [Description("Agent description used in gpt agent, default is 'I am a helpful AI assistant'")]
+    [JsonPropertyName("agent_description")]
+    public string Description { get; init; } = "I am a helpful AI assistant";
+
     [Description("Name of the agent, default is 'gpt'")]
     [JsonPropertyName("name")]
     public string Name { get; init; } = "gpt";

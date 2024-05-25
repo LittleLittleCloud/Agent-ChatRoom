@@ -29,6 +29,10 @@
       "type": "string",
       "description": "System message used in gpt agent, default is \u0027You are a helpful AI assistant\u0027"
     },
+    "agent_description": {
+      "type": "string",
+      "description": "Agent description used in gpt agent, default is \u0027I am a helpful AI assistant\u0027"
+    },
     "name": {
       "type": "string",
       "description": "Name of the agent, default is \u0027gpt\u0027"

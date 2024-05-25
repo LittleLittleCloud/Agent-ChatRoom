@@ -1,0 +1,48 @@
+﻿{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the bing search agent, default is \u0027bing-search\u0027"
+    },
+    "system_message": {
+      "type": "string",
+      "description": "System message, default is \u0027You are a Bing search agent. You can search the web using Bing search engine.\u0027"
+    },
+    "description": {
+      "type": "string",
+      "description": "Agent description, default is \u0027I am a Bing search agent. I can search the web using Bing search engine.\u0027"
+    },
+    "bing_api_key": {
+      "type": "string",
+      "description": "Bing API key, will use $env:BING_API_KEY if not provided"
+    },
+    "llm_type": {
+      "enum": [
+        "AOAI",
+        "OpenAI"
+      ],
+      "description": "Language model type, will use Azure OpenAI if not provided"
+    },
+    "azure_openai_endpoint": {
+      "type": "string",
+      "description": "Azure OpenAI endpoint, will use $env:AZURE_OPENAI_ENDPOINT if not provided"
+    },
+    "azure_openai_key": {
+      "type": "string",
+      "description": "Azure OpenAI key, will use $env:AZURE_OPENAI_API_KEY if not provided"
+    },
+    "azure_deployment_name": {
+      "type": "string",
+      "description": "Azure OpenAI deployment name, will use $env:AZURE_OPENAI_DEPLOY_NAME if not provided"
+    },
+    "openai_api_key": {
+      "type": "string",
+      "description": "OpenAI API key, will use $env:OPENAI_API_KEY if not provided"
+    },
+    "openai_model_id": {
+      "type": "string",
+      "description": "OpenAI model ID, will use gpt-3.5-turbo if not provided"
+    }
+  }
+}

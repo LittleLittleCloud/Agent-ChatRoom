@@ -15,7 +15,7 @@ internal class OpenAICommand : ChatRoomAgentCommand
         var agentFactory = new OpenAIAgentFactory(config);
 
         var host = Host.CreateDefaultBuilder()
-            .AddAgentAsync(async (_) => agentFactory.CreateAgent())
+            .AddAgentAsync(async (_) => agentFactory.CreateAgent(), config.Description)
             .UseChatRoom(roomName: setting.Room ?? "room", port: setting.Port ?? 30000)
             .Build();
 

@@ -11,17 +11,20 @@ namespace ChatRoom.Powershell;
 
 internal class PowershellRunnerAgent : IAgent
 {
-    public PowershellRunnerAgent(string name)
+    public PowershellRunnerAgent(string name, int lastNMessage = 10)
     {
         Name = name;
+        LastNMessage = lastNMessage;
     }
     public string Name { get; }
+
+    public int LastNMessage { get; }
 
     public Task<IMessage> GenerateReplyAsync(IEnumerable<IMessage> messages, GenerateReplyOptions? options = null, CancellationToken cancellationToken = default)
     {
         // get the last message
         var lastMessage = messages
-                .TakeLast(2)
+                .TakeLast(this.LastNMessage)
                 .Where(m => m.GetContent() is string content && content.Contains("```pwsh"))
                 .LastOrDefault() ?? null;
 
