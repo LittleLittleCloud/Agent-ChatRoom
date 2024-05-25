@@ -1,5 +1,5 @@
-- name: Install client
-  href: install_client.md
+- name: 0.0.8-0.1.0
+  href: 0_0_8-0_1_0.md
 
 - name: Configure client
   href: configure_client.md

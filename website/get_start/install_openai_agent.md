@@ -1,11 +1,7 @@
+## Installation
 To install `ChatRoom.OpenAI` agent, run the following command:
 ```bash
 dotnet tool install --global ChatRoom.OpenAI
-```
-
-After the agent is installed, you can start the agent with the following command:
-```bash
-chatroom-openai
 ```
 
 ## Configuration
