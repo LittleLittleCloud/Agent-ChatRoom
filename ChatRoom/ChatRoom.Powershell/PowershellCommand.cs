@@ -15,7 +15,6 @@ public class PowershellCommandSettings : ChatRoomAgentClientCommandSettings
 {
 
     [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_powershell_configuration_schema.json")]
-    [CommandOption("-c|--config <CONFIG>")]
     public override string? ConfigFile { get; init; }
 }
 
