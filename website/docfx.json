@@ -33,7 +33,7 @@
         "_appName": "Agent Chatroom",
         "_appFooter": "Powered by AutoGen.Net and Orleans",
         "_gitContribute": {
-          "repo": "https://github.com/microsoft/autogen.git",
+          "repo": "https://github.com/LittleLittleCloud/Agent-ChatRoom",
           "branch": "main"
         }
       },
