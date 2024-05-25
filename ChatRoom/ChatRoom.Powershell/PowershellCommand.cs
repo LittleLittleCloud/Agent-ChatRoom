@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -9,6 +10,14 @@ using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 
 namespace ChatRoom.Powershell;
+
+public class PowershellCommandSettings : ChatRoomAgentClientCommandSettings
+{
+
+    [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_powershell_configuration_schema.json")]
+    [CommandOption("-c|--config <CONFIG>")]
+    public override string? ConfigFile { get; init; }
+}
 
 public class PowershellCommand : ChatRoomAgentCommand
 {

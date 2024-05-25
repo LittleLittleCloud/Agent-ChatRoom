@@ -2,7 +2,7 @@
 using Spectre.Console.Cli;
 
 namespace ChatRoom.SDK;
-public class ChatRoomAgentClientCommandSettings : CommandSettings
+public abstract class ChatRoomAgentClientCommandSettings : CommandSettings
 {
     [Description("The room name to create.")]
     [CommandOption("-r|--room <ROOM>")]
@@ -14,7 +14,7 @@ public class ChatRoomAgentClientCommandSettings : CommandSettings
 
     [Description("Configuration file")]
     [CommandOption("-c|--config <CONFIG>")]
-    public string? ConfigFile { get; init; } = null;
+    public abstract string? ConfigFile { get; init; }
 }
 
 public abstract class ChatRoomAgentCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>

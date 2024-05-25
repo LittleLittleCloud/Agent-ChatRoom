@@ -8,7 +8,13 @@
   href: use_client.md
 
 - name: Install agents
-  href: Install_agents.md
+  href: install_agents.md
 
-- name: Install OpenAI agent
-  href: install_openai_agent.md
+- name: Agents
+  items:
+    - name: OpenAI agent
+      href: install_openai_agent.md
+    - name: Bing Search agent
+      href: bing_search_agent.md
+    - name: Powershell agent
+      href: powershell_agent.md

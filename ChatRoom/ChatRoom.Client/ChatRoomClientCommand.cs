@@ -14,7 +14,7 @@ namespace ChatRoom.Client;
 
 public class ChatRoomClientCommandSettings : CommandSettings
 {
-    [Description("Configuration file")]
+    [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json")]
     [CommandOption("-c|--config <CONFIG>")]
     public string? ConfigFile { get; init; } = null;
 }
