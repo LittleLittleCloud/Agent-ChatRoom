@@ -2,6 +2,7 @@
 using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
+using FluentAssertions;
 using Json.Schema;
 using Json.Schema.Generation;
 using Xunit;
@@ -19,9 +20,14 @@ namespace ChatRoom.BingSearch.Tests
                 .FromType<BingSearchConfiguration>()
                 .Build();
 
+            var schemaFileName = "chatroom_bing_search_configuration_schema.json";
+            var schemaFilePath = Path.Join("Schema", schemaFileName);
+            var schemaFile = File.ReadAllText(schemaFilePath);
+
             var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
 
             Approvals.Verify(json);
+            schemaFile.Should().BeEquivalentTo(json);
         }
     }
 }

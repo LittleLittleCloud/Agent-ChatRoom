@@ -2,5 +2,6 @@
 using ChatRoom.OpenAI;
 using Spectre.Console.Cli;
 
-var app = new CommandApp<OpenAICommand>();
+var app = new CommandApp<OpenAICommand>()
+    .WithDescription(OpenAICommand.Description);
 await app.RunAsync(args);

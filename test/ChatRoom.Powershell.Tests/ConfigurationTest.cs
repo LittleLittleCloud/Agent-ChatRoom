@@ -10,6 +10,7 @@ using ApprovalTests;
 using Json.Schema;
 using Xunit;
 using Json.Schema.Generation;
+using FluentAssertions;
 
 namespace ChatRoom.Powershell.Tests;
 
@@ -25,7 +26,11 @@ public class ConfigurationTest
             .Build();
 
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
+        var schemaFileName = "chatroom_powershell_configuration_schema.json";
+        var schemaFilePath = Path.Join("Schema", schemaFileName);
+        var schemaFile = File.ReadAllText(schemaFilePath);
 
         Approvals.Verify(json);
+        schemaFile.Should().BeEquivalentTo(json);
     }
 }

@@ -1,0 +1,16 @@
+﻿DESCRIPTION:
+A Chatroom cli client.
+
+The client will start a chat room service and attach a console client to it.
+
+To use the client, you need to provide a configuration file.
+A configuration file is a json file with the following schema:
+- https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json
+
+USAGE:
+    testhost.dll [OPTIONS]
+
+OPTIONS:
+    -h, --help               Prints help information
+    -v, --version            Prints version information
+    -c, --config <CONFIG>    Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json

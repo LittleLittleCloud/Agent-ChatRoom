@@ -6,5 +6,7 @@ using ChatRoom.SDK;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 
-var app = new CommandApp<PowershellCommand>();
+var app = new CommandApp<PowershellCommand>()
+    .WithDescription(PowershellCommand.Description);
+
 await app.RunAsync(args);
