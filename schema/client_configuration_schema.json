@@ -44,7 +44,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "The name of the extension"
+            "description": "The name of the extension, can be any string"
           },
           "command": {
             "type": "string",
@@ -55,7 +55,13 @@
     },
     "name": {
       "type": "string",
-      "description": "Your name in the chat room"
+      "description": "Your name in the chat room",
+      "default": "User"
+    },
+    "workspace": {
+      "type": "string",
+      "description": "The workspace directory to store the chat history and other files like logs.\r\nThe workspace will be created if not exists.\r\nThe default value is \u0027$(cwd)/workspace\u0027.",
+      "default": "workspace"
     }
   },
   "$defs": {
