@@ -60,7 +60,7 @@
     },
     "workspace": {
       "type": "string",
-      "description": "The workspace directory to store the chat history and other files like logs.\r\nThe workspace will be created if not exists.\r\nThe default value is \u0027$(cwd)/workspace\u0027.",
+      "description": "The workspace directory to store the chat history and other files like logs. The workspace will be created if not exists. The default value is \u0027$(cwd)/workspace\u0027.",
       "default": "workspace"
     }
   },

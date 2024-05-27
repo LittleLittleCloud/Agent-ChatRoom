@@ -23,11 +23,7 @@ public class ChatRoomClientConfiguration
     public string YourName { get; set; } = "User";
 
     [JsonPropertyName("workspace")]
-    [Description("""
-The workspace directory to store the chat history and other files like logs.
-The workspace will be created if not exists.
-The default value is '$(cwd)/workspace'.
-""")]
+    [Description("The workspace directory to store the chat history and other files like logs. The workspace will be created if not exists. The default value is '$(cwd)/workspace'.")]
     [Default("workspace")]
     public string Workspace { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "workspace");
 }
