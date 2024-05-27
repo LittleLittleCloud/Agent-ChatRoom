@@ -4,12 +4,19 @@ namespace ChatRoom.Common;
 
 public interface IRoomGrain : IGrainWithStringKey
 {
-    Task Join(AgentInfo nickname, IRoomObserver callBack);
-    Task Leave(string nickname);
+    Task JoinRoom(string name, string description, bool isHuman, IRoomObserver callBack);
+
+    Task LeaveRoom(string nickname);
+
     Task<AgentInfo[]> GetMembers();
+
     Task<ChannelInfo[]> GetChannels();
+
     Task CreateChannel(ChannelInfo channelInfo);
+
     Task DeleteChannel(string channelName);
-    Task AddAgentToChannel(ChannelInfo channelInfo, AgentInfo agentInfo);
-    Task RemoveAgentFromChannel(ChannelInfo channelInfo, AgentInfo agentInfo);
+
+    Task AddAgentToChannel(ChannelInfo channelInfo, string agentName);
+
+    Task RemoveAgentFromChannel(ChannelInfo channelInfo, string agentName);
 }

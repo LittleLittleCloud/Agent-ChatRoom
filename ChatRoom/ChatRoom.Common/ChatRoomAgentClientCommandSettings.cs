@@ -2,7 +2,7 @@
 using Spectre.Console.Cli;
 
 namespace ChatRoom.SDK;
-public abstract class ChatRoomAgentClientCommandSettings : CommandSettings
+public class ChatRoomAgentClientCommandSettings : CommandSettings
 {
     [Description("The room name to create.")]
     [CommandOption("-r|--room <ROOM>")]

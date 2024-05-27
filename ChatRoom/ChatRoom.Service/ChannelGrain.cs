@@ -25,8 +25,9 @@ internal class ChannelGrain : Grain, IChannelGrain
         await base.OnActivateAsync(cancellationToken);
     }
 
-    public async Task Join(AgentInfo agentInfo, IChannelObserver callBack)
+    public async Task JoinChannel(string name, string description, bool isHuman, IChannelObserver callBack)
     {
+        var agentInfo = new AgentInfo(name, description, isHuman);
         // check if agent is already in _agents
         if (_agents.ContainsKey(agentInfo))
         {
@@ -37,13 +38,14 @@ internal class ChannelGrain : Grain, IChannelGrain
 
         foreach (var cb in _agents.Values)
         {
-            await cb.Join(agentInfo, _channelInfo);
+            await cb.JoinChannel(agentInfo, _channelInfo);
         }
     }
 
-    public async Task Leave(AgentInfo agentInfo)
+    public async Task LeaveChannel(string name)
     {
-        if (!_agents.ContainsKey(agentInfo))
+        var agentInfo = _agents.Keys.FirstOrDefault(x => x.Name == name);
+        if (agentInfo is null)
         {
             return;
         }
@@ -52,7 +54,7 @@ internal class ChannelGrain : Grain, IChannelGrain
 
         foreach (var cb in _agents.Values)
         {
-            await cb.Leave(agentInfo, _channelInfo);
+            await cb.LeaveChannel(agentInfo, _channelInfo);
         }
     }
 

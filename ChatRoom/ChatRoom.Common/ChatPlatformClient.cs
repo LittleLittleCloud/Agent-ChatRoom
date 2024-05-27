@@ -16,18 +16,17 @@ public class ChatPlatformClient
 
     public async Task RegisterAgentAsync(IAgent agent, string? description = null)
     {
-        var observer = new AgentObserver(agent);
+        var observer = new AutoGenAgentObserver(agent);
         var room = _client.GetGrain<IRoomGrain>(_room);
         var reference = _client.CreateObjectReference<IRoomObserver>(observer);
-        var agentInfo = new AgentInfo(agent.Name, description ?? string.Empty, false);
-        await room.Join(agentInfo, reference);
+        await room.JoinRoom(agent.Name, description ?? string.Empty, false, reference);
         _observers[agent.Name] = reference;
     }
 
     public async Task UnregisterAgentAsync(IAgent agent)
     {
         var room = _client.GetGrain<IRoomGrain>(_room);
-        await room.Leave(agent.Name);
+        await room.LeaveRoom(agent.Name);
         _observers.Remove(agent.Name);
     }
 }
