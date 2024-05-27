@@ -12,8 +12,9 @@ public abstract class ChatRoomAgentClientCommandSettings : CommandSettings
     [CommandOption("-p|--port <PORT>")]
     public int? Port { get; init; } = null;
 
+    [Description("Configuration file.")]
     [CommandOption("-c|--config <CONFIG>")]
-    public abstract string? ConfigFile { get; init; }
+    public string? ConfigFile { get; init; }
 }
 
 public abstract class ChatRoomAgentCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>

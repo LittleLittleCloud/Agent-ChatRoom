@@ -11,15 +11,19 @@ using Spectre.Console.Cli;
 
 namespace ChatRoom.Powershell;
 
-public class PowershellCommandSettings : ChatRoomAgentClientCommandSettings
-{
-
-    [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_powershell_configuration_schema.json")]
-    public override string? ConfigFile { get; init; }
-}
-
 public class PowershellCommand : ChatRoomAgentCommand
 {
+    public static string Description => """
+        Powershell agents for chat room.
+
+        The following agents are available:
+        - ps-gpt: an agent that generate powershell script.
+        - ps-runner: an agent that run powershell script.
+
+        To use the agents, you need to provide a configuration file.
+        A configuration file is a json file with the following schema:
+        - https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_powershell_configuration_schema.json
+        """;
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings settings)
     {
         var config = settings.ConfigFile is not null

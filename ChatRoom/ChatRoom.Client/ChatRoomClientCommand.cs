@@ -21,6 +21,15 @@ public class ChatRoomClientCommandSettings : CommandSettings
 
 public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 {
+    public static string Description { get; } = """
+        A Chatroom cli client.
+        
+        The client will start a chat room service and attach a console client to it.
+        
+        To use the client, you need to provide a configuration file.
+        A configuration file is a json file with the following schema:
+        - https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json
+        """;
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomClientCommandSettings command)
     {
         var config = command.ConfigFile is not null

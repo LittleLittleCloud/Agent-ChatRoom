@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
+using FluentAssertions;
 using Json.Schema;
 using Json.Schema.Generation;
 using Xunit;
@@ -26,6 +27,11 @@ public class ClientConfigurationTests
 
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
 
+        var schemaFileName = "client_configuration_schema.json";
+        var schemaFilePath = Path.Join("Schema", schemaFileName);
+        var schemaFile = File.ReadAllText(schemaFilePath);
+
         Approvals.Verify(json);
+        schemaFile.Should().BeEquivalentTo(json);
     }
 }
