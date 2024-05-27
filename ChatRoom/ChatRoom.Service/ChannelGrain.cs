@@ -3,6 +3,7 @@ using Azure.AI.OpenAI;
 using ChatRoom.Common;
 using Microsoft.Extensions.Logging;
 using Orleans.Concurrency;
+using Orleans.Runtime;
 
 namespace ChatRoom.Room;
 
@@ -13,7 +14,10 @@ internal class ChannelGrain : Grain, IChannelGrain
     private readonly ILogger _logger;
     private readonly Dictionary<AgentInfo, IChannelObserver> _agents = new();
     private readonly ChannelConfiguration _config;
-    public ChannelGrain(ChannelConfiguration config, ILogger<RoomGrain> logger)
+
+    public ChannelGrain(
+        ChannelConfiguration config,
+        ILogger<ChannelGrain> logger)
     {
         _logger = logger;
         _config = config;
@@ -22,6 +26,7 @@ internal class ChannelGrain : Grain, IChannelGrain
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
         _channelInfo = new ChannelInfo(this.GetPrimaryKeyString());
+        _logger.LogInformation("Channel {ChannelId} activated", _channelInfo.Name);
         await base.OnActivateAsync(cancellationToken);
     }
 
@@ -36,8 +41,11 @@ internal class ChannelGrain : Grain, IChannelGrain
 
         _agents[agentInfo] = callBack;
 
+        _logger.LogInformation("Agent {AgentName} joined channel {ChannelId}", agentInfo.Name, _channelInfo.Name);
+
         foreach (var cb in _agents.Values)
         {
+            _logger.LogInformation("Notifying {AgentName} about new agent {NewAgentName}", cb, agentInfo.Name);
             await cb.JoinChannel(agentInfo, _channelInfo);
         }
     }
@@ -51,24 +59,39 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
 
         _agents.Remove(agentInfo);
+        _logger.LogInformation("Agent {AgentName} left channel {ChannelId}", agentInfo.Name, _channelInfo.Name);
 
         foreach (var cb in _agents.Values)
         {
+            _logger.LogInformation("Notifying {AgentName} about agent {LeavingAgentName} leaving", cb, agentInfo.Name);
             await cb.LeaveChannel(agentInfo, _channelInfo);
         }
     }
 
     public async Task<bool> Message(ChatMsg msg)
     {
+        _logger.LogInformation("Received message from {From} in channel {ChannelId}", msg.From, _channelInfo.Name);
         foreach (var cb in _agents.Values)
         {
+            _logger.LogInformation("Notifying {AgentName} about new message", cb);
             await cb.NewMessage(msg);
         }
 
         if (msg.From != "System")
         {
+            _logger.LogInformation("Adding message to history");
             _messages.Add(msg);
-            await GetNextAgentSpeaker();
+
+            _logger.LogInformation("Getting next agent speaker");
+            var nextSpeaker = await GetNextAgentSpeaker();
+            if (nextSpeaker is not null)
+            {
+                _logger.LogInformation("Next Speaker: {NextSpeaker}", nextSpeaker.Name);
+            }
+            else
+            {
+                _logger.LogInformation("No next speaker found");
+            }
         }
 
         return true;
@@ -200,5 +223,12 @@ internal class ChannelGrain : Grain, IChannelGrain
         {
             await this.Message(reply);
         }
+    }
+
+    public Task InitializeChatHistory(ChatMsg[] history)
+    {
+        this._messages.AddRange(history);
+
+        return Task.CompletedTask;
     }
 }

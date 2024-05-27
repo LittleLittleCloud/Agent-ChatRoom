@@ -85,11 +85,30 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         logger.LogInformation($"Workspace: {workspace}");
         logger.LogInformation($"client log is saved to: {Path.Combine(workspace, "logs", clientLogPath)}");
         AnsiConsole.MarkupLine("[bold green]Client started.[/]");
+        var lifetimeManager = sp.GetRequiredService<IHostApplicationLifetime>();
+
+        await AnsiConsole.Status()
+            .StartAsync("initializing...", async ctx =>
+            {
+                ctx.Spinner(Spinner.Known.Dots);
+
+                do
+                {
+                    await Task.Delay(1000);
+                }
+                while (!lifetimeManager.ApplicationStarted.IsCancellationRequested);
+            });
         var consoleChatRoomService = sp.GetRequiredService<ConsoleChatRoomService>();
         await consoleChatRoomService.StartAsync(CancellationToken.None);
 
-        await host.StopAsync();
-        await host.WaitForShutdownAsync();
+        await AnsiConsole.Status()
+            .StartAsync("shutting down...", async ctx =>
+            {
+                ctx.Spinner(Spinner.Known.Dots);
+                await host.StopAsync();
+                await host.WaitForShutdownAsync();
+            });
+
         return 0;
     }
 }

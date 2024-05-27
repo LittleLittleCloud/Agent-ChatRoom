@@ -12,10 +12,14 @@ public class RoomGrain : Grain, IRoomGrain
     private readonly Dictionary<AgentInfo, IRoomObserver> _agents = [];
     private readonly ILogger<RoomGrain> _logger;
 
-    public RoomGrain(ILogger<RoomGrain> logger)
+    public RoomGrain(
+        ILogger<RoomGrain> logger)
     {
         _logger = logger;
     }
+    public new virtual IGrainFactory GrainFactory => base.GrainFactory;
+
+    public virtual string GrainKey => this.GetPrimaryKeyString(); 
 
     public Task<AgentInfo[]> GetMembers() => Task.FromResult(_agents.Keys.ToArray());
 
@@ -33,7 +37,7 @@ public class RoomGrain : Grain, IRoomGrain
 
         foreach (var ob in _agents.Values)
         {
-            await ob.JoinRoom(agent, this.GetPrimaryKeyString());
+            await ob.JoinRoom(agent, this.GrainKey);
         }
     }
 
@@ -49,7 +53,7 @@ public class RoomGrain : Grain, IRoomGrain
 
         foreach (var ob in _agents.Values)
         {
-            await ob.LeaveRoom(agent, this.GetPrimaryKeyString());
+            await ob.LeaveRoom(agent, this.GrainKey);
         }
 
         // remove agent from all channels
@@ -65,14 +69,43 @@ public class RoomGrain : Grain, IRoomGrain
         return Task.FromResult(_channels.ToArray());
     }
 
-    public async Task CreateChannel(ChannelInfo channelInfo)
+    public async Task CreateChannel(
+        string channelName,
+        string[]? members = null,
+        ChatMsg[]? history = null)
     {
-        if (_channels.Any(x => x.Name == channelInfo.Name))
+        if (_channels.Any(x => x.Name == channelName))
         {
+            _logger.LogWarning("Channel {ChannelName} already exists", channelName);
             return;
         }
 
+        var channelInfo = new ChannelInfo(channelName);
+
         _channels.Add(channelInfo);
+
+        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channelName);
+        if (history is { Length: > 0 })
+        {
+            _logger.LogInformation("Initializing chat history for channel {ChannelName}", channelName);
+            await channelGrain.InitializeChatHistory(history);
+        }
+
+        if (members is { Length: > 0 })
+        {
+            _logger.LogInformation("Adding members to channel {ChannelName}", channelName);
+            foreach (var member in members)
+            {
+                if (_agents.All(x => x.Key.Name != member))
+                {
+                    continue;
+                }
+
+                await AddAgentToChannel(channelInfo, member);
+            }
+        }
+
+        _logger.LogInformation("Channel {ChannelName} created", channelName);
     }
 
     public async Task DeleteChannel(string channelName)

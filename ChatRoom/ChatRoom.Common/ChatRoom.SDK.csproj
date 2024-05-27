@@ -19,6 +19,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="ChatRoom.Room"/>
     <InternalsVisibleTo Include="ChatRoom.Client"/>
+    <InternalsVisibleTo Include="ChatRoom.Tests"/>
   </ItemGroup>
 
 </Project>
