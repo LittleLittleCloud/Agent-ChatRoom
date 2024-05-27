@@ -43,7 +43,12 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "The name of the extension"
+          },
+          "command": {
+            "type": "string",
+            "description": "The command to start the agent extension"
           }
         }
       }

@@ -22,9 +22,9 @@ public class ChatRoomClientConfiguration
     public string YourName { get; set; } = "User";
 }
 
-public abstract class AgentExtensionConfiguration
+public class AgentExtensionConfiguration
 {
-    [Description("The name of the extension")]
+    [Description("The name of the extension, can be any string")]
     [JsonPropertyName("name")]
     public string Name { get; init; } = null!;
 

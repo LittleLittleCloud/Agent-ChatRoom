@@ -53,12 +53,18 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddSingleton(config);
                 serviceCollection.AddSingleton(config.RoomConfig);
                 serviceCollection.AddSingleton(config.ChannelConfig);
-                serviceCollection.AddHostedService<ConsoleChatRoomService>();
+                serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
+                serviceCollection.AddSingleton<ConsoleChatRoomService>();
             })
             .Build();
 
-        await host.RunAsync();
+        await host.StartAsync();
+        var sp = host.Services;
+        var consoleChatRoomService = sp.GetRequiredService<ConsoleChatRoomService>();
+        await consoleChatRoomService.StartAsync(CancellationToken.None);
 
+        await host.StopAsync();
+        await host.WaitForShutdownAsync();
         return 0;
     }
 }

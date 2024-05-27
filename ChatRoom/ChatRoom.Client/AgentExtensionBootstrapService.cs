@@ -38,8 +38,11 @@ public class AgentExtensionBootstrapService : IHostedService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to start extension {ExtensionName}", extension.Name);
+                Console.WriteLine("Failed to start extension {0}", extension.Name);
             }
         }
+
+        Console.WriteLine("Extensions loaded");
     }
     public async Task StopAsync(CancellationToken cancellationToken)
     {
@@ -60,13 +63,15 @@ public class AgentExtensionBootstrapService : IHostedService
 
     public Process CreateExtensionProcess(AgentExtensionConfiguration configuration)
     {
-        var command = configuration.Command;
-
+        var command = configuration.Command.Trim();
+        var fileName = command.Split(' ')[0];
+        var arguments = command.Substring(fileName.Length).Trim();
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = command,
+                FileName = fileName,
+                Arguments = arguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
