@@ -13,7 +13,7 @@ public class ConsoleChatRoomService
     private readonly IRoomObserver _roomObserverRef;
     private readonly ILogger _logger;
     private readonly string _workspacePath = null!;
-    private readonly string _workspaceChatHistoryPath = null!;
+    private readonly string _chatRoomContextSchemaPath = null!;
 
     public ConsoleChatRoomService(
         ChatRoomClientConfiguration configuration,
@@ -22,7 +22,7 @@ public class ConsoleChatRoomService
     {
         _logger = logger;
         _workspacePath = configuration.Workspace;
-        _workspaceChatHistoryPath = Path.Combine(_workspacePath, "chat-history.json");
+        _chatRoomContextSchemaPath = Path.Combine(_workspacePath, "chat-history.json");
         _roomObserver = new ConsoleRoomObserver();
         _roomObserverRef = clsterClient.CreateObjectReference<IRoomObserver>(_roomObserver);
         _clusterClient = clsterClient;
@@ -36,10 +36,11 @@ public class ConsoleChatRoomService
         await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
 
         // restore previous state
-        if (File.Exists(_workspaceChatHistoryPath))
+        if (File.Exists(_chatRoomContextSchemaPath))
         {
             AnsiConsole.MarkupLine("[bold red]Restoring workspace from {0}[/]", _workspacePath);
-            var workspaceConfiguration = JsonSerializer.Deserialize<ChatRoomContext>(File.ReadAllText(_workspaceChatHistoryPath))!;
+            var schema = JsonSerializer.Deserialize<ChatRoomContextSchemaV0>(File.ReadAllText(_chatRoomContextSchemaPath))!;
+            var workspaceConfiguration = new ChatRoomContext(schema);
             foreach (var channel in workspaceConfiguration.Channels)
             {
                 var channelName = channel.Key;
@@ -284,7 +285,7 @@ public class ConsoleChatRoomService
 
         _logger.LogInformation("Saving workspace to {WorkspacePath}", _workspacePath);
         AnsiConsole.MarkupLine("[bold red]Saving workspace to {0}[/]", _workspacePath);
-        await File.WriteAllTextAsync(_workspaceChatHistoryPath, json);
+        await File.WriteAllTextAsync(_chatRoomContextSchemaPath, json);
     }
 
     private async Task ShowChannelMembers(ClientContext context)

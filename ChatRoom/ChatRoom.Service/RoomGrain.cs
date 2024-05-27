@@ -96,6 +96,11 @@ public class RoomGrain : Grain, IRoomGrain
             _logger.LogInformation("Adding members to channel {ChannelName}", channelName);
             foreach (var member in members)
             {
+                if (_agents.All(x => x.Key.Name != member))
+                {
+                    continue;
+                }
+
                 await AddAgentToChannel(channelInfo, member);
             }
         }
