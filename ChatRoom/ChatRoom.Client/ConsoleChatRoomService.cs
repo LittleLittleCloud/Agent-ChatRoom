@@ -28,7 +28,7 @@ public class ConsoleChatRoomService : IHostedService
     {
         PrintUsage();
         var room = _clientContext.ChannelClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await room.Join(_clientContext.AgentInfo!, _roomObserverRef);
+        await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
         await JoinChannel(_clientContext, _clientContext.CurrentChannel!);
         _processTask = ProcessLoopAsync(_clientContext, cancellationToken);
     }
@@ -114,7 +114,7 @@ public class ConsoleChatRoomService : IHostedService
                         continue;
                     }
                     
-                    await room.AddAgentToChannel(channelInfo, memberInfo);
+                    await room.AddAgentToChannel(channelInfo, memberName);
                     continue;
                 }
             }
@@ -139,7 +139,7 @@ public class ConsoleChatRoomService : IHostedService
                 {
                     var channelInfo = channels.First(c => c.Name == context.CurrentChannel);
                     var memberInfo = members.First(m => m.Name == memberName);
-                    await room.RemoveAgentFromChannel(channelInfo, memberInfo);
+                    await room.RemoveAgentFromChannel(channelInfo, memberName);
 
                     continue;
                 }
@@ -366,7 +366,7 @@ public class ConsoleChatRoomService : IHostedService
             var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
             await room.CreateChannel(new ChannelInfo(channelName));
             var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-            await channel.Join(context.AgentInfo!, _roomObserverRef);
+            await channel.JoinChannel(context.UserName!, "Human user", true, _roomObserverRef);
         });
         return context;
     }
@@ -382,7 +382,7 @@ public class ConsoleChatRoomService : IHostedService
         await AnsiConsole.Status().StartAsync("Leaving channel...", async ctx =>
         {
             var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-            await channel.Leave(context.AgentInfo!);
+            await channel.Leave(context.UserName!);
         });
 
         return context with { CurrentChannel = null };

@@ -5,10 +5,10 @@ namespace ChatRoom.Common;
 public interface IChannelObserver : IOrchestratorObserver
 {
     [OneWay]
-    Task Join(AgentInfo agent, ChannelInfo channelInfo);
+    Task JoinChannel(AgentInfo agent, ChannelInfo channelInfo);
 
     [OneWay]
-    Task Leave(AgentInfo agent, ChannelInfo channelInfo);
+    Task LeaveChannel(AgentInfo agent, ChannelInfo channelInfo);
 
     Task<bool> Ping();
 

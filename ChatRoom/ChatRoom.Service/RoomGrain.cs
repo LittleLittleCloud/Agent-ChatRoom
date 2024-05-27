@@ -19,24 +19,25 @@ public class RoomGrain : Grain, IRoomGrain
 
     public Task<AgentInfo[]> GetMembers() => Task.FromResult(_agents.Keys.ToArray());
 
-    public async Task Join(AgentInfo nickname, IRoomObserver observer)
+    public async Task JoinRoom(string name, string description, bool isHuman, IRoomObserver observer)
     {
-        if (_agents.ContainsKey(nickname))
+        var agent = new AgentInfo(name, description, isHuman);
+        if (_agents.ContainsKey(agent))
         {
             return;
         }
 
         var agentObserver = new ObserverManager<IRoomObserver>(TimeSpan.FromMinutes(1), _logger);
         agentObserver.Subscribe(observer, observer);
-        _agents[nickname] = observer;
+        _agents[agent] = observer;
 
         foreach (var ob in _agents.Values)
         {
-            await ob.Join(nickname, this.GetPrimaryKeyString());
+            await ob.JoinRoom(agent, this.GetPrimaryKeyString());
         }
     }
 
-    public async Task Leave(string nickname)
+    public async Task LeaveRoom(string nickname)
     {
         if (!_agents.Any(kv => kv.Key.Name == nickname))
         {
@@ -48,14 +49,14 @@ public class RoomGrain : Grain, IRoomGrain
 
         foreach (var ob in _agents.Values)
         {
-            await ob.Leave(agent, this.GetPrimaryKeyString());
+            await ob.LeaveRoom(agent, this.GetPrimaryKeyString());
         }
 
         // remove agent from all channels
         foreach (var channel in _channels)
         {
             var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
-            await channelGrain.Leave(agent);
+            await channelGrain.Leave(agent.Name);
         }
     }
 
@@ -85,21 +86,21 @@ public class RoomGrain : Grain, IRoomGrain
         _channels.Remove(channel);
     }
 
-    public async Task AddAgentToChannel(ChannelInfo channelInfo, AgentInfo agentInfo)
+    public async Task AddAgentToChannel(ChannelInfo channelInfo, string agentName)
     {
         var channel = _channels.First(x => x.Name == channelInfo.Name);
         var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
-        var agent = _agents.First(x => x.Key.Name == agentInfo.Name).Key;
+        var agent = _agents.First(x => x.Key.Name == agentName).Key;
 
-        await channelGrain.Join(agent, _agents[agent]);
+        await channelGrain.JoinChannel(agent.Name, agent.SelfDescription, agent.IsHuman, _agents[agent]);
     }
 
-    public async Task RemoveAgentFromChannel(ChannelInfo channelInfo, AgentInfo agentInfo)
+    public async Task RemoveAgentFromChannel(ChannelInfo channelInfo, string agentName)
     {
         var channel = _channels.First(x => x.Name == channelInfo.Name);
         var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
-        var agent = _agents.First(x => x.Key.Name == agentInfo.Name).Key;
+        var agent = _agents.First(x => x.Key.Name == agentName).Key;
 
-        await channelGrain.Leave(agent);
+        await channelGrain.Leave(agent.Name);
     }
 }

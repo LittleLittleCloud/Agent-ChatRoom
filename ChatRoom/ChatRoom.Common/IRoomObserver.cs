@@ -12,8 +12,8 @@ public interface IRoomObserver : IChannelObserver, INotificationObserver
 {
 
     [OneWay]
-    Task Join(AgentInfo agent, string room);
+    Task JoinRoom(AgentInfo agent, string room);
 
     [OneWay]
-    Task Leave(AgentInfo agent, string room);
+    Task LeaveRoom(AgentInfo agent, string room);
 }

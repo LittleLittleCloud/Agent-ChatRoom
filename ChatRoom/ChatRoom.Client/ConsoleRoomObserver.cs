@@ -20,26 +20,26 @@ internal class ConsoleRoomObserver : IRoomObserver
         return Task.FromResult<ChatMsg?>(null);
     }
 
-    public Task Join(AgentInfo agent, string room)
+    public Task JoinRoom(AgentInfo agent, string room)
     {
         AnsiConsole.MarkupLine($"[green]{agent.Name}[/] joins the [yellow]{room}[/] room.");
         return Task.CompletedTask;
     }
 
-    public Task Join(AgentInfo agent, ChannelInfo channelInfo)
+    public Task JoinChannel(AgentInfo agent, ChannelInfo channelInfo)
     {
         AnsiConsole.MarkupLine($"[green]{agent.Name}[/] joins the [yellow]{channelInfo.Name}[/] channel.");
         return Task.CompletedTask;
     }
 
-    public Task Leave(AgentInfo agent, string room)
+    public Task LeaveRoom(AgentInfo agent, string room)
     {
         AnsiConsole.MarkupLine($"[green]{agent.Name}[/] leaves the [yellow]{room}[/] room.");
 
         return Task.CompletedTask;
     }
 
-    public Task Leave(AgentInfo agent, ChannelInfo channelInfo)
+    public Task LeaveChannel(AgentInfo agent, ChannelInfo channelInfo)
     {
         AnsiConsole.MarkupLine($"[green]{agent.Name}[/] leaves the [yellow]{channelInfo.Name}[/] channel.");
 

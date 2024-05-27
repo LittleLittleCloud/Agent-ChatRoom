@@ -2,16 +2,16 @@
 
 namespace ChatRoom.Common;
 
-internal class AgentObserver : IRoomObserver
+internal class AutoGenAgentObserver : IRoomObserver
 {
     private readonly IAgent _agent;
 
-    public AgentObserver(IAgent agent)
+    public AutoGenAgentObserver(IAgent agent)
     {
         _agent = agent;
     }
 
-    public async Task Join(AgentInfo agent, ChannelInfo channelInfo)
+    public async Task JoinChannel(AgentInfo agent, ChannelInfo channelInfo)
     {
         if (agent.Name != _agent.Name)
         {
@@ -23,7 +23,7 @@ internal class AgentObserver : IRoomObserver
         }
     }
 
-    public Task Leave(AgentInfo agent, ChannelInfo channelInfo)
+    public Task LeaveChannel(AgentInfo agent, ChannelInfo channelInfo)
     {
         if (agent.Name != _agent.Name)
         {
@@ -69,14 +69,14 @@ internal class AgentObserver : IRoomObserver
 
     public Task<bool> Ping() => Task.FromResult(true);
 
-    public Task Join(AgentInfo agent, string room)
+    public Task JoinRoom(AgentInfo agent, string room)
     {
         Console.WriteLine($"Agent {agent.Name} joined room {room}");
 
         return Task.CompletedTask;
     }
 
-    public Task Leave(AgentInfo agent, string room)
+    public Task LeaveRoom(AgentInfo agent, string room)
     {
         Console.WriteLine($"Agent {agent.Name} left room {room}");
 

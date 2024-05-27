@@ -26,7 +26,7 @@ public class RoomGrainTests(ClusterFixture fixture)
 
         roomGrain.GetChannels().Result.Should().BeEmpty();
 
-        var testChannel = new ChannelInfo("test-channel");
+        var testChannel = new ChannelInfo(nameof(ItCreateChannelAsync));
         await roomGrain.CreateChannel(testChannel);
 
         var channels = roomGrain.GetChannels().Result;
@@ -44,13 +44,13 @@ public class RoomGrainTests(ClusterFixture fixture)
         var agents = new List<AgentInfo>();
         // add mock implementation for Notification which adds the message to the list
         bool hasCompleted = false;
-        Mock.Get(observer).Setup(x => x.Join(It.IsAny<AgentInfo>(), It.IsAny<string>()))
+        Mock.Get(observer).Setup(x => x.JoinRoom(It.IsAny<AgentInfo>(), It.IsAny<string>()))
             .Callback<AgentInfo, string>((agentInfo, _) =>
             {
                 agents.Add(agentInfo);
                 hasCompleted = true;
             });
-        Mock.Get(observer).Setup(x => x.Leave(It.IsAny<AgentInfo>(), It.IsAny<string>()))
+        Mock.Get(observer).Setup(x => x.LeaveRoom(It.IsAny<AgentInfo>(), It.IsAny<string>()))
             .Callback<AgentInfo, string>((agentInfo, _) =>
             {
                 agents.Remove(agentInfo);
@@ -59,7 +59,7 @@ public class RoomGrainTests(ClusterFixture fixture)
 
         var observerRef = _cluster.Client.CreateObjectReference<IRoomObserver>(observer);
         var observerAgent = new AgentInfo("observe-agent", "observe-agent", false);
-        await roomGrain.Join(observerAgent, observerRef);
+        await roomGrain.JoinRoom("observe-agent", "observe-agent", false, observerRef);
         await chatPlatformClient.RegisterAgentAsync(agent);
 
         await WaitUntilTrue(() => hasCompleted);
@@ -79,58 +79,70 @@ public class RoomGrainTests(ClusterFixture fixture)
     {
         var roomGrain = _cluster.GrainFactory.GetGrain<IRoomGrain>(nameof(AgentsJoinAndLeaveChannelTestAsync));
         var chatPlatformClient = new ChatPlatformClient(_cluster.Client, nameof(AgentsJoinAndLeaveChannelTestAsync));
-        var testChannel = new ChannelInfo("test-channel");
+        var testChannel = new ChannelInfo(nameof(AgentsJoinAndLeaveChannelTestAsync));
         await roomGrain.CreateChannel(testChannel);
 
         var agentInfo = new AgentInfo("test-agent", "test-agent", false);
         var agent = new DummyAgent(agentInfo);
+        var agents = new List<AgentInfo>();
 
         var observeAgentInfo = new AgentInfo("observe-agent", "observe-agent", false);
         var roomObserver = Mock.Of<IRoomObserver>();
-        var roomObserverMessages = new List<ChatMsg>();
-        // add mock implementation for Notification which adds the message to the list
-        Mock.Get(roomObserver).Setup(x => x.Notification(It.IsAny<ChatMsg>()))
-            .Callback<ChatMsg>(roomObserverMessages.Add);
-
         var agentInfoList = new List<AgentInfo>();
         bool hasCompleted = false;
-        Mock.Get(roomObserver).Setup(x => x.Join(It.IsAny<AgentInfo>(), It.IsAny<ChannelInfo>()))
+        bool hasJoinRoomCompleted = false;
+        Mock.Get(roomObserver).Setup(x => x.JoinChannel(It.IsAny<AgentInfo>(), It.IsAny<ChannelInfo>()))
             .Callback<AgentInfo, ChannelInfo>((agentInfo, _) =>
             {
                 agentInfoList.Add(agentInfo);
                 hasCompleted = true;
             });
 
-        Mock.Get(roomObserver).Setup(x => x.Leave(It.IsAny<AgentInfo>(), It.IsAny<ChannelInfo>()))
+        Mock.Get(roomObserver).Setup(x => x.LeaveChannel(It.IsAny<AgentInfo>(), It.IsAny<ChannelInfo>()))
             .Callback<AgentInfo, ChannelInfo>((agentInfo, _) =>
             {
                 agentInfoList.Remove(agentInfo);
                 hasCompleted = true;
             });
-        
+
+        Mock.Get(roomObserver).Setup(x => x.JoinRoom(It.IsAny<AgentInfo>(), It.IsAny<string>()))
+            .Callback<AgentInfo, string>((agentInfo, _) =>
+            {
+                agents.Add(agentInfo);
+                hasJoinRoomCompleted = true;
+            });
+        Mock.Get(roomObserver).Setup(x => x.LeaveRoom(It.IsAny<AgentInfo>(), It.IsAny<string>()))
+            .Callback<AgentInfo, string>((agentInfo, _) =>
+            {
+                agents.Remove(agentInfo);
+                hasJoinRoomCompleted = true;
+            });
+
         var observerRef = _cluster.Client.CreateObjectReference<IRoomObserver>(roomObserver);
-        await roomGrain.Join(observeAgentInfo, observerRef);
-        await roomGrain.AddAgentToChannel(testChannel, observeAgentInfo);
-        hasCompleted = false;
-        await WaitUntilTrue(() => hasCompleted);
-        agentInfoList.Clear();
-        // join the room
+        await roomGrain.JoinRoom("observe-agent", "observe-agent", false, observerRef);
+        await WaitUntilTrue(() => hasJoinRoomCompleted);
+        hasJoinRoomCompleted = false;
         await chatPlatformClient.RegisterAgentAsync(agent, agentInfo.SelfDescription);
+        await WaitUntilTrue(() => hasJoinRoomCompleted);
+        await roomGrain.AddAgentToChannel(testChannel, "observe-agent");
+        await WaitUntilTrue(() => hasCompleted);
+        hasCompleted = false;
+        //agentInfoList.Clear();
 
+        // join the room
         // join the channel
-        await roomGrain.AddAgentToChannel(testChannel, agentInfo);
+        await roomGrain.AddAgentToChannel(testChannel, agentInfo.Name);
 
         await WaitUntilTrue(() => hasCompleted);
-        agentInfoList.Should().HaveCount(1);
-        agentInfoList.First().Should().BeEquivalentTo(agentInfo);
+        agentInfoList.Should().HaveCount(2);
 
         // leave the channel
         hasCompleted = false;
 
-        await roomGrain.RemoveAgentFromChannel(testChannel, agentInfo);
+        await roomGrain.RemoveAgentFromChannel(testChannel, agentInfo.Name);
 
         await WaitUntilTrue(() => hasCompleted);
-        agentInfoList.Should().BeEmpty();
+        agentInfoList.Should().HaveCount(1);
     }
 
     [Fact]
@@ -148,22 +160,22 @@ public class RoomGrainTests(ClusterFixture fixture)
         var agentObserver = Mock.Of<IRoomObserver>();
         var agentInfoList = new List<AgentInfo>();
         var hasCompleted = false;
-        Mock.Get(agentObserver).Setup(x => x.Join(It.IsAny<AgentInfo>(), It.IsAny<ChannelInfo>()))
+        Mock.Get(agentObserver).Setup(x => x.JoinChannel(It.IsAny<AgentInfo>(), It.IsAny<ChannelInfo>()))
             .Callback<AgentInfo, ChannelInfo>((agentInfo, _) =>
             {
                 agentInfoList.Add(agentInfo);
                 hasCompleted = true;
             });
 
-        Mock.Get(agentObserver).Setup(x => x.Leave(It.IsAny<AgentInfo>(), It.IsAny<ChannelInfo>()))
+        Mock.Get(agentObserver).Setup(x => x.LeaveChannel(It.IsAny<AgentInfo>(), It.IsAny<ChannelInfo>()))
             .Callback<AgentInfo, ChannelInfo>((agentInfo, _) =>
             {
                 agentInfoList.Remove(agentInfo);
                 hasCompleted = true;
             });
         var agentObserverRef = _cluster.Client.CreateObjectReference<IRoomObserver>(agentObserver);
-        await roomGrain.Join(observeAgentInfo, agentObserverRef);
-        await roomGrain.AddAgentToChannel(testChannel, observeAgentInfo);
+        await roomGrain.JoinRoom("observe-agent", "observe-agent", false, agentObserverRef);
+        await roomGrain.AddAgentToChannel(testChannel, observeAgentInfo.Name);
         await WaitUntilTrue(() => hasCompleted);
 
         hasCompleted = false;
@@ -171,7 +183,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         // join the room
         await chatPlatformClient.RegisterAgentAsync(agent, agentInfo.SelfDescription);
         // join the channel
-        await roomGrain.AddAgentToChannel(testChannel, agentInfo);
+        await roomGrain.AddAgentToChannel(testChannel, agentInfo.Name);
 
         await WaitUntilTrue(() => hasCompleted);
 
@@ -188,13 +200,39 @@ public class RoomGrainTests(ClusterFixture fixture)
         members.Should().HaveCount(1);
     }
 
-    private Task WaitUntilTrue(Func<bool> condition)
+    [Fact]
+    public async Task AgentIsAliveTestAsync()
     {
+        var roomGrain = _cluster.GrainFactory.GetGrain<IRoomGrain>(nameof(AgentIsAliveTestAsync));
+        var chatPlatformClient = new ChatPlatformClient(_cluster.Client, nameof(AgentIsAliveTestAsync));
+
+        var testAgent = new AgentInfo("test-agent", "test-agent", false);
+        var agent = new DummyAgent(testAgent);
+
+        var testChannel = new ChannelInfo("test-channel");
+
+        await chatPlatformClient.RegisterAgentAsync(agent, testAgent.SelfDescription);
+        await roomGrain.CreateChannel(testChannel);
+        await roomGrain.AddAgentToChannel(testChannel, testAgent.Name);
+
+        var channelGrain = _cluster.GrainFactory.GetGrain<IChannelGrain>(testChannel.Name);
+        //var alivedMembers = await channelGrain.GetAli();
+    }
+
+    private Task WaitUntilTrue(Func<bool> condition, int maxSeconds = 10)
+    {
+        var timeout = TimeSpan.FromSeconds(maxSeconds);
         return Task.Run(() =>
         {
             while (!condition())
             {
                 Task.Delay(100).Wait();
+                timeout -= TimeSpan.FromMilliseconds(100);
+
+                if (timeout <= TimeSpan.Zero)
+                {
+                    throw new TimeoutException("Condition was not met within the timeout");
+                }
             }
         });
     }

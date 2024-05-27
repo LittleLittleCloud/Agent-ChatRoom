@@ -5,18 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoGen.Core;
 
-namespace ChatRoom.SDK
+namespace ChatRoom.SDK;
+
+internal class AgentInfoAgent
 {
-    internal class AgentInfoAgent
+    public AgentInfoAgent(IAgent agent, AgentInfo info)
     {
-        public AgentInfoAgent(IAgent agent, AgentInfo info)
-        {
-            Agent = agent;
-            Info = info;
-        }
-
-        public IAgent Agent { get; }
-
-        public AgentInfo Info { get; }
+        Agent = agent;
+        Info = info;
     }
+
+    public IAgent Agent { get; }
+
+    public AgentInfo Info { get; }
 }
