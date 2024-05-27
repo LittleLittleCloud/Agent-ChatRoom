@@ -10,14 +10,11 @@ public class ConsoleChatRoomService : IHostedService
 {
     private readonly IClusterClient _clusterClient;
     private readonly ClientContext _clientContext;
-    private Task? _processTask = null;
     private readonly ConsoleRoomObserver _roomObserver;
     private readonly IRoomObserver _roomObserverRef;
-    private readonly ChatRoomClientConfiguration _configuration;
 
     public ConsoleChatRoomService(ChatRoomClientConfiguration configuration, IClusterClient clsterClient)
     {
-        _configuration = configuration;
         _roomObserver = new ConsoleRoomObserver();
         _roomObserverRef = clsterClient.CreateObjectReference<IRoomObserver>(_roomObserver);
         _clusterClient = clsterClient;
@@ -30,13 +27,13 @@ public class ConsoleChatRoomService : IHostedService
         var room = _clientContext.ChannelClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
         await JoinChannel(_clientContext, _clientContext.CurrentChannel!);
-        _processTask = ProcessLoopAsync(_clientContext, cancellationToken);
+        await ProcessLoopAsync(_clientContext, cancellationToken);
     }
+    
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         //_processTask?.Wait();
         AnsiConsole.MarkupLine("[bold red]Exiting...[/]");
-        _processTask = null;
     }
 
     async Task ProcessLoopAsync(ClientContext context, CancellationToken ct)
@@ -179,12 +176,6 @@ public class ConsoleChatRoomService : IHostedService
     private void PrintUsage()
     {
         AnsiConsole.WriteLine();
-        using var logoStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("ChatRoom.Client.logo.png");
-        var logo = new CanvasImage(logoStream!)
-        {
-            MaxWidth = 25
-        };
-
         var table = new Table()
         {
             Border = TableBorder.None,
