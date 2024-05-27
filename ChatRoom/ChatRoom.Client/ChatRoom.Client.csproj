@@ -17,6 +17,9 @@
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="AutoGen" />
     <PackageReference Include="Spectre.Console.ImageSharp" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
   </ItemGroup>
 
   <ItemGroup>

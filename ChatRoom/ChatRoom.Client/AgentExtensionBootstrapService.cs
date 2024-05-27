@@ -23,6 +23,7 @@ public class AgentExtensionBootstrapService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var extensionConfig = _config.AgentExtensions;
+        _logger.LogInformation("Loading {ExtensionCount} extensions", extensionConfig.Count);
         foreach (var extension in extensionConfig)
         {
             _logger.LogInformation("Loading extension {ExtensionName}", extension.Name);
@@ -41,8 +42,6 @@ public class AgentExtensionBootstrapService : IHostedService
                 Console.WriteLine("Failed to start extension {0}", extension.Name);
             }
         }
-
-        Console.WriteLine("Extensions loaded");
     }
     public async Task StopAsync(CancellationToken cancellationToken)
     {
