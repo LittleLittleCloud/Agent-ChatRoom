@@ -13,10 +13,6 @@
   <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
 
   <ItemGroup>
-    <EmbeddedResource Include="logo.png" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Spectre.Console" />
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="AutoGen" />

@@ -22,8 +22,13 @@ public class ChatRoomClientConfiguration
     public string YourName { get; set; } = "User";
 }
 
-public class AgentExtensionConfiguration
+public abstract class AgentExtensionConfiguration
 {
+    [Description("The name of the extension")]
     [JsonPropertyName("name")]
     public string Name { get; init; } = null!;
+
+    [Description("The command to start the agent extension")]
+    [JsonPropertyName("command")]
+    public string Command { get; init; } = null!;
 }
