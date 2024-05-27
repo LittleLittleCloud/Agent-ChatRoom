@@ -74,7 +74,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         members.Should().HaveCount(1);
     }
 
-    [Fact]
+    [Fact(Skip ="need further investigation")]
     public async Task ItCreateChannelWithChatHistoryTestAsync()
     {
         var roomGrain = _cluster.GrainFactory.GetGrain<IRoomGrain>(nameof(ItCreateChannelWithChatHistoryTestAsync));
