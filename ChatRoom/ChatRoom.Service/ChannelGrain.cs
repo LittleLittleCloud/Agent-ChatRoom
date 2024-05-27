@@ -42,7 +42,7 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
     }
 
-    public async Task Leave(string name)
+    public async Task LeaveChannel(string name)
     {
         var agentInfo = _agents.Keys.FirstOrDefault(x => x.Name == name);
         if (agentInfo is null)

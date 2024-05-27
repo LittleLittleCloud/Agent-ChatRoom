@@ -56,7 +56,7 @@ public class RoomGrain : Grain, IRoomGrain
         foreach (var channel in _channels)
         {
             var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
-            await channelGrain.Leave(agent.Name);
+            await channelGrain.LeaveChannel(agent.Name);
         }
     }
 
@@ -101,6 +101,6 @@ public class RoomGrain : Grain, IRoomGrain
         var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
         var agent = _agents.First(x => x.Key.Name == agentName).Key;
 
-        await channelGrain.Leave(agent.Name);
+        await channelGrain.LeaveChannel(agent.Name);
     }
 }

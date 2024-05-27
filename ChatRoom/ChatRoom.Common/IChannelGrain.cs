@@ -8,7 +8,7 @@ public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
 {
     Task JoinChannel(string name, string description, bool isHuman, IChannelObserver callBack);
     
-    Task Leave(string name);
+    Task LeaveChannel(string name);
 
     internal Task<bool> Message(ChatMsg msg);
 
