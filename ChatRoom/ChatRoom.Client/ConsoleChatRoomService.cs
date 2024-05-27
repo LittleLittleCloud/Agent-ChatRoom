@@ -1,20 +1,28 @@
-﻿using System.Reflection;
+﻿using System.Text.Json;
 using ChatRoom.Common;
-using Microsoft.Extensions.Hosting;
-using Orleans.Runtime;
+using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
 namespace ChatRoom.Client;
 
-public class ConsoleChatRoomService : IHostedService
+public class ConsoleChatRoomService
 {
     private readonly IClusterClient _clusterClient;
-    private readonly ClientContext _clientContext;
+    private ClientContext _clientContext;
     private readonly ConsoleRoomObserver _roomObserver;
     private readonly IRoomObserver _roomObserverRef;
+    private readonly ILogger _logger;
+    private readonly string _workspacePath = null!;
+    private readonly string _workspaceChatHistoryPath = null!;
 
-    public ConsoleChatRoomService(ChatRoomClientConfiguration configuration, IClusterClient clsterClient)
+    public ConsoleChatRoomService(
+        ChatRoomClientConfiguration configuration,
+        IClusterClient clsterClient,
+        ILogger<ConsoleChatRoomService> logger)
     {
+        _logger = logger;
+        _workspacePath = configuration.Workspace;
+        _workspaceChatHistoryPath = Path.Combine(_workspacePath, "chat-history.json");
         _roomObserver = new ConsoleRoomObserver();
         _roomObserverRef = clsterClient.CreateObjectReference<IRoomObserver>(_roomObserver);
         _clusterClient = clsterClient;
@@ -26,10 +34,28 @@ public class ConsoleChatRoomService : IHostedService
         PrintUsage();
         var room = _clientContext.ChannelClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
+
+        // restore previous state
+        if (File.Exists(_workspaceChatHistoryPath))
+        {
+            AnsiConsole.MarkupLine("[bold red]Restoring workspace from {0}[/]", _workspacePath);
+            var workspaceConfiguration = JsonSerializer.Deserialize<ChatRoomContext>(File.ReadAllText(_workspaceChatHistoryPath))!;
+            foreach (var channel in workspaceConfiguration.Channels)
+            {
+                var channelName = channel.Key;
+                var channelMembers = channel.Value;
+                var channelHistory = workspaceConfiguration.ChatHistory.TryGetValue(channelName, out var history) ? history : null;
+                await room.CreateChannel(channelName, channelMembers, channelHistory);
+                _logger.LogInformation("Restored channel {ChannelName} with {MemberCount} members and {HistoryCount} history items", channelName, channelMembers.Count(), channelHistory?.Count() ?? 0);
+            }
+
+            _clientContext = _clientContext with { CurrentChannel = workspaceConfiguration.CurrentChannel };
+        }
+
         await JoinChannel(_clientContext, _clientContext.CurrentChannel!);
         await ProcessLoopAsync(_clientContext, cancellationToken);
     }
-    
+
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         //_processTask?.Wait();
@@ -50,6 +76,11 @@ public class ConsoleChatRoomService : IHostedService
             if (input.StartsWith("/exit") &&
                 AnsiConsole.Confirm("Do you really want to exit?"))
             {
+                if (AnsiConsole.Confirm("Do you want to save the workspace?"))
+                {
+                    await SaveContextToWorkspace(context);
+                }
+
                 break;
             }
 
@@ -110,7 +141,7 @@ public class ConsoleChatRoomService : IHostedService
                         AnsiConsole.MarkupLine("[bold red]Member '{0}' already exists in the channel[/]", memberName);
                         continue;
                     }
-                    
+
                     await room.AddAgentToChannel(channelInfo, memberName);
                     continue;
                 }
@@ -159,12 +190,15 @@ public class ConsoleChatRoomService : IHostedService
             {
                 "/h" => ShowCurrentChannelHistory(context),
                 "/m" => ShowChannelMembers(context),
+                "/s" => SaveContextToWorkspace(context),
                 _ => null
             } is Task task)
             {
                 await task;
                 continue;
             }
+
+
 
             if (context.IsConnectedToChannel)
             {
@@ -197,6 +231,7 @@ public class ConsoleChatRoomService : IHostedService
            + "[bold fuchsia]/l[/] to [underline green]leave[/] the current channel\n"
            + "[bold fuchsia]/h[/] to re-read channel [underline green]history[/]\n"
            + "[bold fuchsia]/m[/] to query [underline green]members[/] in the current channel\n"
+           + "[bold fuchsia]/s[/] to save the channel information and history to the workspace\n"
            + "[bold fuchsia]/lm[/] to query [underline green]members[/] in the room\n"
            + "[bold fuchsia]/lc[/] to query [underline green]all channels[/] in the room\n"
            + "[bold fuchsia]/rc[/] [aqua]<channel>[/] to [underline green]remove channel[/] from the room\n"
@@ -222,6 +257,35 @@ public class ConsoleChatRoomService : IHostedService
         AnsiConsole.WriteLine();
     }
 
+    private async Task SaveContextToWorkspace(ClientContext context)
+    {
+        var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+        var channels = await room.GetChannels();
+        Dictionary<string, ChatMsg[]> chatHistory = new();
+        Dictionary<string, string[]> channelMembers = new();
+        foreach (var channel in channels)
+        {
+            var channelGrain = context.ChannelClient.GetGrain<IChannelGrain>(channel.Name);
+            var history = await channelGrain.ReadHistory(100);
+            chatHistory[channel.Name] = history.ToArray();
+            var members = await channelGrain.GetMembers();
+            channelMembers[channel.Name] = members.Select(m => m.Name).ToArray();
+        }
+
+        var workspaceConfiguration = new ChatRoomContext
+        {
+            Channels = channelMembers,
+            ChatHistory = chatHistory,
+            CurrentChannel = context.CurrentChannel!,
+        };
+
+        var schema = workspaceConfiguration.ToSchema();
+        var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
+
+        _logger.LogInformation("Saving workspace to {WorkspacePath}", _workspacePath);
+        AnsiConsole.MarkupLine("[bold red]Saving workspace to {0}[/]", _workspacePath);
+        await File.WriteAllTextAsync(_workspaceChatHistoryPath, json);
+    }
 
     private async Task ShowChannelMembers(ClientContext context)
     {
@@ -355,7 +419,7 @@ public class ConsoleChatRoomService : IHostedService
         await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
         {
             var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
-            await room.CreateChannel(new ChannelInfo(channelName));
+            await room.CreateChannel(channelName);
             var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
             await channel.JoinChannel(context.UserName!, "Human user", true, _roomObserverRef);
         });

@@ -27,7 +27,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         roomGrain.GetChannels().Result.Should().BeEmpty();
 
         var testChannel = new ChannelInfo(nameof(ItCreateChannelAsync));
-        await roomGrain.CreateChannel(testChannel);
+        await roomGrain.CreateChannel(testChannel.Name);
 
         var channels = roomGrain.GetChannels().Result;
         channels.Should().HaveCount(1);
@@ -75,12 +75,35 @@ public class RoomGrainTests(ClusterFixture fixture)
     }
 
     [Fact]
+    public async Task ItCreateChannelWithChatHistoryTestAsync()
+    {
+        var roomGrain = _cluster.GrainFactory.GetGrain<IRoomGrain>(nameof(ItCreateChannelWithChatHistoryTestAsync));
+        var agent = new DummyAgent(new AgentInfo("test-agent", "test-agent", false));
+        var chatHistory = new List<ChatMsg>
+        {
+            new ChatMsg("test-agent", "test message")
+        };
+
+        var observer = Mock.Of<IRoomObserver>();
+        await roomGrain.JoinRoom(agent.Name, "test-agent", false, _cluster.Client.CreateObjectReference<IRoomObserver>(observer));
+        await roomGrain.CreateChannel(nameof(ItCreateChannelWithChatHistoryTestAsync), [agent.Name], chatHistory.ToArray());
+        // sleep 10 s
+        await Task.Delay(10000);
+        var channelGrain = _cluster.GrainFactory.GetGrain<IChannelGrain>(nameof(ItCreateChannelWithChatHistoryTestAsync));
+
+        var history = await channelGrain.ReadHistory(10);
+        history.Should().HaveCount(1);
+        var member = await channelGrain.GetMembers();
+        member.Should().HaveCount(1);
+    }
+
+    [Fact]
     public async Task AgentsJoinAndLeaveChannelTestAsync()
     {
         var roomGrain = _cluster.GrainFactory.GetGrain<IRoomGrain>(nameof(AgentsJoinAndLeaveChannelTestAsync));
         var chatPlatformClient = new ChatPlatformClient(_cluster.Client, nameof(AgentsJoinAndLeaveChannelTestAsync));
         var testChannel = new ChannelInfo(nameof(AgentsJoinAndLeaveChannelTestAsync));
-        await roomGrain.CreateChannel(testChannel);
+        await roomGrain.CreateChannel(testChannel.Name);
 
         var agentInfo = new AgentInfo("test-agent", "test-agent", false);
         var agent = new DummyAgent(agentInfo);
@@ -151,7 +174,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         var roomGrain = _cluster.GrainFactory.GetGrain<IRoomGrain>(nameof(AgentJoinAndLeaveRoomTestAsync));
         var chatPlatformClient = new ChatPlatformClient(_cluster.Client, nameof(AgentJoinAndLeaveRoomTestAsync));
         var testChannel = new ChannelInfo("test-channel");
-        await roomGrain.CreateChannel(testChannel);
+        await roomGrain.CreateChannel(testChannel.Name);
 
         var agentInfo = new AgentInfo("test-agent", "test-agent", false);
         var agent = new DummyAgent(agentInfo);
@@ -212,7 +235,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         var testChannel = new ChannelInfo("test-channel");
 
         await chatPlatformClient.RegisterAgentAsync(agent, testAgent.SelfDescription);
-        await roomGrain.CreateChannel(testChannel);
+        await roomGrain.CreateChannel(testChannel.Name);
         await roomGrain.AddAgentToChannel(testChannel, testAgent.Name);
 
         var channelGrain = _cluster.GrainFactory.GetGrain<IChannelGrain>(testChannel.Name);

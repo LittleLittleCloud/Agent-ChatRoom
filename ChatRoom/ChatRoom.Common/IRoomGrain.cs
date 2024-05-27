@@ -12,7 +12,7 @@ public interface IRoomGrain : IGrainWithStringKey
 
     Task<ChannelInfo[]> GetChannels();
 
-    Task CreateChannel(ChannelInfo channelInfo);
+    Task CreateChannel(string channelName, string[]? members = null, ChatMsg[]? chatHistory = null);
 
     Task DeleteChannel(string channelName);
 

@@ -10,6 +10,8 @@ public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
     
     Task LeaveChannel(string name);
 
+    internal Task InitializeChatHistory(ChatMsg[] history);
+
     internal Task<bool> Message(ChatMsg msg);
 
     internal Task<ChatMsg[]> ReadHistory(int numberOfMessages);

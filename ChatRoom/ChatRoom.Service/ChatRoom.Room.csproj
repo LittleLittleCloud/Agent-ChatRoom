@@ -16,6 +16,12 @@
     <PackageReference Include="Microsoft.Orleans.Server" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChatRoom.Tests"/>
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
   </ItemGroup>

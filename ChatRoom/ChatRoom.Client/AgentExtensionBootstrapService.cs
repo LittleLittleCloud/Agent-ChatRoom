@@ -35,6 +35,8 @@ public class AgentExtensionBootstrapService : IHostedService
                 process.Start();
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
+
+                _logger.LogInformation("Extension {ExtensionName} started with pid {PID}", extension.Name, process.Id);
             }
             catch (Exception ex)
             {
@@ -52,6 +54,8 @@ public class AgentExtensionBootstrapService : IHostedService
             {
                 process.Kill();
                 await process.WaitForExitAsync();
+
+                _logger.LogInformation("Extension {ExtensionName} stopped", process.Id);
             }
             catch (Exception ex)
             {
@@ -82,7 +86,7 @@ public class AgentExtensionBootstrapService : IHostedService
         {
             if (args.Data is not null)
             {
-                _logger.LogInformation("Extension {ExtensionName} output: {Output}", configuration.Name, args.Data);
+                _logger.LogInformation("Extension {ExtensionName} (pid: {PID}) output: {Output}", configuration.Name, process.Id , args.Data);
             }
         };
 
@@ -90,7 +94,7 @@ public class AgentExtensionBootstrapService : IHostedService
         {
             if (args.Data is not null)
             {
-                _logger.LogError("Extension {ExtensionName} error: {Error}", configuration.Name, args.Data);
+                _logger.LogError("Extension {ExtensionName} (pid: {PID}) error: {Error}", configuration.Name, process.Id, args.Data);
             }
         };
 
