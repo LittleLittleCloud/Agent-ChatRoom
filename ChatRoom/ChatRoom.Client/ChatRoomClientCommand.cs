@@ -19,6 +19,10 @@ public class ChatRoomClientCommandSettings : CommandSettings
     [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json")]
     [CommandOption("-c|--config <CONFIG>")]
     public string? ConfigFile { get; init; } = null;
+
+    [Description("The workspace to store logs and other files. The default value is the current directory.")]
+    [CommandOption("-w|--workspace <WORKSPACE>")]
+    public string Workspace { get; init; } = Environment.CurrentDirectory;
 }
 
 public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
@@ -38,7 +42,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             ? JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(command.ConfigFile))!
             : new ChatRoomClientConfiguration();
 
-        var workspace = config.Workspace;
+        var workspace = command.Workspace;
         if (!Directory.Exists(workspace))
         {
             Directory.CreateDirectory(workspace);
@@ -52,11 +56,9 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             {
                 loggingBuilder.ClearProviders();
 
-                // log to file: workspace/logs/clients-{YYYY-MM-DD HH-mm-ss}.log
-                var logPath = Path.Combine(workspace, "logs", clientLogPath);
                 var serilogLogger = new LoggerConfiguration()
                     .Enrich.FromLogContext()
-                    .WriteTo.File(logPath, outputTemplate: debugLogTemplate)
+                    .WriteTo.File(clientLogPath, outputTemplate: debugLogTemplate)
 #if DEBUG
                     .WriteTo.Console(outputTemplate: debugLogTemplate)
 #endif
@@ -74,6 +76,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddSingleton(config);
                 serviceCollection.AddSingleton(config.RoomConfig);
                 serviceCollection.AddSingleton(config.ChannelConfig);
+                serviceCollection.AddSingleton(command);
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
                 serviceCollection.AddSingleton<ConsoleChatRoomService>();
             })

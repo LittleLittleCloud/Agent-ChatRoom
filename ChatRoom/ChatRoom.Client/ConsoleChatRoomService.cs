@@ -17,11 +17,12 @@ public class ConsoleChatRoomService
 
     public ConsoleChatRoomService(
         ChatRoomClientConfiguration configuration,
+        ChatRoomClientCommandSettings settings,
         IClusterClient clsterClient,
         ILogger<ConsoleChatRoomService> logger)
     {
         _logger = logger;
-        _workspacePath = configuration.Workspace;
+        _workspacePath = settings.Workspace;
         _chatRoomContextSchemaPath = Path.Combine(_workspacePath, "chat-history.json");
         _roomObserver = new ConsoleRoomObserver();
         _roomObserverRef = clsterClient.CreateObjectReference<IRoomObserver>(_roomObserver);
@@ -386,8 +387,10 @@ public class ConsoleChatRoomService
 
         foreach (var chatMsg in history)
         {
+            var encodedText = chatMsg.Text.Replace("[", "[[");
+            encodedText = encodedText.Replace("]", "]]");
             AnsiConsole.MarkupLine("[[[dim]{0}[/]]] [bold yellow]{1}:[/] {2}",
-                chatMsg.Created.LocalDateTime, chatMsg.From!, chatMsg.Text);
+                chatMsg.Created.LocalDateTime, chatMsg.From!, encodedText);
         }
 
         AnsiConsole.Write(new Rule()
