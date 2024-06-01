@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
+using ChatRoom.Client.DTO;
 using ChatRoom.Common;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
@@ -9,31 +11,33 @@ public class ConsoleChatRoomService
 {
     private readonly IClusterClient _clusterClient;
     private ClientContext _clientContext;
-    private readonly ConsoleRoomObserver _roomObserver;
     private readonly IRoomObserver _roomObserverRef;
     private readonly ILogger _logger;
     private readonly string _workspacePath = null!;
     private readonly string _chatRoomContextSchemaPath = null!;
+    private readonly ChatRoomClientController _controller;
 
     public ConsoleChatRoomService(
-        ChatRoomClientConfiguration configuration,
+        ClientContext clientContext,
         ChatRoomClientCommandSettings settings,
+        IRoomObserver roomObserver,
         IClusterClient clsterClient,
+        ChatRoomClientController controller,
         ILogger<ConsoleChatRoomService> logger)
     {
         _logger = logger;
         _workspacePath = settings.Workspace;
         _chatRoomContextSchemaPath = Path.Combine(_workspacePath, "chat-history.json");
-        _roomObserver = new ConsoleRoomObserver();
-        _roomObserverRef = clsterClient.CreateObjectReference<IRoomObserver>(_roomObserver);
+        _roomObserverRef = roomObserver;
         _clusterClient = clsterClient;
-        _clientContext = new ClientContext(_clusterClient, UserName: configuration.YourName, CurrentChannel: "General", CurrentRoom: configuration.RoomConfig.Room);
+        _clientContext = clientContext;
+        _controller = controller;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         PrintUsage();
-        var room = _clientContext.ChannelClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
+        var room = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
 
         // restore previous state
@@ -51,10 +55,10 @@ public class ConsoleChatRoomService
                 _logger.LogInformation("Restored channel {ChannelName} with {MemberCount} members and {HistoryCount} history items", channelName, channelMembers.Count(), channelHistory?.Count() ?? 0);
             }
 
-            _clientContext = _clientContext with { CurrentChannel = workspaceConfiguration.CurrentChannel };
+            _clientContext.CurrentChannel = workspaceConfiguration.CurrentChannel;
         }
 
-        await JoinChannel(_clientContext, _clientContext.CurrentChannel!);
+        await JoinChannel(_clientContext.CurrentChannel!);
         await ProcessLoopAsync(_clientContext, cancellationToken);
     }
 
@@ -89,7 +93,7 @@ public class ConsoleChatRoomService
             var firstThreeCharacters = input.Length >= 3 ? input[..3] : string.Empty;
             if (firstThreeCharacters switch
             {
-                "/lm" => ShowCurrentRoomMembers(context),
+                "/lm" => ShowCurrentRoomMembers(),
                 "/lc" => ShowCurrentRoomChannels(context),
                 _ => null
             } is Task queryTask)
@@ -101,86 +105,29 @@ public class ConsoleChatRoomService
             if (firstThreeCharacters is "/rc")
             {
                 var channelName = input.Replace("/rc", "").Trim();
-                var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
-                var channels = await room.GetChannels();
-                if (channels.Any(c => c.Name == channelName) is false)
-                {
-                    AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", channelName);
-                    continue;
-                }
-                else
-                {
-                    await room.DeleteChannel(channelName);
-                    continue;
-                }
+                await _controller.DeleteChannel(new DeleteChannelRequest(channelName));
+                continue;
             }
 
             if (firstThreeCharacters is "/am")
             {
-                var part = input.Replace("/am", "").Trim();
-                var memberName = part;
-                var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
-                var channels = await room.GetChannels();
-                var members = await room.GetMembers();
-                if (channels.Any(c => c.Name == context.CurrentChannel) is false)
-                {
-                    AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", context.CurrentChannel!);
-                    continue;
-                }
-                else if (members.Any(m => m.Name == memberName) is false)
-                {
-                    AnsiConsole.MarkupLine("[bold red]Member '{0}' does not exist[/]", memberName);
-                    continue;
-                }
-                else
-                {
-                    var channelInfo = channels.First(c => c.Name == context.CurrentChannel);
-                    var memberInfo = members.First(m => m.Name == memberName);
-                    var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-                    var channelMembers = await channel.GetMembers();
-                    if (channelMembers.Any(m => m.Name == memberName) is true)
-                    {
-                        AnsiConsole.MarkupLine("[bold red]Member '{0}' already exists in the channel[/]", memberName);
-                        continue;
-                    }
-
-                    await room.AddAgentToChannel(channelInfo, memberName);
-                    continue;
-                }
+                var memberName = input.Replace("/am", "").Trim();
+                await _controller.AddAgentToChannel(new AddAgentToChannelRequest(_clientContext.CurrentChannel!, memberName));
+                continue;
             }
 
             if (firstThreeCharacters is "/rm")
             {
                 var memberName = input.Replace("/rm", "").Trim();
-                var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
-                var channels = await room.GetChannels();
-                var members = await room.GetMembers();
-                if (channels.Any(c => c.Name == context.CurrentChannel) is false)
-                {
-                    AnsiConsole.MarkupLine("[bold red]Channel '{0}' does not exist[/]", context.CurrentChannel!);
-                    continue;
-                }
-                else if (members.Any(m => m.Name == memberName) is false)
-                {
-                    AnsiConsole.MarkupLine("[bold red]Member '{0}' does not exist[/]", memberName);
-                    continue;
-                }
-                else
-                {
-                    var channelInfo = channels.First(c => c.Name == context.CurrentChannel);
-                    var memberInfo = members.First(m => m.Name == memberName);
-                    await room.RemoveAgentFromChannel(channelInfo, memberName);
-
-                    continue;
-                }
+                await _controller.RemoveAgentFromChannel(new RemoveAgentFromChannelRequest(_clientContext.CurrentChannel!, memberName));
+                continue;
             }
 
             var firstTwoCharacters = input.Length >= 2 ? input[..2] : string.Empty;
 
             if (firstTwoCharacters switch
             {
-                "/j" => JoinChannel(context, input.Replace("/j", "").Trim()),
-                "/l" => LeaveChannel(context),
+                "/j" => JoinChannel(input.Replace("/j", "").Trim()),
                 _ => null
             } is Task<ClientContext> cxtTask)
             {
@@ -191,7 +138,7 @@ public class ConsoleChatRoomService
             if (firstTwoCharacters switch
             {
                 "/h" => ShowCurrentChannelHistory(context),
-                "/m" => ShowChannelMembers(context),
+                "/m" => ShowChannelMembers(),
                 "/s" => SaveContextToWorkspace(context),
                 _ => null
             } is Task task)
@@ -230,7 +177,6 @@ public class ConsoleChatRoomService
 
         var markup = new Markup(
            "[bold fuchsia]/j[/] [aqua]<channel>[/] to [underline green]join[/] a specific channel\n"
-           + "[bold fuchsia]/l[/] to [underline green]leave[/] the current channel\n"
            + "[bold fuchsia]/h[/] to re-read channel [underline green]history[/]\n"
            + "[bold fuchsia]/m[/] to query [underline green]members[/] in the current channel\n"
            + "[bold fuchsia]/s[/] to save the channel information and history to the workspace\n"
@@ -259,15 +205,15 @@ public class ConsoleChatRoomService
         AnsiConsole.WriteLine();
     }
 
-    private async Task SaveContextToWorkspace(ClientContext context)
+    public async Task SaveContextToWorkspace(ClientContext context)
     {
-        var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+        var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
         var channels = await room.GetChannels();
         Dictionary<string, ChatMsg[]> chatHistory = new();
         Dictionary<string, string[]> channelMembers = new();
         foreach (var channel in channels)
         {
-            var channelGrain = context.ChannelClient.GetGrain<IChannelGrain>(channel.Name);
+            var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channel.Name);
             var history = await channelGrain.ReadHistory(100);
             chatHistory[channel.Name] = history.ToArray();
             var members = await channelGrain.GetMembers();
@@ -289,19 +235,19 @@ public class ConsoleChatRoomService
         await File.WriteAllTextAsync(_chatRoomContextSchemaPath, json);
     }
 
-    private async Task ShowChannelMembers(ClientContext context)
+    private async Task ShowChannelMembers()
     {
-        var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+        var memberResponse = await _controller.GetChannelMembers(new GetChannelMembersRequest(_clientContext.CurrentChannel!));
+        var members = (memberResponse.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
 
-        if (!context.IsConnectedToChannel)
+        if (members is null)
         {
-            AnsiConsole.MarkupLine("[bold red]You are not connected to any channel[/]");
+            AnsiConsole.MarkupLine("[bold red]No members found[/]");
             return;
         }
 
-        var members = await room.GetMembers();
 
-        AnsiConsole.Write(new Rule($"Members for '{context.CurrentChannel}'")
+        AnsiConsole.Write(new Rule($"Members for '{_clientContext.CurrentChannel}'")
         {
             Justification = Justify.Center,
             Style = Style.Parse("darkgreen")
@@ -319,13 +265,18 @@ public class ConsoleChatRoomService
         });
     }
 
-    static async Task ShowCurrentRoomMembers(ClientContext context)
+    private async Task ShowCurrentRoomMembers()
     {
-        var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+        var membersRespnose = await _controller.GetRoomMembers();
+        var members = (membersRespnose.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
 
-        var members = await room.GetMembers();
+        if (members is null)
+        {
+            AnsiConsole.MarkupLine("[bold red]No members found[/]");
+            return;
+        }
 
-        AnsiConsole.Write(new Rule($"Members for '{context.CurrentRoom}'")
+        AnsiConsole.Write(new Rule($"Members for '{_clientContext.CurrentRoom}'")
         {
             Justification = Justify.Center,
             Style = Style.Parse("darkgreen")
@@ -343,11 +294,16 @@ public class ConsoleChatRoomService
         });
     }
 
-    static async Task ShowCurrentRoomChannels(ClientContext context)
+    public async Task ShowCurrentRoomChannels(ClientContext context)
     {
-        var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
-
-        var channels = await room.GetChannels();
+        var channelsResponse = await _controller.GetChannels();
+        var channels = (channelsResponse.Result as OkObjectResult)?.Value as IEnumerable<ChannelInfo>;
+        
+        if (channels is null)
+        {
+            AnsiConsole.MarkupLine("[bold red]No channels found[/]");
+            return;
+        }
 
         AnsiConsole.Write(new Rule($"Channels for '{context.CurrentRoom}'")
         {
@@ -367,17 +323,16 @@ public class ConsoleChatRoomService
         });
     }
 
-    static async Task ShowCurrentChannelHistory(ClientContext context)
+    public async Task ShowCurrentChannelHistory(ClientContext context)
     {
-        var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-
-        if (!context.IsConnectedToChannel)
+        var historyResponse = await _controller.GetChannelChatHistory(new GetChannelChatHistoryRequest(context.CurrentChannel!, 1_000));
+        var history = (historyResponse.Result as OkObjectResult)?.Value as IEnumerable<ChatMsg>;
+        
+        if (history is null)
         {
-            AnsiConsole.MarkupLine("[bold red]You are not connected to any channel[/]");
+            AnsiConsole.MarkupLine("[bold red]No history found[/]");
             return;
         }
-
-        var history = await room.ReadHistory(1_000);
 
         AnsiConsole.Write(new Rule($"History for '{context.CurrentChannel}'")
         {
@@ -400,51 +355,21 @@ public class ConsoleChatRoomService
         });
     }
 
-    async Task SendMessage(
+    public async Task SendMessage(
         ClientContext context,
         string messageText)
     {
         var message = new ChatMsg(context.UserName!, messageText);
-        var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel!);
-        await room.Message(message);
+        await _controller.SendTextMessageToChannel(new SendTextMessageToChannelRequest(context.CurrentChannel!, message));
     }
 
-    private async Task<ClientContext> JoinChannel(
-        ClientContext context,
+    public async Task JoinChannel(
         string channelName)
     {
-        if (context.CurrentChannel is not null &&
-            !string.Equals(context.CurrentChannel, channelName, StringComparison.OrdinalIgnoreCase))
-        {
-            await LeaveChannel(context);
-        }
-
-        context = context with { CurrentChannel = channelName };
         await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
         {
-            var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
-            await room.CreateChannel(channelName);
-            var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-            await channel.JoinChannel(context.UserName!, "Human user", true, _roomObserverRef);
+            await _controller.JoinChannel(new JoinChannelRequest(channelName, true));
+            _clientContext.CurrentChannel = channelName;
         });
-        return context;
     }
-
-    private async Task<ClientContext> LeaveChannel(ClientContext context)
-    {
-        if (!context.IsConnectedToChannel)
-        {
-            AnsiConsole.MarkupLine("[bold red]You are not connected to any channel[/]");
-            return context;
-        }
-
-        await AnsiConsole.Status().StartAsync("Leaving channel...", async ctx =>
-        {
-            var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
-            await channel.LeaveChannel(context.UserName!);
-        });
-
-        return context with { CurrentChannel = null };
-    }
-
 }

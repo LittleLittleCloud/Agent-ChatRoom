@@ -10,10 +10,11 @@ public class RoomGrain : Grain, IRoomGrain
 {
     private readonly List<ChannelInfo> _channels = new(100);
     private readonly Dictionary<AgentInfo, IRoomObserver> _agents = [];
-    private readonly ILogger<RoomGrain> _logger;
+    private readonly ILogger<RoomGrain>? _logger;
 
     public RoomGrain(
-        ILogger<RoomGrain> logger)
+        ILogger<RoomGrain>? logger = null)
+        :base()
     {
         _logger = logger;
     }
@@ -76,24 +77,25 @@ public class RoomGrain : Grain, IRoomGrain
     {
         if (_channels.Any(x => x.Name == channelName))
         {
-            _logger.LogWarning("Channel {ChannelName} already exists", channelName);
+            _logger?.LogWarning("Channel {ChannelName} already exists", channelName);
             return;
         }
 
         var channelInfo = new ChannelInfo(channelName);
 
+        // activate the channel
         _channels.Add(channelInfo);
 
         var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channelName);
         if (history is { Length: > 0 })
         {
-            _logger.LogInformation("Initializing chat history for channel {ChannelName}", channelName);
+            _logger?.LogInformation("Initializing chat history for channel {ChannelName}", channelName);
             await channelGrain.InitializeChatHistory(history);
         }
 
         if (members is { Length: > 0 })
         {
-            _logger.LogInformation("Adding members to channel {ChannelName}", channelName);
+            _logger?.LogInformation("Adding members to channel {ChannelName}", channelName);
             foreach (var member in members)
             {
                 if (_agents.All(x => x.Key.Name != member))
@@ -105,7 +107,7 @@ public class RoomGrain : Grain, IRoomGrain
             }
         }
 
-        _logger.LogInformation("Channel {ChannelName} created", channelName);
+        _logger?.LogInformation("Channel {ChannelName} created", channelName);
     }
 
     public async Task DeleteChannel(string channelName)

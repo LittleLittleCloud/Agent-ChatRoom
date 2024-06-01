@@ -21,6 +21,23 @@ public class ChatRoomClientConfiguration
     [Description("Your name in the chat room")]
     [Default("User")]
     public string YourName { get; set; } = "User";
+
+    [JsonPropertyName("server_config")]
+    [Description("The configuration for the server. If provided, the client will start a server for chatroom service")]
+    public ServerConfiguration? ServerConfig { get; set; } = null;
+}
+
+public class ServerConfiguration
+{
+    [Description("The urls to listen on")]
+    [Default("http://localhost:51234;https://localhost:51235")]
+    [JsonPropertyName("urls")]
+    public string Urls { get; set; } = "http://localhost:51234;https://localhost:51235";
+
+    [Description("environment, available values are Development, Staging, Production.")]
+    [JsonPropertyName("environment")]
+    [Default("Development")]
+    public string Environment { get; set; } = "Development";
 }
 
 public class AgentExtensionConfiguration

@@ -42,6 +42,22 @@
       "type": "string",
       "description": "Your name in the chat room",
       "default": "User"
+    },
+    "server_config": {
+      "type": "object",
+      "properties": {
+        "urls": {
+          "type": "string",
+          "description": "The urls to listen on",
+          "default": "http://localhost:51234;https://localhost:51235"
+        },
+        "environment": {
+          "type": "string",
+          "description": "environment, available values are Development, Staging, Production.",
+          "default": "Development"
+        }
+      },
+      "description": "The configuration for the server. If provided, the client will start a server for chatroom service"
     }
   },
   "$defs": {

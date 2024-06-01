@@ -5,12 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ChatRoom.Common;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using Swashbuckle.AspNetCore;
 
 namespace ChatRoom.Client;
 
@@ -48,10 +51,17 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             Directory.CreateDirectory(workspace);
         }
 
+        var clientContext = new ClientContext()
+        {
+            CurrentChannel = "General",
+            UserName = config.YourName,
+            CurrentRoom = config.RoomConfig.Room,
+        };
+
         var dateTimeNow = DateTime.Now;
         var clientLogPath = Path.Combine(workspace, "logs", $"clients-{dateTimeNow:yyyy-MM-dd_HH-mm-ss}.log");
         var debugLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] ({SourceContext}) {Message:lj}{NewLine}{Exception}";
-        var host = Host.CreateDefaultBuilder()
+        var hostBuilder = Host.CreateDefaultBuilder()
             .ConfigureLogging(loggingBuilder =>
             {
                 loggingBuilder.ClearProviders();
@@ -78,9 +88,32 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddSingleton(config.ChannelConfig);
                 serviceCollection.AddSingleton(command);
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
+
+                serviceCollection.AddSingleton(clientContext);
+                serviceCollection.AddSingleton(sp =>
+                {
+                    var roomObserver = new ConsoleRoomObserver();
+                    var clusterClient = sp.GetRequiredService<IClusterClient>();
+                    var roomObserverRef = clusterClient.CreateObjectReference<IRoomObserver>(roomObserver);
+                    return roomObserverRef;
+                });
+                serviceCollection.AddSingleton<ChatRoomClientController>();
                 serviceCollection.AddSingleton<ConsoleChatRoomService>();
-            })
-            .Build();
+            });
+
+        if (config.ServerConfig is ServerConfiguration serverConfig)
+        {
+            hostBuilder.ConfigureWebHostDefaults(builder =>
+             {
+                 builder
+                 .UseEnvironment(serverConfig.Environment)
+                 .UseUrls(serverConfig.Urls)
+                 .UseStartup<Startup>();
+             });
+        }
+
+        var host = hostBuilder.Build();
+
         await host.StartAsync();
         var sp = host.Services;
         var logger = sp.GetRequiredService<ILogger<ChatRoomClientCommand>>();

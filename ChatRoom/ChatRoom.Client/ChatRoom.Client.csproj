@@ -20,12 +20,23 @@
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
     <ProjectReference Include="..\ChatRoom.OpenAI\ChatRoom.OpenAI.csproj" />
     <ProjectReference Include="..\ChatRoom.Service\ChatRoom.Room.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(RepoRoot)\configuration\**\*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
