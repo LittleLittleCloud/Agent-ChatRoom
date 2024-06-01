@@ -18,14 +18,14 @@ public class ChatRoomClientController
 {
     private readonly IClusterClient _clusterClient = null!;
     private readonly ClientContext _clientContext = null!;
-    private readonly ILogger<ChatRoomClientController> _logger = null!;
+    private readonly ILogger<ChatRoomClientController>? _logger = null!;
     private readonly IRoomObserver _roomObserverRef = null!;
 
     public ChatRoomClientController(
         IClusterClient clusterClient,
         ClientContext clientContext,
-        ILogger<ChatRoomClientController> logger,
-        IRoomObserver roomObserverRef)
+        IRoomObserver roomObserverRef,
+        ILogger<ChatRoomClientController>? logger = null)
     {
         _clusterClient = clusterClient;
         _clientContext = clientContext;
@@ -62,7 +62,7 @@ public class ChatRoomClientController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ChannelInfo>>> GetChannels()
     {
-        _logger.LogInformation("Getting channels");
+        _logger?.LogInformation("Getting channels");
         if (_clientContext.CurrentRoom == null)
         {
             return new BadRequestObjectResult("You are not in a room");
@@ -76,7 +76,7 @@ public class ChatRoomClientController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AgentInfo>>> GetRoomMembers()
     {
-        _logger.LogInformation("Getting members");
+        _logger?.LogInformation("Getting members");
         if (_clientContext.CurrentRoom == null)
         {
             return new BadRequestObjectResult("You are not in a room");
@@ -92,7 +92,7 @@ public class ChatRoomClientController
         [FromBody] GetChannelMembersRequest request)
     {
         var channelName = request.ChannelName;
-        _logger.LogInformation("Getting members of channel {channelName}", channelName);
+        _logger?.LogInformation("Getting members of channel {channelName}", channelName);
 
         var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
         var members = await channelGrain.GetMembers();
@@ -110,7 +110,7 @@ public class ChatRoomClientController
             return new BadRequestObjectResult("Count must be greater than 0");
         }
 
-        _logger.LogInformation("Getting history of channel {channelName}", channelName);
+        _logger?.LogInformation("Getting history of channel {channelName}", channelName);
 
         var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
         var history = await channelGrain.ReadHistory(request.Count);
@@ -123,7 +123,7 @@ public class ChatRoomClientController
         [FromBody] CreateChannelRequest request)
     {
         var channelName = request.ChannelName;
-        _logger.LogInformation("Creating channel {channelName}", channelName);
+        _logger?.LogInformation("Creating channel {channelName}", channelName);
 
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await roomGrain.CreateChannel(channelName);
@@ -136,19 +136,19 @@ public class ChatRoomClientController
         [FromBody] JoinChannelRequest request)
     {
         var channelName = request.ChannelName;
-        _logger.LogInformation("Joining channel {channelName}", channelName);
+        _logger?.LogInformation("Joining channel {channelName}", channelName);
         var channelResponse = await GetChannels();
         var channels = (channelResponse.Result as OkObjectResult)?.Value as IEnumerable<ChannelInfo>;
         if (channels?.All(x => x.Name != channelName) is true)
         {
             if (request.CreateIfNotExists)
             {
-                _logger.LogInformation("Channel {channelName} does not exist, creating it", channelName);
+                _logger?.LogInformation("Channel {channelName} does not exist, creating it", channelName);
                 await CreateChannel(new CreateChannelRequest(channelName));
             }
             else
             {
-                _logger.LogWarning("Channel {channelName} does not exist", channelName);
+                _logger?.LogWarning("Channel {channelName} does not exist", channelName);
                 return new BadRequestObjectResult("Channel does not exist");
             }
         }
@@ -164,7 +164,7 @@ public class ChatRoomClientController
         [FromBody] LeaveChannelRequest request)
     {
         var channelName = request.ChannelName;
-        _logger.LogInformation("Leaving channel {channelName}", channelName);
+        _logger?.LogInformation("Leaving channel {channelName}", channelName);
 
         var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
         await channelGrain.LeaveChannel(_clientContext.UserName!);
@@ -177,7 +177,7 @@ public class ChatRoomClientController
         [FromBody] DeleteChannelRequest request)
     {
         var channelName = request.ChannelName;
-        _logger.LogInformation("Deleting channel {channelName}", channelName);
+        _logger?.LogInformation("Deleting channel {channelName}", channelName);
 
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await roomGrain.DeleteChannel(channelName);
@@ -191,7 +191,7 @@ public class ChatRoomClientController
     {
         var channelName = request.ChannelName;
         var agentName = request.AgentName;
-        _logger.LogInformation("Adding agent {agentName} to channel {channelName}", agentName, channelName);
+        _logger?.LogInformation("Adding agent {agentName} to channel {channelName}", agentName, channelName);
 
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await roomGrain.AddAgentToChannel(new ChannelInfo(channelName), agentName);
@@ -205,7 +205,7 @@ public class ChatRoomClientController
     {
         var channelName = request.ChannelName;
         var agentName = request.AgentName;
-        _logger.LogInformation("Removing agent {agentName} from channel {channelName}", agentName, channelName);
+        _logger?.LogInformation("Removing agent {agentName} from channel {channelName}", agentName, channelName);
 
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await roomGrain.RemoveAgentFromChannel(new ChannelInfo(channelName), agentName);

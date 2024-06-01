@@ -21,7 +21,6 @@ namespace ChatRoom.Client
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ChatRoomClientController>();
             services.AddControllers();
             services.AddMvc(option => option.EnableEndpointRouting = false);
             services.AddSwaggerGen();
@@ -30,11 +29,12 @@ namespace ChatRoom.Client
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
-#if DEBUG
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            app.UseDeveloperExceptionPage();
-#endif
+            if (env.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
+            }
 
             app.UseMvc();
             app.UseHttpsRedirection();

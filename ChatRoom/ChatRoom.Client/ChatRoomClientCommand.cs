@@ -61,7 +61,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         var dateTimeNow = DateTime.Now;
         var clientLogPath = Path.Combine(workspace, "logs", $"clients-{dateTimeNow:yyyy-MM-dd_HH-mm-ss}.log");
         var debugLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] ({SourceContext}) {Message:lj}{NewLine}{Exception}";
-        var host = Host.CreateDefaultBuilder()
+        var hostBuilder = Host.CreateDefaultBuilder()
             .ConfigureLogging(loggingBuilder =>
             {
                 loggingBuilder.ClearProviders();
@@ -99,14 +99,20 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 });
                 serviceCollection.AddSingleton<ChatRoomClientController>();
                 serviceCollection.AddSingleton<ConsoleChatRoomService>();
-            })
-            .ConfigureWebHostDefaults(builder =>
-            {
-                builder
-                .UseUrls($"http://localhost:51234;https://localhost:51235")
-                .UseStartup<Startup>();
-            })
-            .Build();
+            });
+
+        if (config.ServerConfig is ServerConfiguration serverConfig)
+        {
+            hostBuilder.ConfigureWebHostDefaults(builder =>
+             {
+                 builder
+                 .UseEnvironment(serverConfig.Environment)
+                 .UseUrls(serverConfig.Urls)
+                 .UseStartup<Startup>();
+             });
+        }
+
+        var host = hostBuilder.Build();
 
         await host.StartAsync();
         var sp = host.Services;

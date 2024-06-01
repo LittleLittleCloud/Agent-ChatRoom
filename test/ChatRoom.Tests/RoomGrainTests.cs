@@ -74,7 +74,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         members.Should().HaveCount(1);
     }
 
-    [Fact(Skip ="need further investigation")]
+    [Fact]
     public async Task ItCreateChannelWithChatHistoryTestAsync()
     {
         var roomGrain = _cluster.GrainFactory.GetGrain<IRoomGrain>(nameof(ItCreateChannelWithChatHistoryTestAsync));
@@ -283,10 +283,8 @@ public sealed class TestSiloConfigurator : ISiloConfigurator
 {
     public void Configure(ISiloBuilder hostBuilder)
     {
-        hostBuilder.UseLocalhostClustering()
+        hostBuilder
             .AddMemoryGrainStorage("PubSubStore")
-            .Services.AddSingleton(new ChannelConfiguration()
-            {
-            });
+            .Services.AddSingleton<ChannelConfiguration>();
     }
 }
