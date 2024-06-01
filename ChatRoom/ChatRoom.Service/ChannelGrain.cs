@@ -203,7 +203,7 @@ internal class ChannelGrain : Grain, IChannelGrain
     [OneWay]
     private async Task GenerateNextReply(IChannelObserver observer, AgentInfo agent, ChatMsg[] msg)
     {
-        var reply = await observer.GenerateReplyAsync(agent, msg);
+        var reply = await observer.GenerateReplyAsync(agent, msg, _channelInfo);
 
         if (reply is not null)
         {
@@ -214,6 +214,19 @@ internal class ChannelGrain : Grain, IChannelGrain
     public Task InitializeChatHistory(ChatMsg[] history)
     {
         this._messages.AddRange(history);
+
+        return Task.CompletedTask;
+    }
+
+    public Task SendNotification(ChatMsg msg)
+    {
+        var content = msg.Text;
+        _logger.LogInformation("Sending notification: {Content}", content);
+
+        foreach (var cb in _agents.Values)
+        {
+            _ = cb.Notification(msg);
+        }
 
         return Task.CompletedTask;
     }

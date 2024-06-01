@@ -15,7 +15,7 @@ internal class ConsoleRoomObserver : IRoomObserver
         return Task.CompletedTask;
     }
 
-    public Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] msg)
+    public Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] msg, ChannelInfo _)
     {
         return Task.FromResult<ChatMsg?>(null);
     }

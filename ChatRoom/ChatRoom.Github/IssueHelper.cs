@@ -6,11 +6,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AutoGen.Core;
+using ChatRoom.SDK;
 using Octokit;
 
 namespace ChatRoom.Github;
 
-public partial class IssueHelper : IAgent
+public partial class IssueHelper : INotifyAgent
 {
     /// <summary>
     /// Get an issue from a GitHub repository
@@ -39,7 +40,7 @@ public partial class IssueHelper : IAgent
     [Function]
     public async Task<string> GetIssueCommentsAsync(string owner, string name, int issueNumber)
     {
-        Console.WriteLine($"Getting comments for issue {issueNumber} from {owner}/{name}");
+        WriteLine($"Getting comments for issue {issueNumber} from {owner}/{name}");
         var comments = await _gitHubClient.Issue.Comment.GetAllForIssue(owner, name, issueNumber);
         var json = JsonSerializer.Serialize(comments, _jsonSerializerOptions);
 
@@ -70,7 +71,7 @@ public partial class IssueHelper : IAgent
         int limit = 5,
         string state = "open")
     {
-        Console.WriteLine($"Searching issues in {owner}/{repoName} with query: {query}");
+        WriteLine($"Searching issues in {owner}/{repoName} with query: {query}");
         var request = new SearchIssuesRequest(query);
         request.In = [
             IssueInQualifier.Title,
@@ -130,6 +131,8 @@ public partial class IssueHelper : IAgent
     private readonly IAgent _agent;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
+    public event EventHandler<ChatMsg>? Notify;
+
     public IssueHelper(IAgent agent, GitHubClient gitHubClient)
     {
         _agent = agent;
@@ -155,8 +158,26 @@ public partial class IssueHelper : IAgent
             });
 
         _agent = agent
-            .RegisterMiddleware(functionCallMiddleware);
-            
+            .RegisterMiddleware(functionCallMiddleware)
+            .RegisterMiddleware(async (msgs, option, innerAgent, ct) =>
+            {
+                try
+                {
+                    var reply = await innerAgent.GenerateReplyAsync(msgs, option, ct);
+                    if (reply is ToolCallAggregateMessage)
+                    {
+                        return await innerAgent.GenerateReplyAsync(msgs.Append(reply), option, ct);
+                    }
+
+                    return reply;
+                }
+                catch (Exception ex)
+                {
+                    return new TextMessage(Role.Assistant, ex.Message, from: innerAgent.Name);
+                }
+            })
+            .RegisterPrintMessage();
+
     }
 
     public string Name => _agent.Name;
@@ -164,6 +185,11 @@ public partial class IssueHelper : IAgent
     public Task<IMessage> GenerateReplyAsync(IEnumerable<IMessage> messages, GenerateReplyOptions? options = null, CancellationToken cancellationToken = default)
     {
         return _agent.GenerateReplyAsync(messages, options, cancellationToken);
+    }
+
+    private void WriteLine(string msg)
+    {
+        Notify?.Invoke(this, new ChatMsg(From: Name, Text: msg));
     }
 
     class IssueDTO

@@ -17,7 +17,6 @@ namespace ChatRoom.Github.Tests;
 
 public class ConfigurationTests
 {
-
     [Fact]
     [UseReporter(typeof(DiffReporter))]
     [UseApprovalSubdirectory("ApprovalTests")]

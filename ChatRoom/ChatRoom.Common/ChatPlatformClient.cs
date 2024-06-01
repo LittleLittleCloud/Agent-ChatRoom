@@ -16,7 +16,7 @@ public class ChatPlatformClient
 
     public async Task RegisterAgentAsync(IAgent agent, string? description = null)
     {
-        var observer = new AutoGenAgentObserver(agent);
+        var observer = new AutoGenAgentObserver(_client, agent);
         var room = _client.GetGrain<IRoomGrain>(_room);
         var reference = _client.CreateObjectReference<IRoomObserver>(observer);
         await room.JoinRoom(agent.Name, description ?? string.Empty, false, reference);

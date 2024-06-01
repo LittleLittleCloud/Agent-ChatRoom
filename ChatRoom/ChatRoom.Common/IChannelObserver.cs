@@ -2,7 +2,7 @@
 
 namespace ChatRoom.Common;
 
-public interface IChannelObserver : IOrchestratorObserver
+public interface IChannelObserver : IOrchestratorObserver, INotificationObserver
 {
     [OneWay]
     Task JoinChannel(AgentInfo agent, ChannelInfo channelInfo);
@@ -12,7 +12,7 @@ public interface IChannelObserver : IOrchestratorObserver
 
     Task<bool> Ping();
 
-    Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] msg);
+    Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] msg, ChannelInfo channelInfo);
 
     [OneWay]
     Task NewMessage(ChatMsg msg);

@@ -48,34 +48,17 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
 
         if (issueHelper is null)
         {
-            issueHelper = AgentFactory.CreateIssueHelperAgent(openaiClient!, deployModelName!, ghClient, config.IssueHelper.Name, config.IssueHelper.SystemMessage)
-                .RegisterMiddleware(async (msgs, option, innerAgent, ct) =>
-                {
-                    try
-                    {
-                        var reply = await innerAgent.GenerateReplyAsync(msgs, option, ct);
-                        if (reply is ToolCallAggregateMessage)
-                        {
-                            return await innerAgent.GenerateReplyAsync(msgs.Append(reply), option, ct);
-                        }
-
-                        return reply;
-                    }
-                    catch (Exception ex)
-                    {
-                        return new TextMessage(Role.Assistant, ex.Message, from: innerAgent.Name);
-                    }
-                })
-                .RegisterPrintMessage();
+            issueHelper = AgentFactory.CreateIssueHelperAgent(openaiClient!, deployModelName!, ghClient, config.IssueHelper.Name, config.IssueHelper.SystemMessage);
         };
 
         var host = Host.CreateDefaultBuilder()
-            .AddAgentAsync(issueHelper, config.IssueHelper.Description)
             .UseChatRoom(roomName: settings.Room ?? "room", port: settings.Port ?? 30000)
             .Build();
+        
+        var sp = host.Services;
 
         await host.StartAsync();
-        await host.WaitForAgentsJoinRoomAsync();
+        await host.JoinRoomAsync(issueHelper, config.IssueHelper.Description);
         await host.WaitForShutdownAsync();
 
         return 0;
