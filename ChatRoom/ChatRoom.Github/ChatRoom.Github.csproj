@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ToolCommandName>chatroom-github</ToolCommandName>
+    <PackAsTool>true</PackAsTool>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChatRoom.Github.Tests" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="AutoGen" />
+    <PackageReference Include="AutoGen.SourceGenerator" />
+    <PackageReference Include="Octokit" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
+  </ItemGroup>
+
+</Project>

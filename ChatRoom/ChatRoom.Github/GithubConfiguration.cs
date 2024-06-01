@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Json.Schema.Generation;
 
-namespace ChatRoom.BingSearch;
+namespace ChatRoom.Github;
 
 public enum LLMType
 {
@@ -17,23 +17,29 @@ public enum LLMType
     OpenAI = 1 // OpenAI
 }
 
-public class BingSearchConfiguration
+public class IssueHelperConfiguration
 {
-    [Description("Name of the bing search agent, default is 'bing-search'")]
+    [Description("Name of the issue helper agent, default is 'issue-helper'")]
     [JsonPropertyName("name")]
-    public string Name { get; set; } = "bing-search";
+    public string Name { get; set; } = "issue-helper";
 
-    [Description("System message, default is 'You are a Bing search agent. You can search the web using Bing search engine.'")]
+    [Description("System message, default is 'You are a github issue helper'")]
     [JsonPropertyName("system_message")]
-    public string SystemMessage { get; set; } = "You are a Bing search agent. You can search the web using Bing search engine.";
+    public string SystemMessage { get; set; } = "You are a github issue helper";
 
-    [Description("Agent description, default is 'I am a Bing search agent. I can search the web using Bing search engine.'")]
+    [Description("Agent description, default is 'I am a github issue helper, I can help you with your github issues.'")]
     [JsonPropertyName("description")]
-    public string Description { get; set; } = "I am a Bing search agent. I can search the web using Bing search engine.";
+    public string Description { get; set; } = "I am a github issue helper, I can help you with your github issues.";
+}
 
-    [Description("Bing API key, will use $env:BING_API_KEY if not provided")]
-    [JsonPropertyName("bing_api_key")]
-    public string? BingApiKey { get; set; } = Environment.GetEnvironmentVariable("BING_API_KEY");
+public class GithubConfiguration
+{
+    [Description("Issue helper configuration")]
+    public IssueHelperConfiguration IssueHelper { get; set; } = new IssueHelperConfiguration();
+
+    [JsonPropertyName("github_token")]
+    [Description("GitHub token, will use $env:GITHUB_TOKEN if not provided")]
+    public string? GithubToken { get; set; } = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
 
     [Description("Language model type, will use Azure OpenAI if not provided")]
     [JsonPropertyName("llm_type")]
