@@ -81,7 +81,7 @@ internal static class AgentFactory
                 try
                 {
                     var reply = await innerAgent.GenerateReplyAsync(msgs, option, ct);
-                    if (reply is AggregateMessage<ToolCallMessage, ToolCallResultMessage>)
+                    if (reply is ToolCallAggregateMessage)
                     {
                         return await innerAgent.GenerateReplyAsync(msgs.Append(reply), option, ct);
                     }

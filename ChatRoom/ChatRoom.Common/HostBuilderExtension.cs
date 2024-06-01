@@ -75,6 +75,23 @@ public static class HostBuilderExtension
             });
     }
 
+    public static IHostBuilder AddAgentAsync<TAgent>(
+        this IHostBuilder hostBuilder,
+        TAgent agent,
+        string selfDescription)
+        where TAgent : IAgent
+    {
+        return hostBuilder
+            .ConfigureServices(async (ctx, serviceCollections) =>
+            {
+                serviceCollections.AddSingleton(sp =>
+                {
+                    var agentInfo = new AgentInfo(agent.Name, selfDescription);
+                    return new AgentInfoAgent(agent, agentInfo);
+                });
+            });
+    }
+
     public static async Task WaitForAgentsJoinRoomAsync(this IHost host)
     {
         var collections = host.Services.GetServices<AgentInfoAgent>();
