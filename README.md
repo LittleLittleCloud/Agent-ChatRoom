@@ -5,50 +5,32 @@
 
 ## 🌟 Highlights
 - **Multi-Agent Chat**: Chat with multiple agents simultaneously.
+- **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 - **Extensible**: Create your own agents and integrate them into the chatroom.
 
 ## 🚀 Quick Start
+We provide the following quick-start configuration to help you get started quickly. More configurations will be added in the future.
+- [Powershell-Chatroom](https://github.com/LittleLittleCloud/Powershell-ChatRoom): chat with `ps-gpt` and `ps-runner` to help you write and run PowerShell scripts.
 
-- 🛠️ Install the Client
-To install the client, run the following command:
-```bash
-dotnet tool install --global ChatRoom.Client
-```
-
-- 🧩 Install the Agent
-To install the OpenAI agent, run the following command:
-```bash
-dotnet tool install --global ChatRoom.OpenAI
-```
+## 🌐 Server mode
+To start a restful backend from `ChatRoom.Client`, add a `server_config` section to the client configuration file.
 
 > [!Note]
-> As of 2024/05/24, the following agents are available as dotnet tools from NuGet:
-> - `ChatRoom.OpenAI`: OpenAI agent.
-> - `ChatRoom.Powershell`: Powershell GPT agent and Powershell executor agent.
-> - `ChatRoom.BingSearch`: Bing search agent.
+> You can find the complete configuration sample in [chatroom-client-server.json](configuration/chatroom-client-server.json)
 
-You can search for and install these agents from [nuget.org](https://www.nuget.org/).
-
-- 🚪 Start the Chatroom
-To start the chatroom service as an Orleans silo, run:
-```bash
-chatroom
+```json
+// file: chatroom-client-server.json
+"server_config": {
+    "environment": "Development", // one of Development, Staging, Production.
+    "urls": "http://localhost:51234;https://localhost:51235"
+}
 ```
 
-- 🤖 Start the OpenAI Agent and Join the Chatroom
-To start the OpenAI agent, run:
+Then, run the following command to start the server. And the server will start on the http://localhost:51234 and https://localhost:51235.
+
 ```bash
-chatroom-openai
+chatroom -c chatroom-client-server.json
 ```
 
-After the OpenAI agent is started, you will see the following message in the chatroom:
-```bash
-gpt joined the chatroom.
-```
-
-- 💬 Add the OpenAI Agent to the Current Channel and Start Chatting
-Once the GPT agent is in the chatroom, you can add it to the current channel and start chatting with it using the following command:
-```bash
-/am gpt
-Hey, tell me a joke.
-```
+### Swagger UI for the server
+When the environment is set to `Development`, the server will automatically start the Swagger UI at `/swagger` and `/swagger/index.html`. You can also access the complete swagger schema at `/swagger/v1/swagger.json`, or visit [swagger-schema.json](schema/chatroom_client_swagger_schema.json) in this repository.
