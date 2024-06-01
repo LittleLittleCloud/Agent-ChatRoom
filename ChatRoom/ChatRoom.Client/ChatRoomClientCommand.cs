@@ -5,12 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using Swashbuckle.AspNetCore;
 
 namespace ChatRoom.Client;
 
@@ -80,7 +82,14 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
                 serviceCollection.AddSingleton<ConsoleChatRoomService>();
             })
+            .ConfigureWebHostDefaults(builder =>
+            {
+                builder
+                .UseUrls($"http://localhost:51234;https://localhost:51235")
+                .UseStartup<Startup>();
+            })
             .Build();
+
         await host.StartAsync();
         var sp = host.Services;
         var logger = sp.GetRequiredService<ILogger<ChatRoomClientCommand>>();

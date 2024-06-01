@@ -27,13 +27,18 @@ public class ConsoleChatRoomService
         _roomObserver = new ConsoleRoomObserver();
         _roomObserverRef = clsterClient.CreateObjectReference<IRoomObserver>(_roomObserver);
         _clusterClient = clsterClient;
-        _clientContext = new ClientContext(_clusterClient, UserName: configuration.YourName, CurrentChannel: "General", CurrentRoom: configuration.RoomConfig.Room);
+        _clientContext = new ClientContext()
+        {
+            UserName = configuration.YourName,
+            CurrentChannel = "General",
+            CurrentRoom = configuration.RoomConfig.Room,
+        };
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         PrintUsage();
-        var room = _clientContext.ChannelClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
+        var room = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
 
         // restore previous state
@@ -51,7 +56,7 @@ public class ConsoleChatRoomService
                 _logger.LogInformation("Restored channel {ChannelName} with {MemberCount} members and {HistoryCount} history items", channelName, channelMembers.Count(), channelHistory?.Count() ?? 0);
             }
 
-            _clientContext = _clientContext with { CurrentChannel = workspaceConfiguration.CurrentChannel };
+            _clientContext.CurrentChannel = workspaceConfiguration.CurrentChannel;
         }
 
         await JoinChannel(_clientContext, _clientContext.CurrentChannel!);
@@ -101,7 +106,7 @@ public class ConsoleChatRoomService
             if (firstThreeCharacters is "/rc")
             {
                 var channelName = input.Replace("/rc", "").Trim();
-                var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+                var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
                 var channels = await room.GetChannels();
                 if (channels.Any(c => c.Name == channelName) is false)
                 {
@@ -119,7 +124,7 @@ public class ConsoleChatRoomService
             {
                 var part = input.Replace("/am", "").Trim();
                 var memberName = part;
-                var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+                var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
                 var channels = await room.GetChannels();
                 var members = await room.GetMembers();
                 if (channels.Any(c => c.Name == context.CurrentChannel) is false)
@@ -136,7 +141,7 @@ public class ConsoleChatRoomService
                 {
                     var channelInfo = channels.First(c => c.Name == context.CurrentChannel);
                     var memberInfo = members.First(m => m.Name == memberName);
-                    var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+                    var channel = _clusterClient.GetGrain<IChannelGrain>(context.CurrentChannel);
                     var channelMembers = await channel.GetMembers();
                     if (channelMembers.Any(m => m.Name == memberName) is true)
                     {
@@ -152,7 +157,7 @@ public class ConsoleChatRoomService
             if (firstThreeCharacters is "/rm")
             {
                 var memberName = input.Replace("/rm", "").Trim();
-                var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+                var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
                 var channels = await room.GetChannels();
                 var members = await room.GetMembers();
                 if (channels.Any(c => c.Name == context.CurrentChannel) is false)
@@ -259,15 +264,15 @@ public class ConsoleChatRoomService
         AnsiConsole.WriteLine();
     }
 
-    private async Task SaveContextToWorkspace(ClientContext context)
+    public async Task SaveContextToWorkspace(ClientContext context)
     {
-        var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+        var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
         var channels = await room.GetChannels();
         Dictionary<string, ChatMsg[]> chatHistory = new();
         Dictionary<string, string[]> channelMembers = new();
         foreach (var channel in channels)
         {
-            var channelGrain = context.ChannelClient.GetGrain<IChannelGrain>(channel.Name);
+            var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channel.Name);
             var history = await channelGrain.ReadHistory(100);
             chatHistory[channel.Name] = history.ToArray();
             var members = await channelGrain.GetMembers();
@@ -291,7 +296,7 @@ public class ConsoleChatRoomService
 
     private async Task ShowChannelMembers(ClientContext context)
     {
-        var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+        var room = _clusterClient.GetGrain<IChannelGrain>(context.CurrentChannel);
 
         if (!context.IsConnectedToChannel)
         {
@@ -319,9 +324,9 @@ public class ConsoleChatRoomService
         });
     }
 
-    static async Task ShowCurrentRoomMembers(ClientContext context)
+    private async Task ShowCurrentRoomMembers(ClientContext context)
     {
-        var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+        var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
 
         var members = await room.GetMembers();
 
@@ -343,9 +348,9 @@ public class ConsoleChatRoomService
         });
     }
 
-    static async Task ShowCurrentRoomChannels(ClientContext context)
+    public async Task ShowCurrentRoomChannels(ClientContext context)
     {
-        var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+        var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
 
         var channels = await room.GetChannels();
 
@@ -367,9 +372,9 @@ public class ConsoleChatRoomService
         });
     }
 
-    static async Task ShowCurrentChannelHistory(ClientContext context)
+    public async Task ShowCurrentChannelHistory(ClientContext context)
     {
-        var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+        var room = _clusterClient.GetGrain<IChannelGrain>(context.CurrentChannel);
 
         if (!context.IsConnectedToChannel)
         {
@@ -400,16 +405,16 @@ public class ConsoleChatRoomService
         });
     }
 
-    async Task SendMessage(
+    public async Task SendMessage(
         ClientContext context,
         string messageText)
     {
         var message = new ChatMsg(context.UserName!, messageText);
-        var room = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel!);
+        var room = _clusterClient.GetGrain<IChannelGrain>(context.CurrentChannel!);
         await room.Message(message);
     }
 
-    private async Task<ClientContext> JoinChannel(
+    public async Task<ClientContext> JoinChannel(
         ClientContext context,
         string channelName)
     {
@@ -419,12 +424,12 @@ public class ConsoleChatRoomService
             await LeaveChannel(context);
         }
 
-        context = context with { CurrentChannel = channelName };
+        context.CurrentChannel = channelName;
         await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
         {
-            var room = context.ChannelClient.GetGrain<IRoomGrain>(context.CurrentRoom);
+            var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
             await room.CreateChannel(channelName);
-            var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+            var channel = _clusterClient.GetGrain<IChannelGrain>(context.CurrentChannel);
             await channel.JoinChannel(context.UserName!, "Human user", true, _roomObserverRef);
         });
         return context;
@@ -440,11 +445,12 @@ public class ConsoleChatRoomService
 
         await AnsiConsole.Status().StartAsync("Leaving channel...", async ctx =>
         {
-            var channel = context.ChannelClient.GetGrain<IChannelGrain>(context.CurrentChannel);
+            var channel = _clusterClient.GetGrain<IChannelGrain>(context.CurrentChannel);
             await channel.LeaveChannel(context.UserName!);
         });
 
-        return context with { CurrentChannel = null };
+        context.CurrentChannel = null;
+        return context;
     }
 
 }
