@@ -30,42 +30,14 @@ internal static class AgentFactory
         var kernel = new Kernel();
         var plugin = kernel.Plugins.AddFromObject(webSearchPlugin);
         var middleware = new KernelPluginMiddleware(kernel, plugin);
-        OpenAIClient openaiClient;
-        string deployModelName;
-        if (config.LLMType == LLMType.AOAI)
+        OpenAIClient? openaiClient = config.OpenAIConfiguration?.ToOpenAIClient();
+        string? deployModelName = config.OpenAIConfiguration?.ModelId;
+        
+        if (openaiClient is null || deployModelName is null)
         {
-            var azureOpenAiEndpoint = config.AzureOpenAiEndpoint;
-            var azureOpenAiKey = config.AzureOpenAiKey;
-            var azureDeploymentName = config.AzureDeploymentName;
-
-            if (string.IsNullOrWhiteSpace(azureOpenAiEndpoint) || string.IsNullOrWhiteSpace(azureOpenAiKey) || string.IsNullOrWhiteSpace(azureDeploymentName))
-            {
-                var defaultReply = "Azure OpenAI endpoint, key, or deployment name not found. Please provide Azure OpenAI endpoint, key, and deployment name in the configuration file or via env:AZURE_OPENAI_ENDPOINT, env:AZURE_OPENAI_API_KEY, env:AZURE_OPENAI_DEPLOY_NAME";
-                return new DefaultReplyAgent(config.Name, defaultReply);
-            }
-
-            openaiClient = new OpenAIClient(new Uri(azureOpenAiEndpoint), new Azure.AzureKeyCredential(azureOpenAiKey));
-            deployModelName = azureDeploymentName;
-        }
-        else if (config.LLMType == LLMType.OpenAI)
-        {
-            var openaiApiKey = config.OpenAiApiKey;
-            var openaiModelId = config.OpenAiModelId;
-
-            if (string.IsNullOrWhiteSpace(openaiApiKey))
-            {
-                var defaultReply = "OpenAI API key not found. Please provide OpenAI API key in the configuration file or via env:OPENAI_API_KEY";
-                return new DefaultReplyAgent(config.Name, defaultReply);
-            }
-
-            openaiClient = new OpenAIClient(openaiApiKey);
-            deployModelName = openaiModelId;
-        }
-        else
-        {
-            var defaultReply = "Language model type not found. Please provide language model type in the configuration file";
-
-            return new DefaultReplyAgent(config.Name, defaultReply);
+            return new DefaultReplyAgent(
+                config.Name,
+                $"{config.Name} is not configured properly. Please check the configuration file.");
         }
 
 

@@ -1,6 +1,7 @@
 ﻿using AutoGen.Core;
 using Azure.AI.OpenAI;
 using ChatRoom.Common;
+using ChatRoom.OpenAI;
 using Microsoft.Extensions.Logging;
 using Orleans.Concurrency;
 using Orleans.Runtime;
@@ -135,29 +136,14 @@ internal class ChannelGrain : Grain, IChannelGrain
         var notHumanAgents = notHumanMembers.Select(x => new DummyAgent(x)).ToArray();
         var agents = humanAgents.Concat(notHumanAgents).ToArray();
         // create agents
-        var AZURE_OPENAI_ENDPOINT = _config.AzureOpenAIEndpoint;
-        var AZURE_OPENAI_KEY = _config.AzureOpenAIKey;
-        var AZURE_DEPLOYMENT_NAME = _config.AzureOpenAIDeployName;
-        var OPENAI_API_KEY = _config.OpenAIApiKey;
-        var OPENAI_MODEL_ID = _config.OpenAIModelId;
+        var openaiClient = _config.OpenAIConfiguration?.ToOpenAIClient();
+        var deployModelName = _config.OpenAIConfiguration?.ModelId;
 
-        OpenAIClient openaiClient;
-        bool useAzure = false;
-        if (AZURE_OPENAI_ENDPOINT is string && AZURE_OPENAI_KEY is string && AZURE_DEPLOYMENT_NAME is string)
+        if (openaiClient is null || deployModelName is null)
         {
-            openaiClient = new OpenAIClient(new Uri(AZURE_OPENAI_ENDPOINT), new Azure.AzureKeyCredential(AZURE_OPENAI_KEY));
-            useAzure = true;
+            throw new ArgumentException("channel is not configured properly. Please check the configuration file.");
         }
-        else if (OPENAI_API_KEY is string)
-        {
-            openaiClient = new OpenAIClient(OPENAI_API_KEY);
-        }
-        else
-        {
-            throw new ArgumentException("Please provide either (AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_DEPLOYMENT_NAME) or OPENAI_API_KEY");
-        }
-
-        var deployModelName = useAzure ? AZURE_DEPLOYMENT_NAME! : OPENAI_MODEL_ID;
+        
 
         // create graph chat
         // allow not human agents <-> human agents 

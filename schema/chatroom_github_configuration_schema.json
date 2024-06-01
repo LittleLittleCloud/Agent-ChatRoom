@@ -1,21 +1,24 @@
 {
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string",
-      "description": "Name of the bing search agent, default is \u0027bing-search\u0027"
+    "IssueHelper": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string"
+        },
+        "system_message": {
+          "$ref": "#/$defs/string1"
+        },
+        "description": {
+          "$ref": "#/$defs/string2"
+        }
+      },
+      "description": "Issue helper configuration"
     },
-    "system_message": {
+    "github_token": {
       "type": "string",
-      "description": "System message, default is \u0027You are a Bing search agent. You can search the web using Bing search engine.\u0027"
-    },
-    "description": {
-      "type": "string",
-      "description": "Agent description, default is \u0027I am a Bing search agent. I can search the web using Bing search engine.\u0027"
-    },
-    "bing_api_key": {
-      "type": "string",
-      "description": "Bing API key, will use $env:BING_API_KEY if not provided"
+      "description": "GitHub token, will use $env:GITHUB_TOKEN if not provided"
     },
     "openai_config": {
       "type": "object",
@@ -24,37 +27,49 @@
           "$ref": "#/$defs/lLMType"
         },
         "openai_api_key": {
-          "$ref": "#/$defs/string"
-        },
-        "openai_model_id": {
-          "$ref": "#/$defs/string1"
-        },
-        "azure_openai_endpoint": {
-          "$ref": "#/$defs/string2"
-        },
-        "azure_openai_key": {
           "$ref": "#/$defs/string3"
         },
-        "azure_openai_deploy_name": {
+        "openai_model_id": {
           "$ref": "#/$defs/string4"
         },
-        "third_party_llm_endpoint": {
+        "azure_openai_endpoint": {
           "$ref": "#/$defs/string5"
         },
-        "third_party_llm_key": {
+        "azure_openai_key": {
           "$ref": "#/$defs/string6"
         },
-        "third_party_llm_model_id": {
+        "azure_openai_deploy_name": {
           "$ref": "#/$defs/string7"
         },
-        "ModelId": {
+        "third_party_llm_endpoint": {
           "$ref": "#/$defs/string8"
+        },
+        "third_party_llm_key": {
+          "$ref": "#/$defs/string9"
+        },
+        "third_party_llm_model_id": {
+          "$ref": "#/$defs/string10"
+        },
+        "ModelId": {
+          "$ref": "#/$defs/string11"
         }
       },
       "description": "OpenAI configuration"
     }
   },
   "$defs": {
+    "string": {
+      "type": "string",
+      "description": "Name of the issue helper agent, default is \u0027issue-helper\u0027"
+    },
+    "string1": {
+      "type": "string",
+      "description": "System message, default is \u0027You are a github issue helper\u0027"
+    },
+    "string2": {
+      "type": "string",
+      "description": "Agent description, default is \u0027I am a github issue helper, I can help you with your github issues.\u0027"
+    },
     "lLMType": {
       "enum": [
         "AOAI",
@@ -63,39 +78,39 @@
       ],
       "description": "LLM provider, default is Azure OpenAI"
     },
-    "string": {
+    "string3": {
       "type": "string",
       "description": "OpenAI API key, default is $env:OPENAI_API_KEY"
     },
-    "string1": {
+    "string4": {
       "type": "string",
       "description": "OpenAI model ID, default is gpt-3.5-turbo"
     },
-    "string2": {
+    "string5": {
       "type": "string",
       "description": "Azure OpenAI endpoint, default is $env:AZURE_OPENAI_ENDPOINT"
     },
-    "string3": {
+    "string6": {
       "type": "string",
       "description": "Azure OpenAI key, default is $env:AZURE_OPENAI_API_KEY"
     },
-    "string4": {
+    "string7": {
       "type": "string",
       "description": "Azure OpenAI deploy name, default is $env:AZURE_OPENAI_DEPLOY_NAME"
     },
-    "string5": {
+    "string8": {
       "type": "string",
       "description": "Third-party LLM provider endpoint, default is $env:THIRD_PARTY_LLM_ENDPOINT"
     },
-    "string6": {
+    "string9": {
       "type": "string",
       "description": "Third-party LLM provider key, default is $env:THIRD_PARTY_LLM_KEY"
     },
-    "string7": {
+    "string10": {
       "type": "string",
       "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
     },
-    "string8": {
+    "string11": {
       "type": "string",
       "readOnly": true
     }

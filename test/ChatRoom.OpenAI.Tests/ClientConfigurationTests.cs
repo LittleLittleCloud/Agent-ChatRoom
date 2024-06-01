@@ -20,6 +20,8 @@ namespace ChatRoom.OpenAI.Tests;
 
 public class ClientConfigurationTests
 {
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true };
+    
     [Fact]
     [UseReporter(typeof(DiffReporter))]
     [UseApprovalSubdirectory("ApprovalTests")]
@@ -36,5 +38,35 @@ public class ClientConfigurationTests
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
         Approvals.Verify(json);
         schemaFile.Should().BeEquivalentTo(json);
+    }
+
+    [Fact]
+    [UseReporter(typeof(DiffReporter))]
+    [UseApprovalSubdirectory("ApprovalTests")]
+    public void ConfigurationLoadTest()
+    {
+        var config = new OpenAIAgentConfiguration
+        {
+            LLMConfiguration = new OpenAIClientConfiguration
+            {
+                LLMType = LLMType.AOAI,
+                OpenAIApiKey = "test",
+                OpenAIModelId = "test",
+                AzureOpenAIEndpoint = "test",
+                AzureOpenAIKey = "test",
+                AzureOpenAIDeployName = "test",
+                ThirdPartyLLMEndpoint = "test",
+                ThirdPartyLLMKey = "test"
+            },
+            SystemMessage = "test",
+            Description = "test",
+            Name = "test"
+        };
+
+        var json = JsonSerializer.Serialize(config, _jsonSerializerOptions);
+        Approvals.Verify(json);
+        config = JsonSerializer.Deserialize<OpenAIAgentConfiguration>(json)!;
+
+        json.Should().BeEquivalentTo(JsonSerializer.Serialize(config, _jsonSerializerOptions));
     }
 }
