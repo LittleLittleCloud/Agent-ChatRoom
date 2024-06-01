@@ -29,36 +29,15 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
             ? JsonSerializer.Deserialize<GithubConfiguration>(File.ReadAllText(settings.ConfigFile))!
             : new GithubConfiguration();
 
-        OpenAIClient? openaiClient = null;
-        string? deployModelName = null;
+        OpenAIClient? openaiClient = config.OpenAIConfiguration?.ToOpenAIClient();
+        string? deployModelName = config.OpenAIConfiguration?.ModelId;
+
         IAgent? issueHelper = null;
-        if (config.LLMType == LLMType.AOAI)
+
+        if (openaiClient is null || deployModelName is null)
         {
-            if (config.AzureOpenAiKey is string
-            && config.AzureOpenAiEndpoint is string
-            && config.AzureDeploymentName is string)
-            {
-                openaiClient = new OpenAIClient(new Uri(config.AzureOpenAiEndpoint), new Azure.AzureKeyCredential(config.AzureOpenAiKey));
-                deployModelName = config.AzureDeploymentName;
-            }
-            else
-            {
-                var defaultReply = "Azure OpenAI endpoint, key, or deployment name not found. Please provide Azure OpenAI endpoint, key, and deployment name in the configuration file or via env:AZURE_OPENAI_ENDPOINT, env:AZURE_OPENAI_API_KEY, env:AZURE_OPENAI_DEPLOY_NAME";
-                issueHelper = new DefaultReplyAgent(config.IssueHelper.Name, defaultReply);
-            }
-        }
-        else
-        {
-            if (config.OpenAiApiKey is string && config.OpenAiModelId is string)
-            {
-                openaiClient = new OpenAIClient(config.OpenAiApiKey);
-                deployModelName = config.OpenAiModelId;
-            }
-            else
-            {
-                var defaultReply = "OpenAI API key or model id not found. Please provide OpenAI API key and model id in the configuration file or via env:OPENAI_API_KEY, env:OPENAI_MODEL_ID";
-                issueHelper = new DefaultReplyAgent(config.IssueHelper.Name, defaultReply);
-            }
+            var defaultReply = $"{config.IssueHelper.Name} is not configured properly. Please check the configuration file.";
+            issueHelper = new DefaultReplyAgent(config.IssueHelper.Name, defaultReply);
         }
 
         var ghClient = new GitHubClient(new ProductHeaderValue("ChatRoom"));
@@ -69,7 +48,25 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
 
         if (issueHelper is null)
         {
-            issueHelper = AgentFactory.CreateIssueHelperAgent(openaiClient!, deployModelName!, ghClient, config.IssueHelper.Name, config.IssueHelper.SystemMessage);
+            issueHelper = AgentFactory.CreateIssueHelperAgent(openaiClient!, deployModelName!, ghClient, config.IssueHelper.Name, config.IssueHelper.SystemMessage)
+                .RegisterMiddleware(async (msgs, option, innerAgent, ct) =>
+                {
+                    try
+                    {
+                        var reply = await innerAgent.GenerateReplyAsync(msgs, option, ct);
+                        if (reply is ToolCallAggregateMessage)
+                        {
+                            return await innerAgent.GenerateReplyAsync(msgs.Append(reply), option, ct);
+                        }
+
+                        return reply;
+                    }
+                    catch (Exception ex)
+                    {
+                        return new TextMessage(Role.Assistant, ex.Message, from: innerAgent.Name);
+                    }
+                })
+                .RegisterPrintMessage();
         };
 
         var host = Host.CreateDefaultBuilder()

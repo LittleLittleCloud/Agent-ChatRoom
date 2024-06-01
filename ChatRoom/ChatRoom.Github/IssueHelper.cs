@@ -155,25 +155,8 @@ public partial class IssueHelper : IAgent
             });
 
         _agent = agent
-            .RegisterMiddleware(functionCallMiddleware)
-            .RegisterMiddleware(async (msgs, option, innerAgent, ct) =>
-            {
-                try
-                {
-                    var reply = await innerAgent.GenerateReplyAsync(msgs, option, ct);
-                    if (reply is ToolCallAggregateMessage)
-                    {
-                        return await innerAgent.GenerateReplyAsync(msgs.Append(reply), option, ct);
-                    }
-
-                    return reply;
-                }
-                catch (Exception ex)
-                {
-                    return new TextMessage(Role.Assistant, ex.Message, from: innerAgent.Name);
-                }
-            })
-            .RegisterPrintMessage();
+            .RegisterMiddleware(functionCallMiddleware);
+            
     }
 
     public string Name => _agent.Name;

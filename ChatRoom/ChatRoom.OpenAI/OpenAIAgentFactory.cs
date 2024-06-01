@@ -16,40 +16,10 @@ public class OpenAIAgentFactory
     public IAgent CreateAgent()
     {
         IAgent? agent = default;
-        OpenAIClient? openaiClient = default;
-        string? deployModelName = default;
-        bool useAzure = _config.UseAOAI;
-        if (_config.UseAOAI)
-        {
-            if (_config.AzureOpenAIDeployName is string
-            && _config.AzureOpenAIKey is string
-            && _config.AzureOpenAIEndpoint is string)
-            {
-                openaiClient = new OpenAIClient(new Uri(_config.AzureOpenAIEndpoint), new Azure.AzureKeyCredential(_config.AzureOpenAIKey));
-                deployModelName = _config.AzureOpenAIDeployName;
-            }
-            else
-            {
-                var defaultReply = "Please provide either (AzureOpenAIEndpoint, AzureOpenAIKey, AzureOpenAIDeployName)";
+        OpenAIClient? openaiClient = _config.LLMConfiguration.ToOpenAIClient();
+        string? deployModelName = _config.LLMConfiguration.ModelId;
 
-                agent = new DefaultReplyAgent(_config.Name, defaultReply);
-            }
-        }
-        else
-        {
-            if (_config.OpenAIApiKey is string && _config.OpenAIModelId is string)
-            {
-                openaiClient = new OpenAIClient(_config.OpenAIApiKey);
-                deployModelName = _config.OpenAIModelId;
-            }
-            else
-            {
-                var defaultReply = "Please provide either (OpenAIApiKey, OpenAIModelId)";
-                agent = new DefaultReplyAgent(_config.Name, defaultReply);
-            }
-        }
-
-        if (agent is not DefaultReplyAgent && openaiClient is not null && deployModelName is not null)
+        if (openaiClient is not null && deployModelName is not null)
         {
             agent = new OpenAIChatAgent(
             openAIClient: openaiClient,
@@ -60,7 +30,7 @@ public class OpenAIAgentFactory
         }
         else
         {
-            var defaultReply = "Please provide either (AzureOpenAIEndpoint, AzureOpenAIKey, AzureOpenAIDeployName) or (OpenAIApiKey, OpenAIModelId)";
+            var defaultReply = $"{_config.Name} is not configured properly. Please check the configuration file.";
             agent = new DefaultReplyAgent(_config.Name, defaultReply);
         }
 

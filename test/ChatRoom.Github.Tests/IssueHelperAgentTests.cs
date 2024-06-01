@@ -27,7 +27,7 @@ public class IssueHelperAgentTests
         var ghClient = new GitHubClient(new ProductHeaderValue("chatroom-github-test"));
         var issueHelperAgent = AgentFactory.CreateIssueHelperAgent(openaiClient, aoaiDeployName!, ghClient);
 
-        var reply = await issueHelperAgent.SendAsync("What's the first issue in the https://github.com/LittleLittleCloud/Agent-ChatRoom repository?");
+        var reply = await issueHelperAgent.SendAsync("Get the first issue in the https://github.com/LittleLittleCloud/Agent-ChatRoom repository?");
 
         reply.Should().BeOfType<ToolCallAggregateMessage>();
         var aggregateMessage = reply as ToolCallAggregateMessage;

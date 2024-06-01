@@ -31,23 +31,8 @@
         "description": {
           "$ref": "#/$defs/string5"
         },
-        "llm_type": {
-          "$ref": "#/$defs/lLMType"
-        },
-        "azure_openai_endpoint": {
-          "$ref": "#/$defs/string6"
-        },
-        "azure_openai_key": {
-          "$ref": "#/$defs/string7"
-        },
-        "azure_deployment_name": {
-          "$ref": "#/$defs/string8"
-        },
-        "openai_api_key": {
-          "$ref": "#/$defs/string9"
-        },
-        "openai_model_id": {
-          "$ref": "#/$defs/string10"
+        "openai_config": {
+          "$ref": "#/$defs/openAIClientConfiguration"
         }
       },
       "description": "Powershell GPT configuration"
@@ -82,32 +67,85 @@
       "type": "string",
       "description": "Agent description, default is \u0027I am PowerShell GPT, I am good at writing powershell scripts.\u0027"
     },
+    "openAIClientConfiguration": {
+      "type": "object",
+      "properties": {
+        "llm_type": {
+          "$ref": "#/$defs/lLMType"
+        },
+        "openai_api_key": {
+          "$ref": "#/$defs/string6"
+        },
+        "openai_model_id": {
+          "$ref": "#/$defs/string7"
+        },
+        "azure_openai_endpoint": {
+          "$ref": "#/$defs/string8"
+        },
+        "azure_openai_key": {
+          "$ref": "#/$defs/string9"
+        },
+        "azure_openai_deploy_name": {
+          "$ref": "#/$defs/string10"
+        },
+        "third_party_llm_endpoint": {
+          "$ref": "#/$defs/string11"
+        },
+        "third_party_llm_key": {
+          "$ref": "#/$defs/string12"
+        },
+        "third_party_llm_model_id": {
+          "$ref": "#/$defs/string13"
+        },
+        "ModelId": {
+          "$ref": "#/$defs/string14"
+        }
+      },
+      "description": "OpenAI configuration"
+    },
     "lLMType": {
       "enum": [
         "AOAI",
-        "OpenAI"
+        "OpenAI",
+        "ThirdParty"
       ],
-      "description": "Language model type, will use Azure OpenAI if not provided"
+      "description": "LLM provider, default is Azure OpenAI"
     },
     "string6": {
       "type": "string",
-      "description": "Azure OpenAI endpoint, will use $env:AZURE_OPENAI_ENDPOINT if not provided"
+      "description": "OpenAI API key, default is $env:OPENAI_API_KEY"
     },
     "string7": {
       "type": "string",
-      "description": "Azure OpenAI key, will use $env:AZURE_OPENAI_API_KEY if not provided"
+      "description": "OpenAI model ID, default is gpt-3.5-turbo"
     },
     "string8": {
       "type": "string",
-      "description": "Azure OpenAI deployment name, will use $env:AZURE_OPENAI_DEPLOY_NAME if not provided"
+      "description": "Azure OpenAI endpoint, default is $env:AZURE_OPENAI_ENDPOINT"
     },
     "string9": {
       "type": "string",
-      "description": "OpenAI API key, will use $env:OPENAI_API_KEY if not provided"
+      "description": "Azure OpenAI key, default is $env:AZURE_OPENAI_API_KEY"
     },
     "string10": {
       "type": "string",
-      "description": "OpenAI model ID, will use gpt-3.5-turbo if not provided"
+      "description": "Azure OpenAI deploy name, default is $env:AZURE_OPENAI_DEPLOY_NAME"
+    },
+    "string11": {
+      "type": "string",
+      "description": "Third-party LLM provider endpoint, default is $env:THIRD_PARTY_LLM_ENDPOINT"
+    },
+    "string12": {
+      "type": "string",
+      "description": "Third-party LLM provider key, default is $env:THIRD_PARTY_LLM_KEY"
+    },
+    "string13": {
+      "type": "string",
+      "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
+    },
+    "string14": {
+      "type": "string",
+      "readOnly": true
     }
   }
 }

@@ -1,0 +1,17 @@
+﻿{
+  "llm_config": {
+    "llm_type": "AOAI",
+    "openai_api_key": "test",
+    "openai_model_id": "test",
+    "azure_openai_endpoint": "test",
+    "azure_openai_key": "test",
+    "azure_openai_deploy_name": "test",
+    "third_party_llm_endpoint": "test",
+    "third_party_llm_key": "test",
+    "third_party_llm_model_id": null,
+    "ModelId": "test"
+  },
+  "system_message": "test",
+  "agent_description": "test",
+  "name": "test"
+}
