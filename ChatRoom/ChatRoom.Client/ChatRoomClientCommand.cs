@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ChatRoom.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -50,6 +51,13 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             Directory.CreateDirectory(workspace);
         }
 
+        var clientContext = new ClientContext()
+        {
+            CurrentChannel = "General",
+            UserName = config.YourName,
+            CurrentRoom = config.RoomConfig.Room,
+        };
+
         var dateTimeNow = DateTime.Now;
         var clientLogPath = Path.Combine(workspace, "logs", $"clients-{dateTimeNow:yyyy-MM-dd_HH-mm-ss}.log");
         var debugLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] ({SourceContext}) {Message:lj}{NewLine}{Exception}";
@@ -80,6 +88,16 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddSingleton(config.ChannelConfig);
                 serviceCollection.AddSingleton(command);
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
+
+                serviceCollection.AddSingleton(clientContext);
+                serviceCollection.AddSingleton(sp =>
+                {
+                    var roomObserver = new ConsoleRoomObserver();
+                    var clusterClient = sp.GetRequiredService<IClusterClient>();
+                    var roomObserverRef = clusterClient.CreateObjectReference<IRoomObserver>(roomObserver);
+                    return roomObserverRef;
+                });
+                serviceCollection.AddSingleton<ChatRoomClientController>();
                 serviceCollection.AddSingleton<ConsoleChatRoomService>();
             })
             .ConfigureWebHostDefaults(builder =>
