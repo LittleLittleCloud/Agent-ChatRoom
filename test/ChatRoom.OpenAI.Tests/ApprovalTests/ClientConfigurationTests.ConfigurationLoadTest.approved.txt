@@ -8,8 +8,7 @@
     "azure_openai_deploy_name": "test",
     "third_party_llm_endpoint": "test",
     "third_party_llm_key": "test",
-    "third_party_llm_model_id": null,
-    "ModelId": "test"
+    "third_party_llm_model_id": null
   },
   "system_message": "test",
   "agent_description": "test",

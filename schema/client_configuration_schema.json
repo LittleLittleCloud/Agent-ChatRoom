@@ -82,9 +82,6 @@
         },
         "third_party_llm_model_id": {
           "$ref": "#/$defs/string8"
-        },
-        "ModelId": {
-          "$ref": "#/$defs/string9"
         }
       },
       "description": "openai configuration, this will be used to create openai client"
@@ -128,10 +125,6 @@
     "string8": {
       "type": "string",
       "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
-    },
-    "string9": {
-      "type": "string",
-      "readOnly": true
     }
   }
 }

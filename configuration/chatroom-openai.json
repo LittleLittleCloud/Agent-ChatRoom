@@ -2,7 +2,9 @@
     "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_openai_configuration_schema.json",
     "name": "openai",
     "system_message": "You are a helpful AI assistant",
-    "openai_api_key": "sk-<your-openai-api-key>",
-    "use_aoai": false,
-    "openai_model_id": "gpt-3.5-turbo"
+    "openai_config": {
+        "llm_type": "OpenAI",
+        "openai_api_key": "xxx",
+        "openai_model_id": "gpt-3.5-turbo"
+    }
 }
