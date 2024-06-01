@@ -62,6 +62,7 @@ public class OpenAIClientConfiguration
     [JsonPropertyName("third_party_llm_model_id")]
     public string? ThirdPartyLLMModelId { get; set; } = Environment.GetEnvironmentVariable("THIRD_PARTY_LLM_MODEL_ID");
 
+    [JsonIgnore]
     public string? ModelId
     {
         get

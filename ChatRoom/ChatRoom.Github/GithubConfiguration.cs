@@ -35,5 +35,5 @@ public class GithubConfiguration
 
     [JsonPropertyName("openai_config")]
     [Description("OpenAI configuration")]
-    public OpenAIClientConfiguration? OpenAIConfiguration { get; set; }
+    public OpenAIClientConfiguration? OpenAIConfiguration { get; set; } = new OpenAIClientConfiguration();
 }

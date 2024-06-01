@@ -30,9 +30,6 @@
         },
         "third_party_llm_model_id": {
           "$ref": "#/$defs/string7"
-        },
-        "ModelId": {
-          "$ref": "#/$defs/string8"
         }
       },
       "description": "llm configuration"
@@ -90,10 +87,6 @@
     "string7": {
       "type": "string",
       "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
-    },
-    "string8": {
-      "type": "string",
-      "readOnly": true
     }
   }
 }

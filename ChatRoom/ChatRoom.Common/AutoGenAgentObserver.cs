@@ -1,13 +1,16 @@
 ﻿using AutoGen.Core;
+using ChatRoom.SDK;
 
 namespace ChatRoom.Common;
 
 internal class AutoGenAgentObserver : IRoomObserver
 {
     private readonly IAgent _agent;
+    private readonly IClusterClient _client;
 
-    public AutoGenAgentObserver(IAgent agent)
+    public AutoGenAgentObserver(IClusterClient client, IAgent agent)
     {
+        _client = client;
         _agent = agent;
     }
 
@@ -37,7 +40,10 @@ internal class AutoGenAgentObserver : IRoomObserver
         return Task.CompletedTask;
     }
 
-    public async Task<ChatMsg?> GenerateReplyAsync(AgentInfo agent, ChatMsg[] messages)
+    public async Task<ChatMsg?> GenerateReplyAsync(
+        AgentInfo agent,
+        ChatMsg[] messages,
+        ChannelInfo channelInfo)
     { 
         if (agent.Name != _agent.Name)
         {
@@ -45,7 +51,19 @@ internal class AutoGenAgentObserver : IRoomObserver
         }
         // convert ChatMsg to TextMessage
         var textMessages = messages.Select(msg => new TextMessage(Role.Assistant, msg.Text, from: msg.From)).ToArray();
+        var channel = _client.GetGrain<IChannelGrain>(channelInfo.Name);
+        var eventHandler = new EventHandler<ChatMsg>(async (sender, msg) => await channel.SendNotification(msg));
+        if (_agent is INotifyAgent notifyAgent)
+        {
+            notifyAgent.Notify += eventHandler;
+        }
+
         var reply = await _agent!.GenerateReplyAsync(textMessages);
+
+        if (_agent is INotifyAgent notifyAgent2)
+        {
+            notifyAgent2.Notify -= eventHandler;
+        }
 
         if (reply.GetContent() is string content)
         {

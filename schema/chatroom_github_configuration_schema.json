@@ -49,9 +49,6 @@
         },
         "third_party_llm_model_id": {
           "$ref": "#/$defs/string10"
-        },
-        "ModelId": {
-          "$ref": "#/$defs/string11"
         }
       },
       "description": "OpenAI configuration"
@@ -109,10 +106,6 @@
     "string10": {
       "type": "string",
       "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
-    },
-    "string11": {
-      "type": "string",
-      "readOnly": true
     }
   }
 }
