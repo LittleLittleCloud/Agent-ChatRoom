@@ -16,10 +16,27 @@
       "resource": [
         {
           "files": [
-            "images/**"
+            "images/**",
+            "logo/**",
+            "favicon.ico"
           ]
+        },
+        {
+          "files": ["*.json"],
+          "src": "../schema",
+          "dest": "schema"
+        },
+        {
+          "files": ["*.json"],
+          "src": "../configuration",
+          "dest": "configuration"
         }
       ],
+      "sitemap": {
+        "baseUrl": "https://littlelittlecloud.github.io/Agent-ChatRoom",
+        "priority": 0.5,
+        "changefreq": "daily"
+      },
       "output": "_site",
       "globalMetadataFiles": [],
       "fileMetadataFiles": [],
@@ -31,11 +48,16 @@
       "globalMetadata":{
         "_appTitle": "Agent Chatroom",
         "_appName": "Agent Chatroom",
-        "_appFooter": "Powered by AutoGen.Net and Orleans",
+        "_appFooter": "<span>Supported by the <a href=\"https://microsoft.github.io/autogen-for-net/\">AutoGen.Net</a> and <a href=\"https://learn.microsoft.com/en-us/dotnet/orleans/\">Orleans</a></span>",
+        "_appLogoPath": "logo/icon.svg",
         "_gitContribute": {
-          "repo": "https://github.com/LittleLittleCloud/Agent-ChatRoom",
+          "repo": "https://github.com/LittleLittleCloud/Agent-ChatRoom.git",
           "branch": "main"
-        }
+        },
+        "_enableSearch": true,
+        "_disableBreadcrumb": false,
+        "_disableContribution": false,
+        "_gitUrlPattern": "github"
       },
       "postProcessors": [],
       "keepFileLink": false,

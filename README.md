@@ -9,7 +9,7 @@
 - **Extensible**: Create your own agents and integrate them into the chatroom.
 
 ## 🚀 Quick Start
-We provide the following quick-start templates to help you get started quickly. More templates will be added in the future. You are also welcome to contribute your own templates.
+We provide the following quick-start configuration to help you get started quickly. More configurations will be added in the future.
 - [Powershell-Chatroom](https://github.com/LittleLittleCloud/Powershell-ChatRoom): chat with `ps-gpt` and `ps-runner` to help you write and run PowerShell scripts.
 
 ## 🌐 Server mode
