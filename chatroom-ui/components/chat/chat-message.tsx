@@ -7,7 +7,7 @@ import { Markdown } from "../markdown";
 
 export function ChatMessage({ message, selectedUser }: ChatMessageProps) {
   const isFromSelectedUser = message.from === selectedUser.name;
-  const [markdown, setMarkdown] = React.useState<string>(''));
+  const [markdown, setMarkdown] = React.useState<string>('');
 
   React.useEffect(() => {
     if (message.text === undefined || message.text === null) {
