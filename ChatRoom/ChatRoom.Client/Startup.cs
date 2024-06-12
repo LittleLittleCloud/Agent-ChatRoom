@@ -45,8 +45,6 @@ namespace ChatRoom.Client
             }
 
             app.UseMvc();
-
-            
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
             app.UseStaticFiles();

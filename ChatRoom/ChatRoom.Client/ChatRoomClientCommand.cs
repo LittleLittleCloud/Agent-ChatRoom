@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -106,10 +107,18 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         {
             hostBuilder.ConfigureWebHostDefaults(builder =>
              {
+                 var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                 var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? Environment.CurrentDirectory;
+                 var webRoot = Path.Combine(assemblyDirectory, "wwwroot");
+                 Console.WriteLine($"web root: {webRoot}");
                  builder
+                 .UseWebRoot(webRoot)
+                 .UseContentRoot(workspace)
                  .UseEnvironment(serverConfig.Environment)
                  .UseUrls(serverConfig.Urls)
                  .UseStartup<Startup>();
+
+                 AnsiConsole.MarkupLine($"web ui is available at: [bold blue]{serverConfig.Urls}[/]");
              });
         }
 
@@ -122,6 +131,8 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         logger.LogInformation($"Workspace: {workspace}");
         logger.LogInformation($"client log is saved to: {Path.Combine(workspace, "logs", clientLogPath)}");
         AnsiConsole.MarkupLine("[bold green]Client started.[/]");
+        AnsiConsole.MarkupLine($"[bold green]Workspace:[/] {workspace}");
+        AnsiConsole.MarkupLine($"[bold green]client log is saved to:[/] {Path.Combine(workspace, "logs", clientLogPath)}");
         var lifetimeManager = sp.GetRequiredService<IHostApplicationLifetime>();
 
         await AnsiConsole.Status()
