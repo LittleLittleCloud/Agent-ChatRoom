@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ChatBottombar from "./chat-bottombar";
 import { AnimatePresence, motion } from "framer-motion";
-import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
+import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
 import { AgentAvatar } from "../agent-avatar";
 import ChatTopbar from "./chat-topbar";
 
@@ -38,20 +38,26 @@ export function ChatList({
   }
 
   const onDeleteMessages = async () => {
-    if (channel.name == undefined) {
-      return;
-    }
-
     if (confirm(`Are you sure you want to delete all messages in ${channel.name}?`) === false) {
       return;
     }
 
-    await getApiChatRoomClientClearHistoryByChannelName({
-      channelName: channel.name
-    });
-
-    await onReloadMessages();
-  }
+    await postApiChatRoomClientSendTextMessageToChannel({
+      requestBody: {
+        channelName: channel.name,
+        message: {
+          from: selectedUser.name,
+          text: "All messages deleted",
+        },
+      },
+    })
+      .then((data) => {
+        setMessages([]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    }
 
   useEffect(() => {
     onReloadMessages();
@@ -61,7 +67,7 @@ export function ChatList({
       console.log(newMessage);
       onReloadMessages();
     });
-
+    
     es.onopen = (event) => {
       console.log("Connection opened");
     }
@@ -71,7 +77,7 @@ export function ChatList({
     }
 
     setEventSource(es);
-  }, []);
+    }, []);
 
   React.useEffect(() => {
     if (messagesContainerRef.current) {
@@ -100,8 +106,8 @@ export function ChatList({
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto h-full flex flex-col justify-end">
       <div className="static">
-        <ChatTopbar channel={channel} onRefresh={onReloadMessages} onDeleteChatHistory={onDeleteMessages} />
-      </div>
+        <ChatTopbar channel={channel} onRefresh={onReloadMessages} />
+        </div>
       <div
         ref={messagesContainerRef}
         className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col grow"
@@ -133,13 +139,13 @@ export function ChatList({
             >
               <div className="flex gap-3 items-center">
                 {message.from === selectedUser.name && (
-                  <AgentAvatar agent={{ name: message.from }} />
+                  <AgentAvatar agent={{name: message.from}} />
                 )}
                 <span className=" bg-accent p-3 rounded-md max-w-xs">
                   {message.text}
                 </span>
                 {message.from !== selectedUser.name && (
-                  <AgentAvatar agent={{ name: message.from }} />
+                  <AgentAvatar agent={{name: message.from}} />
                 )}
               </div>
             </motion.div>

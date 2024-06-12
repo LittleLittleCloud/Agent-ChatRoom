@@ -51,9 +51,10 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
 
                 var schemaFile = "chatroom_client_swagger_schema.json";
                 var schemaFilePath = Path.Join("Schema", schemaFile);
-                var schema = File.ReadAllText(schemaFilePath);
-
-                result.Trim().Should().BeEquivalentTo(schema.Trim());
+                var schemaJson = File.ReadAllText(schemaFilePath);
+                var schema = JObject.Parse(schemaJson).ToString();
+                var resultJson = JObject.Parse(result).ToString();
+                resultJson.Should().BeEquivalentTo(schema);
             }
         }
     }
