@@ -16,16 +16,20 @@ import {
   import { Textarea } from "@/components/ui/textarea";
   import { EmojiPicker } from "@/components/emoji-picker";
   import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { AgentInfo, ChatMsg } from "@/chatroom-client";
   
   interface ChatBottombarProps {
-    sendMessage: (newMessage: Message) => void;
+    user: AgentInfo
+    sendMessage: (newMessage: ChatMsg) => void;
     isMobile: boolean;
   }
   
-  export const BottombarIcons = [{ icon: FileImage }, { icon: Paperclip }];
+  // export const BottombarIcons = [{icon: PlusCircle}, { icon: FileImage }, { icon: Paperclip }];
   
   export default function ChatBottombar({
-    sendMessage, isMobile,
+    sendMessage,
+    isMobile,
+    user,
   }: ChatBottombarProps) {
     const [message, setMessage] = useState("");
     const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -35,11 +39,10 @@ import {
     };
   
     const handleThumbsUp = () => {
-      const newMessage: Message = {
-        id: message.length + 1,
-        name: loggedInUserData.name,
-        avatar: loggedInUserData.avatar,
-        message: "👍",
+      const newMessage: ChatMsg = {
+        from: user.name,
+        text: "👍",
+        created: new Date().toISOString(),
       };
       sendMessage(newMessage);
       setMessage("");
@@ -47,11 +50,10 @@ import {
   
     const handleSend = () => {
       if (message.trim()) {
-        const newMessage: Message = {
-          id: message.length + 1,
-          name: loggedInUserData.name,
-          avatar: loggedInUserData.avatar,
-          message: message.trim(),
+        const newMessage: ChatMsg = {
+          from: user.name,
+          text: message.trim(),
+          created: new Date().toISOString(),
         };
         sendMessage(newMessage);
         setMessage("");
@@ -77,7 +79,7 @@ import {
     return (
       <div className="p-2 flex justify-between w-full items-center gap-2">
         <div className="flex">
-            <Popover>
+            {/* <Popover>
               <PopoverTrigger asChild>
               <Link
             href="#"
@@ -87,7 +89,6 @@ import {
               "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
             )}
           >
-            <PlusCircle size={20} className="text-muted-foreground" />
           </Link>
               </PopoverTrigger>
               <PopoverContent 
@@ -105,19 +106,6 @@ import {
                 >
                   <Mic size={20} className="text-muted-foreground" />
                 </Link>
-                 {BottombarIcons.map((icon, index) => (
-                   <Link
-                     key={index}
-                     href="#"
-                     className={cn(
-                       buttonVariants({ variant: "ghost", size: "icon" }),
-                       "h-9 w-9",
-                       "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
-                     )}
-                   >
-                     <icon.icon size={20} className="text-muted-foreground" />
-                   </Link>
-                 ))}
                </div>
                ) : (
                 <Link 
@@ -132,8 +120,8 @@ import {
                 </Link>
                )}
               </PopoverContent>
-            </Popover>
-          {!message.trim() && !isMobile && (
+            </Popover> */}
+          {/* {!message.trim() && !isMobile && (
             <div className="flex">
               {BottombarIcons.map((icon, index) => (
                 <Link
@@ -149,7 +137,7 @@ import {
                 </Link>
               ))}
             </div>
-          )}
+          )} */}
         </div>
   
         <AnimatePresence initial={false}>

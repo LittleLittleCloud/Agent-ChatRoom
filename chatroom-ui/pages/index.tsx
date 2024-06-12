@@ -10,13 +10,38 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const [layout, _] = useState(undefined);
+  const [user, setUser] = useState<AgentInfo | undefined>(undefined);
+
+  useEffect(() => {
+      getApiChatRoomClientGetUserInfo()
+          .then((res) => {
+              setUser(res);
+          })
+          .catch((err) => {
+              console.log(err);
+          });
+  }, []);
   const defaultLayout = layout ? JSON.parse(layout) : undefined;
   useEffect(() => {
     localStorage.getItem("react-resizable-panels:layout");
   }, [layout]);
-  return (
-    <div className="z-10 border rounded-lg w-full h-full text-sm">
-      <ChatLayout defaultLayout={defaultLayout} navCollapsedSize={8} />
+
+  if (user){
+    return (
+      <div className="z-10 border rounded-lg w-full h-full text-sm">
+      <ChatLayout selectedUser={user} defaultCollapsed={true} defaultLayout={defaultLayout} navCollapsedSize={8} />
     </div>
-  );
+    );
+  }
+  else
+  {
+    // show loading screen
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center">
+          <Label className="text-lg">Loading...</Label>
+        </div>
+      </div>
+    );
+  }
 }

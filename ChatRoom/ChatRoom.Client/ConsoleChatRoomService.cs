@@ -237,7 +237,7 @@ public class ConsoleChatRoomService
 
     private async Task ShowChannelMembers()
     {
-        var memberResponse = await _controller.PostChannelMembers(new GetChannelMembersRequest(_clientContext.CurrentChannel!));
+        var memberResponse = await _controller.GetChannelMembers(new GetChannelMembersRequest(_clientContext.CurrentChannel!));
         var members = (memberResponse.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
 
         if (members is null)

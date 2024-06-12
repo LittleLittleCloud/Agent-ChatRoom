@@ -10,21 +10,22 @@ import {
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/sidebar";
 import { Chat } from "./chat";
-import { ChannelInfo, getApiChatRoomClientGetChannels } from "@/chatroom-client";
+import { AgentInfo, ChannelInfo, getApiChatRoomClientGetChannels } from "@/chatroom-client";
 
 interface ChatLayoutProps {
   defaultLayout: number[] | undefined;
   defaultCollapsed?: boolean;
   navCollapsedSize: number;
+  selectedUser: AgentInfo;
 }
 
 export function ChatLayout({
   defaultLayout = [320, 480],
   defaultCollapsed = false,
   navCollapsedSize,
+  selectedUser,
 }: ChatLayoutProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
-  const [selectedUser, setSelectedUser] = React.useState(userData[0]);
   const [isMobile, setIsMobile] = useState(false);
   const [channels, setChannels] = useState<ChannelInfo[] | undefined>(undefined);
   const [selectedChannel, setSelectedChannel] = useState<ChannelInfo | undefined>(undefined);
@@ -60,75 +61,83 @@ export function ChatLayout({
     setChannels(channels);
   }
 
-  return ( channels &&
-    <ResizablePanelGroup
-      direction="horizontal"
-      onLayout={(sizes: number[]) => {
-        document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-          sizes
-        )}`;
-      }}
-      className="h-full items-stretch"
-    >
-      <ResizablePanel
-        defaultSize={defaultLayout[0]}
-        collapsedSize={navCollapsedSize}
-        collapsible={true}
-        minSize={isMobile ? 0 : 24}
-        maxSize={isMobile ? 8 : 30}
-        onCollapse={() => {
-          setIsCollapsed(true);
-          document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-            true
+  if (channels){
+    return (
+      <ResizablePanelGroup
+        direction="horizontal"
+        onLayout={(sizes: number[]) => {
+          document.cookie = `react-resizable-panels:layout=${JSON.stringify(
+            sizes
           )}`;
         }}
-        onExpand={() => {
-          setIsCollapsed(false);
-          document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-            false
-          )}`;
-        }}
-        className={cn(
-          isCollapsed && "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out h-full"
-        )}
+        className="h-full items-stretch"
       >
-        <Sidebar
-          isCollapsed={isCollapsed || isMobile}
-          channels={channels.map((channel) => ({
-            ...channel,
-            variant: "grey",
-          }))}
-          isMobile={isMobile}
-          onAddChannel={async (channel) => {
-            console.log(channel);
-            await reloadChannels();
+        <ResizablePanel
+          defaultSize={defaultLayout[0]}
+          collapsedSize={navCollapsedSize}
+          collapsible={true}
+          minSize={isMobile ? 0 : 24}
+          maxSize={isMobile ? 8 : 30}
+          onCollapse={() => {
+            setIsCollapsed(true);
+            document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
+              true
+            )}`;
           }}
-          onEditChannel={async (channel) => {
-            console.log(channel);
-            await reloadChannels();
+          onExpand={() => {
+            setIsCollapsed(false);
+            document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
+              false
+            )}`;
           }}
-          onDeleteChannel={async (channel) => {
-            console.log(channel);
-            await reloadChannels();
-          }}
-          onSelectedChannel={setSelectedChannel}
-        />
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
-        {
-          selectedChannel && <Chat
-          messages={selectedUser.messages}
-          selectedUser={selectedUser}
-          isMobile={isMobile}
-          channel={selectedChannel} />
-        }
-        {
-          !selectedChannel && <div className="flex flex-col justify-center items-center h-full">
-          <p className="text-xl font-bold">Select a channel</p>
-        </div>
-        }
-      </ResizablePanel>
-    </ResizablePanelGroup>
-  );
+          className={cn(
+            isCollapsed && "min-w-[50px] md:min-w-[70px] transition-all duration-300 ease-in-out h-full"
+          )}
+        >
+          <Sidebar
+            isCollapsed={isCollapsed || isMobile}
+            channels={channels.map((channel) => ({
+              ...channel,
+              variant: "grey",
+            }))}
+            isMobile={isMobile}
+            onAddChannel={async (channel) => {
+              console.log(channel);
+              await reloadChannels();
+            }}
+            onEditChannel={async (channel) => {
+              console.log(channel);
+              await reloadChannels();
+            }}
+            onDeleteChannel={async (channel) => {
+              console.log(channel);
+              await reloadChannels();
+            }}
+            onSelectedChannel={setSelectedChannel}
+          />
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
+          {
+            selectedChannel && <Chat
+            selectedUser={selectedUser}
+            isMobile={isMobile}
+            channel={selectedChannel} />
+          }
+          {
+            !selectedChannel && <div className="flex flex-col justify-center items-center h-full">
+            <p className="text-xl font-bold">Select a channel</p>
+          </div>
+          }
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    );
+  }
+  else {
+    return (
+      <div className="flex flex-col justify-center items-center h-full">
+        <p className="text-xl font-bold">Loading...</p>
+      </div>
+    );
+  }
 }

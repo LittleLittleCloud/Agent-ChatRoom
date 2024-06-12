@@ -69,17 +69,17 @@ export type GetApiChatRoomClientGetUserInfoResponse = AgentInfo;
 
 export type GetApiChatRoomClientGetRoomMembersResponse = Array<AgentInfo>;
 
-export type PostApiChatRoomClientPostChannelMembersData = {
+export type PostApiChatRoomClientGetChannelMembersData = {
     requestBody?: GetChannelMembersRequest;
 };
 
-export type PostApiChatRoomClientPostChannelMembersResponse = Array<AgentInfo>;
+export type PostApiChatRoomClientGetChannelMembersResponse = Array<AgentInfo>;
 
-export type GetApiChatRoomClientGetChannelChatHistoryData = {
+export type PostApiChatRoomClientGetChannelChatHistoryData = {
     requestBody?: GetChannelChatHistoryRequest;
 };
 
-export type GetApiChatRoomClientGetChannelChatHistoryResponse = Array<ChatMsg>;
+export type PostApiChatRoomClientGetChannelChatHistoryResponse = Array<ChatMsg>;
 
 export type PostApiChatRoomClientCreateChannelData = {
     requestBody?: CreateChannelRequest;
@@ -159,9 +159,9 @@ export type $OpenApiTs = {
             };
         };
     };
-    '/api/ChatRoomClient/PostChannelMembers': {
+    '/api/ChatRoomClient/GetChannelMembers': {
         post: {
-            req: PostApiChatRoomClientPostChannelMembersData;
+            req: PostApiChatRoomClientGetChannelMembersData;
             res: {
                 /**
                  * OK
@@ -171,8 +171,8 @@ export type $OpenApiTs = {
         };
     };
     '/api/ChatRoomClient/GetChannelChatHistory': {
-        get: {
-            req: GetApiChatRoomClientGetChannelChatHistoryData;
+        post: {
+            req: PostApiChatRoomClientGetChannelChatHistoryData;
             res: {
                 /**
                  * OK

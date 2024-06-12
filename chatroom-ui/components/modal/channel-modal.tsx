@@ -1,4 +1,4 @@
-import { AgentInfo, ChannelInfo, getApiChatRoomClientGetChannels, getApiChatRoomClientGetRoomMembers, postApiChatRoomClientAddAgentToChannel, postApiChatRoomClientCreateChannel, postApiChatRoomClientLeaveChannel, postApiChatRoomClientPostChannelMembers, postApiChatRoomClientRemoveAgentFromChannel } from "@/chatroom-client";
+import { AgentInfo, ChannelInfo, getApiChatRoomClientGetChannels, getApiChatRoomClientGetRoomMembers, postApiChatRoomClientAddAgentToChannel, postApiChatRoomClientCreateChannel, postApiChatRoomClientLeaveChannel, postApiChatRoomClientGetChannelMembers, postApiChatRoomClientRemoveAgentFromChannel } from "@/chatroom-client";
 import { Separator } from "@radix-ui/react-separator";
 import { StarIcon, ChevronDownIcon, PlusIcon, CircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -29,7 +29,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
         }
 
         if (channelName) {
-            postApiChatRoomClientPostChannelMembers({
+            postApiChatRoomClientGetChannelMembers({
                 requestBody: {
                     channelName: channelName
                 }
@@ -84,7 +84,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
                 return;
             }
 
-            var originalMembers = await postApiChatRoomClientPostChannelMembers(
+            var originalMembers = await postApiChatRoomClientGetChannelMembers(
                 {
                     requestBody: {
                         channelName: channel?.name ?? channelName

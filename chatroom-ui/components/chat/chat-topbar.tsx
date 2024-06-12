@@ -1,24 +1,27 @@
 import React, { useEffect } from 'react'
 import { Avatar, AvatarImage } from '../ui/avatar'
 import { UserData } from '@/types/Message';
-import { Info, Phone, Video } from 'lucide-react';
+import { Info, Phone, RotateCcw, Video } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '../ui/button';
-import { AgentInfo, ChannelInfo, postApiChatRoomClientPostChannelMembers } from '@/chatroom-client';
+import { AgentInfo, ChannelInfo, postApiChatRoomClientGetChannelMembers } from '@/chatroom-client';
 import { AgentAvatar } from '../agent-avatar';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 interface ChatTopbarProps {
-    channel: ChannelInfo;
-    }
-    
+  channel: ChannelInfo;
+  onRefresh?: () => void;
+}
+
 export const TopbarIcons = [{ icon: Phone }, { icon: Video }, { icon: Info }];
 
-export default function ChatTopbar({channel}: ChatTopbarProps) {
+export default function ChatTopbar({ channel, onRefresh }: ChatTopbarProps) {
   const [members, setMembers] = React.useState<AgentInfo[]>([]);
 
   useEffect(() => {
-    postApiChatRoomClientPostChannelMembers({
+    postApiChatRoomClientGetChannelMembers({
       requestBody: {
         channelName: channel.name
       }
@@ -28,17 +31,35 @@ export default function ChatTopbar({channel}: ChatTopbarProps) {
   }, []);
   return (
     <div className="w-full h-20 flex p-4 justify-between items-center border-b">
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col">
-            <span className="font-medium">{channel.name}</span>
-          </div>
+      <div className="flex items-center gap-5">
+        <div className="flex flex-col">
+          <span className="font-medium">{channel.name}</span>
         </div>
-
-        <div>
-          {members.map((agent, index) => (
-            <AgentAvatar key={index} agent={agent} />
-          ))}
-        </div>
+        {/* // refresh button */}
+        <Link
+          href="#"
+          onClick={onRefresh}
+          className={
+            cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
+          }>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <RotateCcw size={15} />
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="flex items-center gap-4">
+                Refresh
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </Link>
       </div>
+
+      <div className='flex gap-2'>
+        {members.map((agent, index) => (
+          <AgentAvatar key={index} agent={agent} />
+        ))}
+      </div>
+    </div>
   )
 }

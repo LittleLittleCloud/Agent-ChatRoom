@@ -95,7 +95,7 @@ public class ChatRoomClientController
     }
 
     [HttpPost]
-    public async Task<ActionResult<IEnumerable<AgentInfo>>> PostChannelMembers(
+    public async Task<ActionResult<IEnumerable<AgentInfo>>> GetChannelMembers(
         [FromBody] GetChannelMembersRequest request)
     {
         var channelName = request.ChannelName;
@@ -107,7 +107,7 @@ public class ChatRoomClientController
         return new OkObjectResult(members);
     }
 
-    [HttpGet]
+    [HttpPost]
     public async Task<ActionResult<IEnumerable<ChatMsg>>> GetChannelChatHistory(
         [FromBody] GetChannelChatHistoryRequest request)
     {

@@ -103,7 +103,7 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
         await controller.CreateChannel(new CreateChannelRequest(channelName));
         await controller.AddAgentToChannel(new AddAgentToChannelRequest(channelName, testAgentName));
 
-        var channelMembers = await controller.PostChannelMembers(new GetChannelMembersRequest(channelName));
+        var channelMembers = await controller.GetChannelMembers(new GetChannelMembersRequest(channelName));
         var channelMembersList = (channelMembers.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
         channelMembersList.Should().NotBeNull();
         channelMembersList!.Any(m => m.Name == testAgentName).Should().BeTrue();
@@ -111,7 +111,7 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
         // test remove agent from channel
         await controller.RemoveAgentFromChannel(new RemoveAgentFromChannelRequest(channelName, testAgentName));
 
-        channelMembers = await controller.PostChannelMembers(new GetChannelMembersRequest(channelName));
+        channelMembers = await controller.GetChannelMembers(new GetChannelMembersRequest(channelName));
         channelMembersList = (channelMembers.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
         channelMembersList.Should().NotBeNull();
         channelMembersList!.Any(m => m.Name == testAgentName).Should().BeFalse();

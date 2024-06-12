@@ -141,7 +141,7 @@
         }
       }
     },
-    "/api/ChatRoomClient/PostChannelMembers": {
+    "/api/ChatRoomClient/GetChannelMembers": {
       "post": {
         "tags": [
           "ChatRoomClient"
@@ -199,7 +199,7 @@
       }
     },
     "/api/ChatRoomClient/GetChannelChatHistory": {
-      "get": {
+      "post": {
         "tags": [
           "ChatRoomClient"
         ],

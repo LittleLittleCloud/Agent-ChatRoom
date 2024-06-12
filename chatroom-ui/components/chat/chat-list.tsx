@@ -4,29 +4,41 @@ import React, { useEffect, useRef } from "react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ChatBottombar from "./chat-bottombar";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChannelInfo, ChatMsg } from "@/chatroom-client";
+import { AgentInfo, ChannelInfo, ChatMsg, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
+import { AgentAvatar } from "../agent-avatar";
+import ChatTopbar from "./chat-topbar";
 
 interface ChatListProps {
-  selectedUser: UserData;
-  sendMessage: (newMessage: Message) => void;
+  selectedUser: AgentInfo;
   isMobile: boolean;
   channel: ChannelInfo;
 }
 
 export function ChatList({
   selectedUser,
-  sendMessage,
   isMobile,
   channel,
 }: ChatListProps) {
   const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  const onReloadMessages = async () => {
+    postApiChatRoomClientGetChannelChatHistory({
+      requestBody: {
+        channelName: channel.name,
+        count: 1000,
+      },
+    })
+      .then((data) => {
+        setMessages(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
   useEffect(() => {
-    if (channel.messages) {
-      setMessages(channel.messages);
-    }
-  }, []);
+    onReloadMessages();
+    }, []);
 
   React.useEffect(() => {
     if (messagesContainerRef.current) {
@@ -35,8 +47,28 @@ export function ChatList({
     }
   }, [messages]);
 
+  const sendMessage = async (newMessage: ChatMsg) => {
+    await postApiChatRoomClientSendTextMessageToChannel(
+      {
+        requestBody: {
+          channelName: channel.name,
+          message: newMessage,
+        },
+      }
+    )
+      .then((data) => {
+        setMessages([...messages, newMessage]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto h-full flex flex-col justify-end">
+      <div className="static">
+        <ChatTopbar channel={channel} onRefresh={onReloadMessages} />
+        </div>
       <div
         ref={messagesContainerRef}
         className="w-full overflow-y-auto overflow-x-hidden h-full flex flex-col grow"
@@ -63,32 +95,18 @@ export function ChatList({
               }}
               className={cn(
                 "flex flex-col gap-2 p-4 whitespace-pre-wrap",
-                message.name !== selectedUser.name ? "items-end" : "items-start"
+                message.from !== selectedUser.name ? "items-end" : "items-start"
               )}
             >
               <div className="flex gap-3 items-center">
-                {message.name === selectedUser.name && (
-                  <Avatar className="flex justify-center items-center">
-                    <AvatarImage
-                      src={message.avatar}
-                      alt={message.name}
-                      width={6}
-                      height={6}
-                    />
-                  </Avatar>
+                {message.from === selectedUser.name && (
+                  <AgentAvatar agent={{name: message.from}} />
                 )}
                 <span className=" bg-accent p-3 rounded-md max-w-xs">
-                  {message.message}
+                  {message.text}
                 </span>
-                {message.name !== selectedUser.name && (
-                  <Avatar className="flex justify-center items-center">
-                    <AvatarImage
-                      src={message.avatar}
-                      alt={message.name}
-                      width={6}
-                      height={6}
-                    />
-                  </Avatar>
+                {message.from !== selectedUser.name && (
+                  <AgentAvatar agent={{name: message.from}} />
                 )}
               </div>
             </motion.div>
@@ -96,8 +114,7 @@ export function ChatList({
         </AnimatePresence>
       </div>
       <div className="static">
-
-        <ChatBottombar sendMessage={sendMessage} isMobile={isMobile} />
+        <ChatBottombar user={selectedUser} sendMessage={sendMessage} isMobile={isMobile} />
       </div>
     </div>
   );

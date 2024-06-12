@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { PostApiChatRoomClientSendTextMessageToChannelData, PostApiChatRoomClientSendTextMessageToChannelResponse, GetApiChatRoomClientGetChannelsResponse, GetApiChatRoomClientGetUserInfoResponse, GetApiChatRoomClientGetRoomMembersResponse, PostApiChatRoomClientPostChannelMembersData, PostApiChatRoomClientPostChannelMembersResponse, GetApiChatRoomClientGetChannelChatHistoryData, GetApiChatRoomClientGetChannelChatHistoryResponse, PostApiChatRoomClientCreateChannelData, PostApiChatRoomClientCreateChannelResponse, PostApiChatRoomClientJoinChannelData, PostApiChatRoomClientJoinChannelResponse, PostApiChatRoomClientLeaveChannelData, PostApiChatRoomClientLeaveChannelResponse, PostApiChatRoomClientDeleteChannelData, PostApiChatRoomClientDeleteChannelResponse, PostApiChatRoomClientAddAgentToChannelData, PostApiChatRoomClientAddAgentToChannelResponse, PostApiChatRoomClientRemoveAgentFromChannelData, PostApiChatRoomClientRemoveAgentFromChannelResponse } from './types.gen';
+import type { PostApiChatRoomClientSendTextMessageToChannelData, PostApiChatRoomClientSendTextMessageToChannelResponse, GetApiChatRoomClientGetChannelsResponse, GetApiChatRoomClientGetUserInfoResponse, GetApiChatRoomClientGetRoomMembersResponse, PostApiChatRoomClientGetChannelMembersData, PostApiChatRoomClientGetChannelMembersResponse, PostApiChatRoomClientGetChannelChatHistoryData, PostApiChatRoomClientGetChannelChatHistoryResponse, PostApiChatRoomClientCreateChannelData, PostApiChatRoomClientCreateChannelResponse, PostApiChatRoomClientJoinChannelData, PostApiChatRoomClientJoinChannelResponse, PostApiChatRoomClientLeaveChannelData, PostApiChatRoomClientLeaveChannelResponse, PostApiChatRoomClientDeleteChannelData, PostApiChatRoomClientDeleteChannelResponse, PostApiChatRoomClientAddAgentToChannelData, PostApiChatRoomClientAddAgentToChannelResponse, PostApiChatRoomClientRemoveAgentFromChannelData, PostApiChatRoomClientRemoveAgentFromChannelResponse } from './types.gen';
 
 /**
  * @param data The data for the request.
@@ -51,9 +51,9 @@ export const getApiChatRoomClientGetRoomMembers = (): CancelablePromise<GetApiCh
  * @returns AgentInfo OK
  * @throws ApiError
  */
-export const postApiChatRoomClientPostChannelMembers = (data: PostApiChatRoomClientPostChannelMembersData = {}): CancelablePromise<PostApiChatRoomClientPostChannelMembersResponse> => { return __request(OpenAPI, {
+export const postApiChatRoomClientGetChannelMembers = (data: PostApiChatRoomClientGetChannelMembersData = {}): CancelablePromise<PostApiChatRoomClientGetChannelMembersResponse> => { return __request(OpenAPI, {
     method: 'POST',
-    url: '/api/ChatRoomClient/PostChannelMembers',
+    url: '/api/ChatRoomClient/GetChannelMembers',
     body: data.requestBody,
     mediaType: 'application/json'
 }); };
@@ -64,8 +64,8 @@ export const postApiChatRoomClientPostChannelMembers = (data: PostApiChatRoomCli
  * @returns ChatMsg OK
  * @throws ApiError
  */
-export const getApiChatRoomClientGetChannelChatHistory = (data: GetApiChatRoomClientGetChannelChatHistoryData = {}): CancelablePromise<GetApiChatRoomClientGetChannelChatHistoryResponse> => { return __request(OpenAPI, {
-    method: 'GET',
+export const postApiChatRoomClientGetChannelChatHistory = (data: PostApiChatRoomClientGetChannelChatHistoryData = {}): CancelablePromise<PostApiChatRoomClientGetChannelChatHistoryResponse> => { return __request(OpenAPI, {
+    method: 'POST',
     url: '/api/ChatRoomClient/GetChannelChatHistory',
     body: data.requestBody,
     mediaType: 'application/json'
