@@ -1,7 +1,8 @@
 import { ClipboardCheck, Clipboard, Download } from 'lucide-react';
-  import { FC, memo, useState } from 'react';
+import { useTheme } from 'next-themes';
+  import { FC, memo, useEffect, useState } from 'react';
   import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-  import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+  import { oneDark, oneLight } from 'react-syntax-highlighter/dist/cjs/styles/prism';
   
   interface languageMap {
     [key: string]: string | undefined;
@@ -50,7 +51,14 @@ import { ClipboardCheck, Clipboard, Download } from 'lucide-react';
   
   export const CodeBlock: FC<Props> = memo(({ language, value }) => {
     const [isCopied, setIsCopied] = useState<Boolean>(false);
-  
+    const [mounted, setMounted] = useState<Boolean>(false);
+    const {theme, setTheme} = useTheme();
+
+    useEffect(() => {
+      setMounted(true);
+    }
+    , []);
+
     const copyToClipboard = () => {
       if (!navigator.clipboard || !navigator.clipboard.writeText) {
         return;
@@ -92,7 +100,7 @@ import { ClipboardCheck, Clipboard, Download } from 'lucide-react';
       URL.revokeObjectURL(url);
     };
     return (
-        <div className="relative bg-gray-900 rounded-md overflow-hidden">
+        <div className="relative bg-gray-500 dark:bg-gray-900 rounded-md overflow-hidden">
         <div className="flex items-center justify-between py-1.5 px-4">
           <span className="text-xs lowercase text-white">{language}</span>
   
@@ -118,7 +126,7 @@ import { ClipboardCheck, Clipboard, Download } from 'lucide-react';
         </div>
         <SyntaxHighlighter
           language={language}
-          style={oneDark}
+          style={theme === 'dark' ? oneDark : oneLight}
           customStyle={{ margin: 0 }}
         >
           {value}

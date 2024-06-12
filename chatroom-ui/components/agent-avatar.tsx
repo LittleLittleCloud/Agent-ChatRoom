@@ -5,9 +5,10 @@ import { TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface AgentAvatarProps {
     agent: AgentInfo & { avatar?: string };
+    size?: number;
 }
 
-export function AgentAvatar({ agent }: AgentAvatarProps) {
+export function AgentAvatar({ agent, size = 6 }: AgentAvatarProps) {
     return (
         <TooltipProvider>
             <Tooltip>
@@ -16,8 +17,8 @@ export function AgentAvatar({ agent }: AgentAvatarProps) {
                         <AvatarImage
                             src={agent.avatar}
                             alt={agent.avatar}
-                            width={6}
-                            height={6}
+                            width={size}
+                            height={size}
                             className="w-10 h-10 " />
                         {agent.name && <AvatarFallback className="w-10 h-10">{agent.name.charAt(0)}</AvatarFallback>}
                     </Avatar>

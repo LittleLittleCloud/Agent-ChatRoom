@@ -56,7 +56,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
         var channels = await getApiChatRoomClientGetChannels();
 
         var channelExists = channels.map(channel => channel.name).includes(channelName);
-        if (channel == undefined) {
+        if (channel?.name == undefined) {
             // create a new channel
             if (channelExists) {
                 alert("Channel already exists, please choose a different name.");
@@ -123,7 +123,6 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
             className="relative z-10"
             role="dialog"
             aria-modal="true">
-
             <div
                 className="fixed inset-0 overflow-y-auto z-10 w-screen">
                 <div className="flex items-end  justify-center p-4 text-center sm:items-center sm:p-0">
@@ -141,7 +140,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
                                     onChange={(e) => setChannelName((e.target as HTMLInputElement).value)} />
                             </div>
                             <Label className="text-sm font-medium mt-2">Members</Label>
-                            <div className="flex rounded-md shadow-sm  mt-2 space-x-5">
+                            <div className="flex flex-wrap rounded-md shadow-sm  mt-2 space-x-5">
                                 {
                                     availableMembers && availableMembers.length > 0 &&
                                     availableMembers.map((agent, index) => (
@@ -164,7 +163,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
                                                     }
                                                 }}
                                             />
-                                            <Label>{agent.name}</Label>
+                                            <Label className="text-nowrap">{agent.name}</Label>
                                         </div>
                                         )))
                                 }

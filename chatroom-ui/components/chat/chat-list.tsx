@@ -14,10 +14,6 @@ interface ChatListProps {
   channel: ChannelInfo;
 }
 
-export interface ChatMessageProps {
-  message: ChatMsg;
-  selectedUser: AgentInfo;
-}
 
 export function ChatList({
   selectedUser,

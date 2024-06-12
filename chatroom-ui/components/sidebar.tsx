@@ -96,15 +96,6 @@ export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onAddCh
                 </Tooltip>
               </TooltipProvider>
             </Link>
-            <Link
-              href="#"
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "icon" }),
-                "h-9 w-9"
-              )}
-            >
-              <MoreHorizontal size={20} />
-            </Link>
           </div>
         </div>
       )}
