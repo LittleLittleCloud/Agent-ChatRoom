@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ChatRoom.Client.DTO;
 using ChatRoom.Common;
@@ -14,23 +15,26 @@ namespace ChatRoom.Client;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-public class ChatRoomClientController
+public class ChatRoomClientController : Controller
 {
     private readonly IClusterClient _clusterClient = null!;
     private readonly ClientContext _clientContext = null!;
     private readonly ILogger<ChatRoomClientController>? _logger = null!;
     private readonly IRoomObserver _roomObserverRef = null!;
+    private readonly ConsoleRoomObserver _consoleRoomObserver = null!;
 
     public ChatRoomClientController(
         IClusterClient clusterClient,
         ClientContext clientContext,
         IRoomObserver roomObserverRef,
+        ConsoleRoomObserver consoleRoomObserver,
         ILogger<ChatRoomClientController>? logger = null)
     {
         _clusterClient = clusterClient;
         _clientContext = clientContext;
         _logger = logger;
         _roomObserverRef = roomObserverRef;
+        _consoleRoomObserver = consoleRoomObserver;
     }
 
     [HttpPost]
@@ -78,6 +82,54 @@ public class ChatRoomClientController
     {
         _logger?.LogInformation("Getting user info");
         return new OkObjectResult(new AgentInfo(_clientContext.UserName!, _clientContext.Description!));
+    }
+
+    [HttpGet]
+    [Route("{channelName}")]
+    public async Task<ActionResult> ClearHistory(string channelName)
+    {
+        _logger?.LogInformation("Deleting messages in channel {channelName}", channelName);
+
+        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
+        await channelGrain.ClearHistory();
+
+        return new OkResult();
+    }
+
+    [HttpGet]
+    [Route("{channelName}")]
+    public async Task NewMessageSse(string channelName)
+    {
+        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
+        Response.Headers.Append("Content-Type", "text/event-stream");
+        Response.Headers.Append("Content-Type", "text/event-stream");
+        Response.Headers.Append("Cache-Control", "no-cache");
+        Response.Headers.Append("Connection", "keep-alive");
+
+        EventHandler<ChatMsg> handler = (sender, msg) =>
+        {
+            var sseEvent = new SSEEvent
+            {
+                Id = msg.Created.ToString(),
+                Retry = 1000,
+                Event = "message",
+                Data = JsonSerializer.Serialize(msg),
+            };
+
+            var sseData = Encoding.UTF8.GetBytes(sseEvent.ToString());
+            Response.Body.WriteAsync(sseData);
+            Response.Body.WriteAsync(Encoding.UTF8.GetBytes("\n\n"));
+            Response.Body.FlushAsync();
+        };
+
+        _consoleRoomObserver.OnMessageReceived += handler;
+        
+        while (!HttpContext.RequestAborted.IsCancellationRequested)
+        {
+            await Task.Delay(1000);
+        }
+
+        _consoleRoomObserver.OnMessageReceived -= handler;
     }
 
     [HttpGet]
@@ -218,5 +270,18 @@ public class ChatRoomClientController
         await roomGrain.RemoveAgentFromChannel(new ChannelInfo(channelName), agentName);
 
         return new OkResult();
+    }
+}
+
+public struct SSEEvent
+{
+    public string Id { get; set; }
+    public int Retry { get; set; }
+    public string Event { get; set; }
+    public string Data { get; set; }
+
+    public override string ToString()
+    {
+        return $"id: {Id}\nretry: {Retry}\nevent: {Event}\ndata: {Data}\n\n";
     }
 }

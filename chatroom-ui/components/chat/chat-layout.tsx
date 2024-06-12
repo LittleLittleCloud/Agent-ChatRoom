@@ -59,6 +59,8 @@ export function ChatLayout({
   const reloadChannels = async () => {
     var channels = await getApiChatRoomClientGetChannels();
     setChannels(channels);
+    var selectedChannelName = selectedChannel?.name;
+    setSelectedChannel(channels.find(channel => channel.name === selectedChannelName));
   }
 
   if (channels){

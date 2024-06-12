@@ -67,6 +67,18 @@ export type GetApiChatRoomClientGetChannelsResponse = Array<ChannelInfo>;
 
 export type GetApiChatRoomClientGetUserInfoResponse = AgentInfo;
 
+export type GetApiChatRoomClientClearHistoryByChannelNameData = {
+    channelName: string;
+};
+
+export type GetApiChatRoomClientClearHistoryByChannelNameResponse = unknown;
+
+export type GetApiChatRoomClientNewMessageSseByChannelNameData = {
+    channelName: string;
+};
+
+export type GetApiChatRoomClientNewMessageSseByChannelNameResponse = unknown;
+
 export type GetApiChatRoomClientGetRoomMembersResponse = Array<AgentInfo>;
 
 export type PostApiChatRoomClientGetChannelMembersData = {
@@ -146,6 +158,28 @@ export type $OpenApiTs = {
                  * OK
                  */
                 200: AgentInfo;
+            };
+        };
+    };
+    '/api/ChatRoomClient/ClearHistory/{channelName}': {
+        get: {
+            req: GetApiChatRoomClientClearHistoryByChannelNameData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/NewMessageSse/{channelName}': {
+        get: {
+            req: GetApiChatRoomClientNewMessageSseByChannelNameData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
             };
         };
     };

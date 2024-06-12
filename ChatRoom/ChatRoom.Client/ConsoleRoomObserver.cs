@@ -8,8 +8,11 @@ using Spectre.Console;
 
 namespace ChatRoom.Client;
 
-internal class ConsoleRoomObserver : IRoomObserver
+public class ConsoleRoomObserver : IRoomObserver
 {
+    public event EventHandler<ChatMsg>? OnMessageReceived;
+    public event EventHandler<ChatMsg>? OnNotificationReceived;
+
     public Task AddMemberToChannel(ChannelInfo channel, AgentInfo agent)
     {
         return Task.CompletedTask;
@@ -55,6 +58,7 @@ internal class ConsoleRoomObserver : IRoomObserver
             "[[[dim]{0}[/]]] [bold yellow]{1}:[/] {2}",
             msg.Created.LocalDateTime, msg.From!, text);
 
+        this.OnMessageReceived?.Invoke(this, msg);
         return Task.CompletedTask;
     }
 
@@ -62,6 +66,7 @@ internal class ConsoleRoomObserver : IRoomObserver
     {
         AnsiConsole.MarkupLine($"[grey]{msg.From}[/]: {msg.Text}");
 
+        this.OnNotificationReceived?.Invoke(this, msg);
         return Task.CompletedTask;
     }
 

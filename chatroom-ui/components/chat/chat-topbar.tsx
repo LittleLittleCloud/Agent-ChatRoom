@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Avatar, AvatarImage } from '../ui/avatar'
 import { UserData } from '@/types/Message';
-import { Info, Phone, RotateCcw, Video } from 'lucide-react';
+import { Info, Phone, RotateCcw, Trash, Video } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '../ui/button';
@@ -13,11 +13,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 interface ChatTopbarProps {
   channel: ChannelInfo;
   onRefresh?: () => void;
+  onDeleteChatHistory?: () => void;
 }
 
 export const TopbarIcons = [{ icon: Phone }, { icon: Video }, { icon: Info }];
 
-export default function ChatTopbar({ channel, onRefresh }: ChatTopbarProps) {
+export default function ChatTopbar({
+    channel,
+    onRefresh,
+    onDeleteChatHistory,
+  }: ChatTopbarProps) {
   const [members, setMembers] = React.useState<AgentInfo[]>([]);
 
   useEffect(() => {
@@ -49,6 +54,25 @@ export default function ChatTopbar({ channel, onRefresh }: ChatTopbarProps) {
               </TooltipTrigger>
               <TooltipContent side="bottom" className="flex items-center gap-4">
                 Refresh
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </Link>
+
+        {/* delete chat history icon */}
+        <Link
+          href="#"
+          onClick={onDeleteChatHistory}
+          className={
+            cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
+          }>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Trash size={15} />
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="flex items-center gap-4">
+                Delete Chat History
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

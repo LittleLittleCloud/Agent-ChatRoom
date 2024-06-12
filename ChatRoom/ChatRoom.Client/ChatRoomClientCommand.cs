@@ -90,9 +90,10 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
 
                 serviceCollection.AddSingleton(clientContext);
+                serviceCollection.AddSingleton<ConsoleRoomObserver>();
                 serviceCollection.AddSingleton(sp =>
                 {
-                    var roomObserver = new ConsoleRoomObserver();
+                    var roomObserver = sp.GetRequiredService<ConsoleRoomObserver>();
                     var clusterClient = sp.GetRequiredService<IClusterClient>();
                     var roomObserverRef = clusterClient.CreateObjectReference<IRoomObserver>(roomObserver);
                     return roomObserverRef;

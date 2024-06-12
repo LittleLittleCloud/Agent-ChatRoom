@@ -61,8 +61,8 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     [Fact]
     public async Task ItCreateAndRemoveChannelTestAsync()
     {
-        var observerMock = Mock.Of<IRoomObserver>();
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock);
+        var observerMock = Mock.Of<ConsoleRoomObserver>();
+        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock);
 
         // create nameof(ChatRoomClientControllerTests) channel
         await controller.CreateChannel(new CreateChannelRequest(nameof(ChatRoomClientControllerTests)));
@@ -86,9 +86,9 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     [Fact]
     public async Task ItAddAndRemoveAgentToChannelTestAsync()
     {
-        var observerMock = Mock.Of<IRoomObserver>();
+        var observerMock = Mock.Of<ConsoleRoomObserver>();
         var observerRef = _cluster.Client.CreateObjectReference<IRoomObserver>(observerMock);
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock);
+        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock);
         var roomGrain = _cluster.Client.GetGrain<IRoomGrain>(nameof(ChatRoomClientControllerTests));
         var testAgentName = "testAgent";
         await roomGrain.JoinRoom(testAgentName, "test", true, observerRef);

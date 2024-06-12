@@ -10,7 +10,6 @@ public interface INotificationObserver : IGrainObserver
 
 public interface IRoomObserver : IChannelObserver, INotificationObserver
 {
-
     [OneWay]
     Task JoinRoom(AgentInfo agent, string room);
 

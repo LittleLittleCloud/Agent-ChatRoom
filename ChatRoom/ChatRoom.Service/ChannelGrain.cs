@@ -230,4 +230,13 @@ internal class ChannelGrain : Grain, IChannelGrain
 
         return Task.CompletedTask;
     }
+
+    public Task ClearHistory()
+    {
+        _logger.LogInformation("Clearing chat history");
+
+        _messages.Clear();
+
+        return Task.CompletedTask;
+    }
 }

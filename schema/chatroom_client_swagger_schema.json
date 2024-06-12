@@ -103,6 +103,50 @@
         }
       }
     },
+    "/api/ChatRoomClient/ClearHistory/{channelName}": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "parameters": [
+          {
+            "name": "channelName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ChatRoomClient/NewMessageSse/{channelName}": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "parameters": [
+          {
+            "name": "channelName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/ChatRoomClient/GetRoomMembers": {
       "get": {
         "tags": [
