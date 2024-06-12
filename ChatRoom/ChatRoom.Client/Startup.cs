@@ -34,10 +34,21 @@ namespace ChatRoom.Client
                 app.UseSwagger();
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
+                // enable cors from the same origin
+                app.UseCors(builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+
             }
 
             app.UseMvc();
+
+            
             app.UseHttpsRedirection();
+            app.UseDefaultFiles();
             app.UseStaticFiles();
         }
     }

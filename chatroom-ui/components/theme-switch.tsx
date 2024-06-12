@@ -17,12 +17,11 @@ export function ThemeSwitch() {
     }
 
     return (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 h-full">
             <Switch id="dark-mode" checked={theme === "dark"} onClick={() => {
                 setTheme(theme === "dark" ? "light" : "dark");
-                console.log("theme", theme);
             }} />
-            <Label htmlFor="dark-mode">dark Mode</Label>
+            <Label htmlFor="dark-mode" className="text-nowrap">Dark Mode</Label>
         </div>
     )
 }

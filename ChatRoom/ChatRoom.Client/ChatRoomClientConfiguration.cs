@@ -24,7 +24,7 @@ public class ChatRoomClientConfiguration
 
     [JsonPropertyName("server_config")]
     [Description("The configuration for the server. If provided, the client will start a server for chatroom service")]
-    public ServerConfiguration? ServerConfig { get; set; } = null;
+    public ServerConfiguration? ServerConfig { get; set; } = new ServerConfiguration();
 }
 
 public class ServerConfiguration

@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/sidebar";
 import { Chat } from "./chat";
+import { ChannelInfo, getApiChatRoomClientGetChannels } from "@/chatroom-client";
 
 interface ChatLayoutProps {
   defaultLayout: number[] | undefined;
@@ -25,6 +26,8 @@ export function ChatLayout({
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
   const [selectedUser, setSelectedUser] = React.useState(userData[0]);
   const [isMobile, setIsMobile] = useState(false);
+  const [channels, setChannels] = useState<ChannelInfo[] | undefined>(undefined);
+  const [selectedChannel, setSelectedChannel] = useState<ChannelInfo | undefined>(undefined);
 
   useEffect(() => {
     const checkScreenWidth = () => {
@@ -37,13 +40,27 @@ export function ChatLayout({
     // Event listener for screen width changes
     window.addEventListener("resize", checkScreenWidth);
 
+    // fetch all channels from the server
+    getApiChatRoomClientGetChannels()
+    .then((res) => {
+      setChannels(res);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
     // Cleanup the event listener on component unmount
     return () => {
       window.removeEventListener("resize", checkScreenWidth);
     };
   }, []);
 
-  return (
+  const reloadChannels = async () => {
+    var channels = await getApiChatRoomClientGetChannels();
+    setChannels(channels);
+  }
+
+  return ( channels &&
     <ResizablePanelGroup
       direction="horizontal"
       onLayout={(sizes: number[]) => {
@@ -77,22 +94,40 @@ export function ChatLayout({
       >
         <Sidebar
           isCollapsed={isCollapsed || isMobile}
-          links={userData.map((user) => ({
-            name: user.name,
-            messages: user.messages ?? [],
-            avatar: user.avatar,
-            variant: selectedUser.name === user.name ? "grey" : "ghost",
+          channels={channels.map((channel) => ({
+            ...channel,
+            variant: "grey",
           }))}
           isMobile={isMobile}
+          onAddChannel={async (channel) => {
+            console.log(channel);
+            await reloadChannels();
+          }}
+          onEditChannel={async (channel) => {
+            console.log(channel);
+            await reloadChannels();
+          }}
+          onDeleteChannel={async (channel) => {
+            console.log(channel);
+            await reloadChannels();
+          }}
+          onSelectedChannel={setSelectedChannel}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
-        <Chat
+        {
+          selectedChannel && <Chat
           messages={selectedUser.messages}
           selectedUser={selectedUser}
           isMobile={isMobile}
-        />
+          channel={selectedChannel} />
+        }
+        {
+          !selectedChannel && <div className="flex flex-col justify-center items-center h-full">
+          <p className="text-xl font-bold">Select a channel</p>
+        </div>
+        }
       </ResizablePanel>
     </ResizablePanelGroup>
   );

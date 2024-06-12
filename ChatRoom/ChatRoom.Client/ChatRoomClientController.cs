@@ -74,6 +74,13 @@ public class ChatRoomClientController
     }
 
     [HttpGet]
+    public async Task<ActionResult<AgentInfo>> GetUserInfo()
+    {
+        _logger?.LogInformation("Getting user info");
+        return new OkObjectResult(new AgentInfo(_clientContext.UserName!, _clientContext.Description!));
+    }
+
+    [HttpGet]
     public async Task<ActionResult<IEnumerable<AgentInfo>>> GetRoomMembers()
     {
         _logger?.LogInformation("Getting members");
@@ -87,8 +94,8 @@ public class ChatRoomClientController
         return new OkObjectResult(members);
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<AgentInfo>>> GetChannelMembers(
+    [HttpPost]
+    public async Task<ActionResult<IEnumerable<AgentInfo>>> PostChannelMembers(
         [FromBody] GetChannelMembersRequest request)
     {
         var channelName = request.ChannelName;

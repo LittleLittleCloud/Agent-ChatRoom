@@ -1,24 +1,32 @@
 import { Message, UserData } from "@/types/Message";
 import { cn } from "@/lib/utils";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ChatBottombar from "./chat-bottombar";
 import { AnimatePresence, motion } from "framer-motion";
+import { ChannelInfo, ChatMsg } from "@/chatroom-client";
 
 interface ChatListProps {
-  messages?: Message[];
   selectedUser: UserData;
   sendMessage: (newMessage: Message) => void;
   isMobile: boolean;
+  channel: ChannelInfo;
 }
 
 export function ChatList({
-  messages,
   selectedUser,
   sendMessage,
-  isMobile
+  isMobile,
+  channel,
 }: ChatListProps) {
+  const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (channel.messages) {
+      setMessages(channel.messages);
+    }
+  }, []);
 
   React.useEffect(() => {
     if (messagesContainerRef.current) {

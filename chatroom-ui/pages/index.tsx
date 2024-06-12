@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { ChatLayout } from "@/components/chat/chat-layout";
 import { cookies } from "next/headers";
 import { useEffect, useState } from "react";
+import { AgentInfo, getApiChatRoomClientGetUserInfo } from "@/chatroom-client";
+import { Label } from "@radix-ui/react-label";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,8 +15,8 @@ export default function Home() {
     localStorage.getItem("react-resizable-panels:layout");
   }, [layout]);
   return (
-      <div className="z-10 border rounded-lg w-full h-full text-sm">
-        <ChatLayout defaultLayout={defaultLayout} navCollapsedSize={8} />
-      </div>
+    <div className="z-10 border rounded-lg w-full h-full text-sm">
+      <ChatLayout defaultLayout={defaultLayout} navCollapsedSize={8} />
+    </div>
   );
 }

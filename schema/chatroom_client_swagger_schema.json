@@ -74,6 +74,35 @@
         }
       }
     },
+    "/api/ChatRoomClient/GetUserInfo": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ChatRoomClient/GetRoomMembers": {
       "get": {
         "tags": [
@@ -112,8 +141,8 @@
         }
       }
     },
-    "/api/ChatRoomClient/GetChannelMembers": {
-      "get": {
+    "/api/ChatRoomClient/PostChannelMembers": {
+      "post": {
         "tags": [
           "ChatRoomClient"
         ],
