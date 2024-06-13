@@ -32,8 +32,6 @@ public class RoomGrain : Grain, IRoomGrain
             return;
         }
 
-        var agentObserver = new ObserverManager<IRoomObserver>(TimeSpan.FromMinutes(1), _logger);
-        agentObserver.Subscribe(observer, observer);
         _agents[agent] = observer;
 
         foreach (var ob in _agents.Values)

@@ -118,25 +118,9 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
     }
 
-    public async Task<AgentInfo[]> GetOnlineMembers()
-    {
-        var agents = new List<AgentInfo>();
-        foreach (var agent in _agents.Keys)
-        {
-            var observer = _agents[agent];
-            var ping = await observer.Ping();
-            if (ping)
-            {
-                agents.Add(agent);
-            }
-        }
-
-        return agents.ToArray();
-    }
-
     public async Task<AgentInfo?> GetNextAgentSpeaker()
     {
-        var onlineMembers = await GetOnlineMembers();
+        var onlineMembers = await GetMembers();
         var humanMembers = onlineMembers.Where(x => x.IsHuman).ToArray();
         var notHumanMembers = onlineMembers.Where(x => !x.IsHuman).ToArray();
         var humanAgents = humanMembers.Select(x => new DummyAgent(x)).ToArray();
@@ -177,7 +161,7 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
         else if (nextAvailableAgents.Count() > 1)
         {
-            IAgent admin = AgentFactory.CreateGroupChatAdmin(openaiClient, modelName: "gpt-4");
+            IAgent admin = AgentFactory.CreateGroupChatAdmin(openaiClient, modelName: deployModelName);
             var groupChat = new GroupChat(
                 workflow: graph,
                 members: humanAgents.Concat(notHumanAgents),
@@ -270,9 +254,7 @@ internal class ChannelGrain : Grain, IChannelGrain
         {
             lock (_lock)
             {
-                var newMsg = new ChatMsg(msg.From, newText);
-                _messages.Insert(_messages.IndexOf(msg), newMsg);
-                _messages.Remove(msg);
+                msg.Text = newText;
             }
         }
 

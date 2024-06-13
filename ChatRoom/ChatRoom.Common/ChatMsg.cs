@@ -18,7 +18,7 @@ public record class ChatMsg : IMessage
     public DateTimeOffset Created { get; init; } = DateTimeOffset.Now;
 
     [Id(2)]
-    public string Text { get; }
+    public string Text { get; set; }
 
     /// <summary>
     /// ID is the timestamp in seconds of the message creation.

@@ -313,7 +313,7 @@ public class ConsoleChatRoomService
 
         foreach (var channel in channels)
         {
-            AnsiConsole.MarkupLine("[bold yellow]{0}[/]", channel);
+            AnsiConsole.MarkupLine("[bold yellow]{0}[/]", channel.Name);
         }
 
         AnsiConsole.Write(new Rule()

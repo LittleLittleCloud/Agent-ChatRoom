@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ChatBottombar from "./chat-bottombar";
 import { AnimatePresence, motion } from "framer-motion";
-import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, getApiChatRoomClientDeleteMessageByChannelNameByMessageId, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
+import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, getApiChatRoomClientDeleteMessageByChannelNameByMessageId, postApiChatRoomClientEditTextMessage, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
 import ChatTopbar from "./chat-topbar";
 import { ChatMessage } from "./chat-message";
 import { on } from "events";
@@ -67,6 +67,23 @@ export function ChatList({
 
     await onReloadMessages();
   }
+
+  const editMessageHandler = async (message: ChatMsg) => {
+    if (channel.name === undefined || channel.name === null || message.id === undefined || message.id === null) {
+      return;
+    }
+
+    await postApiChatRoomClientEditTextMessage(
+      {
+        requestBody: {
+          channelName: channel.name,
+          messageId: message.id,
+          newText: message.text,
+      }
+    });
+
+    await onReloadMessages();
+  };
 
   useEffect(() => {
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
@@ -153,6 +170,7 @@ export function ChatList({
                 key={index}
                 message={message}
                 selectedUser={selectedUser}
+                onEdit={editMessageHandler}
                 onDeleted={deleteMessageHandler}/>
             </motion.div>
           ))}

@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { CopyToClipboardIcon } from "../copy-to-clipboard-icon";
 import { channel } from "diagnostics_channel";
 import { on } from "events";
+import EmojiPicker from "@emoji-mart/react";
 
 export interface ChatMessageProps {
   message: ChatMsg;
@@ -26,19 +27,23 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
   const [showResend, setShowResend] = React.useState<boolean>(message.from == selectedUser.name);
   const [showMarkdown, setShowMarkdown] = React.useState<boolean>(true);
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
-
+  const [editingText, setEditingText] = React.useState<string>('');
   React.useEffect(() => {
     if (message.text === undefined || message.text === null) {
       return;
     }
 
     setMarkdown(message.text);
-  }, []);
+  }, [message]);
 
   const handleDelete = async (msg: ChatMsg) => {
     onDeleted?.(msg);
   }
-     
+
+  const handleEditing = async (msg: ChatMsg) => {
+    setIsEditing(false);
+    onEdit?.(msg);
+  }
 
   return (
     <div className={cn("flex flex-col w-full ", isFromSelectedUser ? "items-start" : "items-end")}>
@@ -47,7 +52,7 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
           className="flex items-center py-2 pr-3 bg-accent group/settings">
           <Badge className="text-nowrap" variant={"accent"}>{message.from}</Badge>
           <div className="invisible flex flex-grow items-center justify-end gap-2 group-hover/settings:visible">
-            <ToggleGroup defaultValue="markdown" type="single" size={"tiny"}
+            {/* <ToggleGroup defaultValue="markdown" type="single" size={"tiny"}
               variant={"accent"}
             >
               <ToggleGroupItem
@@ -80,10 +85,13 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
                   </Tooltip>
                 </TooltipProvider>
               </ToggleGroupItem>
-            </ToggleGroup>
+            </ToggleGroup> */}
             {
               isFromSelectedUser &&
-              <Button variant={"ghost"} size={"tiny"} onClick={() => setIsEditing(!isEditing)}>
+              <Button variant={"ghost"} size={"tiny"} onClick={() => {
+                setEditingText(message.text || '');
+                setIsEditing(true);
+              }}>
                 <Edit size={14} />
               </Button>
             }
@@ -106,11 +114,30 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
         </div>
         <div className="p-3 overflow-y-auto">
           { isEditing ?
+            <div className="flex flex-col border-2 border-solid border-accent rounded-md">
             <textarea
-              value={markdown}
-              onChange={(e) => setMarkdown(e.target.value)}
-              className="w-full h-auto border-2 border-solid border-accent rounded-md p-2"
-            /> :
+              value={editingText}
+              onChange={(e) => setEditingText(e.target.value)}
+              className="w-full p-2 h-auto bg-transparent border-0 focus:outline-none"
+            />
+            <div className="flex gap-2 p-2 whitespace-pre-wrap justify-end">
+              <Button
+                variant={"ghost"}
+                size={"tiny"}
+                onClick={() => handleEditing({ ...message, text: editingText })}
+                >
+                Save
+              </Button>
+              <Button
+                variant={"warning"}
+                size={"tiny"}
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </Button>
+              </div>
+              </div>
+            :
             showMarkdown ? <Markdown>{markdown}</Markdown> : <span>{markdown}</span>
           }
         </div>

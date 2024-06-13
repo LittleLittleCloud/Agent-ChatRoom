@@ -20,7 +20,7 @@ public class ChatPlatformClient
         var room = _client.GetGrain<IRoomGrain>(_room);
         var reference = _client.CreateObjectReference<IRoomObserver>(observer);
         await room.JoinRoom(agent.Name, description ?? string.Empty, false, reference);
-        _observers[agent.Name] = reference;
+        _observers[agent.Name] = observer;
     }
 
     public async Task UnregisterAgentAsync(IAgent agent)
