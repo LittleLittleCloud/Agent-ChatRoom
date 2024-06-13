@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ChatBottombar from "./chat-bottombar";
 import { AnimatePresence, motion } from "framer-motion";
-import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
+import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, getApiChatRoomClientDeleteMessageByChannelNameByMessageId, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
 import ChatTopbar from "./chat-topbar";
 import { ChatMessage } from "./chat-message";
 import { on } from "events";
@@ -47,6 +47,22 @@ export function ChatList({
 
     await getApiChatRoomClientClearHistoryByChannelName({
       channelName: channel.name
+    });
+
+    await onReloadMessages();
+  }
+
+  const deleteMessageHandler = async (message: ChatMsg) => {
+    if (confirm(`Are you sure you want to delete this message?`) === false) {
+      return;
+    }
+    if (channel.name === undefined || channel.name === null || message.id === undefined || message.id === null) {
+      return;
+    }
+
+    await getApiChatRoomClientDeleteMessageByChannelNameByMessageId({
+      channelName: channel.name,
+      messageId: message.id
     });
 
     await onReloadMessages();
@@ -133,7 +149,11 @@ export function ChatList({
                 "flex flex-col gap-2 p-4 whitespace-pre-wrap"
               )}
             >
-              <ChatMessage key={index} message={message} selectedUser={selectedUser} />
+              <ChatMessage
+                key={index}
+                message={message}
+                selectedUser={selectedUser}
+                onDeleted={deleteMessageHandler}/>
             </motion.div>
           ))}
         </AnimatePresence>
