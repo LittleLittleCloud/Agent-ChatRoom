@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
 import ChatTopbar from "./chat-topbar";
 import { ChatMessage } from "./chat-message";
+import { on } from "events";
 
 interface ChatListProps {
   selectedUser: AgentInfo;
@@ -24,18 +25,16 @@ export function ChatList({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [eventSource, setEventSource] = React.useState<EventSource | null>(null);
   const onReloadMessages = async () => {
-    postApiChatRoomClientGetChannelChatHistory({
+    console.log("Reloading messages");
+    var data = await postApiChatRoomClientGetChannelChatHistory({
       requestBody: {
         channelName: channel.name,
         count: 1000,
       },
-    })
-      .then((data) => {
-        setMessages(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    });
+
+    setMessages(data);
+    console.log(data);
   }
 
   const onDeleteMessages = async () => {
@@ -54,12 +53,11 @@ export function ChatList({
   }
 
   useEffect(() => {
-    onReloadMessages();
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
-    es.addEventListener("message", (event) => {
+    es.addEventListener("message", async (event) => {
       const newMessage: ChatMsg = JSON.parse(event.data);
       console.log(newMessage);
-      onReloadMessages();
+      await onReloadMessages();
     });
 
     es.onopen = (event) => {
@@ -69,9 +67,14 @@ export function ChatList({
     es.onerror = (event) => {
       console.log("Error", event);
     }
-
     setEventSource(es);
-  }, []);
+    onReloadMessages();
+
+    return () => {
+      console.log("Closing event source");
+      es.close();
+    }
+  }, [channel]);
 
   React.useEffect(() => {
     if (messagesContainerRef.current) {

@@ -39,6 +39,13 @@ export const $ChannelInfo = {
         name: {
             type: 'string',
             nullable: true
+        },
+        members: {
+            type: 'array',
+            items: {
+                '$ref': '#/components/schemas/AgentInfo'
+            },
+            nullable: true
         }
     },
     additionalProperties: false
@@ -58,6 +65,10 @@ export const $ChatMsg = {
         text: {
             type: 'string',
             nullable: true
+        },
+        id: {
+            type: 'integer',
+            format: 'int64'
         }
     },
     additionalProperties: false
@@ -78,6 +89,25 @@ export const $DeleteChannelRequest = {
     type: 'object',
     properties: {
         channelName: {
+            type: 'string',
+            nullable: true
+        }
+    },
+    additionalProperties: false
+} as const;
+
+export const $EditTextMessageRequest = {
+    type: 'object',
+    properties: {
+        channelName: {
+            type: 'string',
+            nullable: true
+        },
+        messageId: {
+            type: 'integer',
+            format: 'int64'
+        },
+        newText: {
             type: 'string',
             nullable: true
         }

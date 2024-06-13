@@ -8,7 +8,7 @@ namespace ChatRoom.Room;
 
 public class RoomGrain : Grain, IRoomGrain
 {
-    private readonly List<ChannelInfo> _channels = new(100);
+    private readonly List<string> _channelNames = new(100);
     private readonly Dictionary<AgentInfo, IRoomObserver> _agents = [];
     private readonly ILogger<RoomGrain>? _logger;
 
@@ -58,16 +58,24 @@ public class RoomGrain : Grain, IRoomGrain
         }
 
         // remove agent from all channels
-        foreach (var channel in _channels)
+        foreach (var channel in _channelNames)
         {
-            var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
+            var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
             await channelGrain.LeaveChannel(agent.Name);
         }
     }
 
-    public Task<ChannelInfo[]> GetChannels()
+    public async Task<ChannelInfo[]> GetChannels()
     {
-        return Task.FromResult(_channels.ToArray());
+        var channelInfos = new List<ChannelInfo>();
+        foreach (var channelName in _channelNames)
+        {
+            var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channelName);
+            var channelInfo = await channelGrain.GetChannelInfo();
+            channelInfos.Add(channelInfo);
+        }
+
+        return channelInfos.ToArray();
     }
 
     public async Task CreateChannel(
@@ -75,16 +83,14 @@ public class RoomGrain : Grain, IRoomGrain
         string[]? members = null,
         ChatMsg[]? history = null)
     {
-        if (_channels.Any(x => x.Name == channelName))
+        if (_channelNames.Any(x => x == channelName))
         {
             _logger?.LogWarning("Channel {ChannelName} already exists", channelName);
             return;
         }
 
-        var channelInfo = new ChannelInfo(channelName);
-
         // activate the channel
-        _channels.Add(channelInfo);
+        _channelNames.Add(channelName);
 
         var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channelName);
         if (history is { Length: > 0 })
@@ -103,7 +109,7 @@ public class RoomGrain : Grain, IRoomGrain
                     continue;
                 }
 
-                await AddAgentToChannel(channelInfo, member);
+                await AddAgentToChannel(channelName, member);
             }
         }
 
@@ -112,28 +118,28 @@ public class RoomGrain : Grain, IRoomGrain
 
     public async Task DeleteChannel(string channelName)
     {
-        if (_channels.All(x => x.Name != channelName))
+        if (_channelNames.All(x => x != channelName))
         {
             return;
         }
 
-        var channel = _channels.First(x => x.Name == channelName);
-        _channels.Remove(channel);
+        var channel = _channelNames.First(x => x == channelName);
+        _channelNames.Remove(channel);
     }
 
-    public async Task AddAgentToChannel(ChannelInfo channelInfo, string agentName)
+    public async Task AddAgentToChannel(string channelName, string agentName)
     {
-        var channel = _channels.First(x => x.Name == channelInfo.Name);
-        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
+        var channel = _channelNames.First(x => x == channelName);
+        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
         var agent = _agents.First(x => x.Key.Name == agentName).Key;
 
         await channelGrain.JoinChannel(agent.Name, agent.SelfDescription, agent.IsHuman, _agents[agent]);
     }
 
-    public async Task RemoveAgentFromChannel(ChannelInfo channelInfo, string agentName)
+    public async Task RemoveAgentFromChannel(string channelName, string agentName)
     {
-        var channel = _channels.First(x => x.Name == channelInfo.Name);
-        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel.Name);
+        var channel = _channelNames.First(x => x == channelName);
+        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
         var agent = _agents.First(x => x.Key.Name == agentName).Key;
 
         await channelGrain.LeaveChannel(agent.Name);

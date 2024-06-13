@@ -14,12 +14,17 @@ public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
 
     Task ClearHistory();
 
+    Task<ChannelInfo> GetChannelInfo();
+
     internal Task InitializeChatHistory(ChatMsg[] history);
 
-    internal Task<bool> Message(ChatMsg msg);
+    internal Task<bool> SendMessage(ChatMsg msg);
+
+    internal Task DeleteMessage(long msgId);
+
+    internal Task EditTextMessage(long msgId, string newText);
 
     internal Task<ChatMsg[]> ReadHistory(int numberOfMessages);
-
 
     internal Task<AgentInfo[]> GetMembers();
 }

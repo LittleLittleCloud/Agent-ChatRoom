@@ -59,7 +59,7 @@ export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onAddCh
       {channelConfigModalChannel && <ChannelConfigModal
         channel={channelConfigModalChannel}
         onSave={(channel) => {
-          if (channelConfigModalChannel) {
+          if (channelConfigModalChannel.name !== undefined) {
             // todo
             // check if name conflict with existing channels
             onEditChannel?.(channel);

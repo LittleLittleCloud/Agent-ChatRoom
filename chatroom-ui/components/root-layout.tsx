@@ -25,9 +25,10 @@ export default function RootLayout({
                 <div className="flex w-full justify-between items-center">
                     <Link href="#" className="text-4xl w-full font-bold text-gradient">Agent Chatroom</Link>
                     <div className="flex space-x-5 items-center justify-end ">
+                        <Welcome />
                         <ThemeSwitch />
                         <Link
-                            href="https://github.com/jakobhoeg/shadcn-chat"
+                            href="https://github.com/LittleLittleCloud/Agent-ChatRoom"
                             className={cn(
                                 buttonVariants({ variant: "ghost", size: "icon" }),
                                 "h-10 w-10"
@@ -35,7 +36,6 @@ export default function RootLayout({
                         >
                             <GitHubLogoIcon className="w-7 h-7 text-muted-foreground" />
                         </Link>
-                        <Welcome />
                     </div>
                 </div>
 

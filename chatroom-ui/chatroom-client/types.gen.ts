@@ -13,12 +13,14 @@ export type AgentInfo = {
 
 export type ChannelInfo = {
     name?: string | null;
+    members?: Array<AgentInfo> | null;
 };
 
 export type ChatMsg = {
     from?: string | null;
     created?: string;
     text?: string | null;
+    id?: number;
 };
 
 export type CreateChannelRequest = {
@@ -27,6 +29,12 @@ export type CreateChannelRequest = {
 
 export type DeleteChannelRequest = {
     channelName?: string | null;
+};
+
+export type EditTextMessageRequest = {
+    channelName?: string | null;
+    messageId?: number;
+    newText?: string | null;
 };
 
 export type GetChannelChatHistoryRequest = {
@@ -80,6 +88,25 @@ export type GetApiChatRoomClientNewMessageSseByChannelNameData = {
 export type GetApiChatRoomClientNewMessageSseByChannelNameResponse = unknown;
 
 export type GetApiChatRoomClientGetRoomMembersResponse = Array<AgentInfo>;
+
+export type GetApiChatRoomClientGetChannelInfoByChannelNameData = {
+    channelName: string;
+};
+
+export type GetApiChatRoomClientGetChannelInfoByChannelNameResponse = ChannelInfo;
+
+export type PostApiChatRoomClientEditTextMessageData = {
+    requestBody?: EditTextMessageRequest;
+};
+
+export type PostApiChatRoomClientEditTextMessageResponse = unknown;
+
+export type GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdData = {
+    channelName: string;
+    messageId: number;
+};
+
+export type GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdResponse = unknown;
 
 export type PostApiChatRoomClientGetChannelMembersData = {
     requestBody?: GetChannelMembersRequest;
@@ -190,6 +217,39 @@ export type $OpenApiTs = {
                  * OK
                  */
                 200: Array<AgentInfo>;
+            };
+        };
+    };
+    '/api/ChatRoomClient/GetChannelInfo/{channelName}': {
+        get: {
+            req: GetApiChatRoomClientGetChannelInfoByChannelNameData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: ChannelInfo;
+            };
+        };
+    };
+    '/api/ChatRoomClient/EditTextMessage': {
+        post: {
+            req: PostApiChatRoomClientEditTextMessageData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/DeleteMessage/{channelName}/{messageId}': {
+        get: {
+            req: GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
             };
         };
     };

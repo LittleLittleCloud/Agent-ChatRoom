@@ -16,7 +16,7 @@ public interface IRoomGrain : IGrainWithStringKey
 
     Task DeleteChannel(string channelName);
 
-    Task AddAgentToChannel(ChannelInfo channelInfo, string agentName);
+    Task AddAgentToChannel(string channelName, string agentName);
 
-    Task RemoveAgentFromChannel(ChannelInfo channelInfo, string agentName);
+    Task RemoveAgentFromChannel(string channelName, string agentName);
 }

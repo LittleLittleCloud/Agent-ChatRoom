@@ -110,3 +110,19 @@ public record class RemoveAgentFromChannelRequest
 
     public string AgentName { get; init; }
 }
+
+public record class EditTextMessageRequest
+{
+    public EditTextMessageRequest(string channelName, long messageId, string newText)
+    {
+        ChannelName = channelName;
+        MessageId = messageId;
+        NewText = newText;
+    }
+
+    public string ChannelName { get; init; }
+
+    public long MessageId { get; init; }
+
+    public string NewText { get; init; }
+}

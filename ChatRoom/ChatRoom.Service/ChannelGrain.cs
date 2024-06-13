@@ -10,6 +10,7 @@ namespace ChatRoom.Room;
 
 internal class ChannelGrain : Grain, IChannelGrain
 {
+    private static readonly object _lock = new();
     private readonly List<ChatMsg> _messages = new(100);
     private ChannelInfo _channelInfo = null!;
     private readonly ILogger _logger;
@@ -69,7 +70,7 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
     }
 
-    public async Task<bool> Message(ChatMsg msg)
+    public async Task<bool> SendMessage(ChatMsg msg)
     {
         _logger.LogInformation("Received message from {From} in channel {ChannelId}", msg.From, _channelInfo.Name);
         foreach (var cb in _agents.Values)
@@ -81,7 +82,11 @@ internal class ChannelGrain : Grain, IChannelGrain
         if (msg.From != "System")
         {
             _logger.LogInformation("Adding message to history");
-            _messages.Add(msg);
+
+            lock (_lock)
+            {
+                _messages.Add(msg);
+            }
 
             _logger.LogInformation("Getting next agent speaker");
             var nextSpeaker = await GetNextAgentSpeaker();
@@ -102,13 +107,15 @@ internal class ChannelGrain : Grain, IChannelGrain
 
     public Task<ChatMsg[]> ReadHistory(int numberOfMessages)
     {
-        var response = _messages
+        lock (_lock)
+        {
+            var response = _messages
             .OrderByDescending(x => x.Created)
             .Take(numberOfMessages)
             .OrderBy(x => x.Created)
             .ToArray();
-
-        return Task.FromResult(response);
+            return Task.FromResult(response);
+        }
     }
 
     public async Task<AgentInfo[]> GetOnlineMembers()
@@ -207,7 +214,7 @@ internal class ChannelGrain : Grain, IChannelGrain
 
         if (reply is not null)
         {
-            await this.Message(reply);
+            await this.SendMessage(reply);
         }
     }
 
@@ -234,9 +241,50 @@ internal class ChannelGrain : Grain, IChannelGrain
     public Task ClearHistory()
     {
         _logger.LogInformation("Clearing chat history");
-
-        _messages.Clear();
+        lock (_lock)
+        {
+            _messages.Clear();
+        }
 
         return Task.CompletedTask;
+    }
+
+    public Task DeleteMessage(long msgId)
+    {
+        var msg = _messages.FirstOrDefault(x => x.ID == msgId);
+        if (msg is not null)
+        {
+            lock (_lock)
+            {
+                _messages.Remove(msg);
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task EditTextMessage(long msgId, string newText)
+    {
+        var msg = _messages.FirstOrDefault(x => x.ID == msgId);
+        if (msg is not null)
+        {
+            lock (_lock)
+            {
+                var newMsg = new ChatMsg(msg.From, newText);
+                _messages.Insert(_messages.IndexOf(msg), newMsg);
+                _messages.Remove(msg);
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task<ChannelInfo> GetChannelInfo()
+    {
+        var channelInfo = new ChannelInfo(this.GetPrimaryKeyString())
+        {
+            Members = _agents.Keys.ToList()
+        };
+        return Task.FromResult(channelInfo);
     }
 }

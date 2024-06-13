@@ -23,17 +23,13 @@ export default function ChatTopbar({
     onRefresh,
     onDeleteChatHistory,
   }: ChatTopbarProps) {
-  const [members, setMembers] = React.useState<AgentInfo[]>([]);
-
+  const [members, setMembers] = React.useState<AgentInfo[]>(channel.members || []);
+  
   useEffect(() => {
-    postApiChatRoomClientGetChannelMembers({
-      requestBody: {
-        channelName: channel.name
-      }
-    }).then((data) => {
-      setMembers(data);
-    });
-  }, []);
+    setMembers(channel.members || []);
+  }
+  , [channel]);
+
   return (
     <div className="w-full h-20 flex p-4 justify-between items-center border-b">
       <div className="flex items-center gap-5">

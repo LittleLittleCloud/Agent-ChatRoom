@@ -185,6 +185,107 @@
         }
       }
     },
+    "/api/ChatRoomClient/GetChannelInfo/{channelName}": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "parameters": [
+          {
+            "name": "channelName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelInfo"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelInfo"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ChatRoomClient/EditTextMessage": {
+      "post": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditTextMessageRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditTextMessageRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditTextMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ChatRoomClient/DeleteMessage/{channelName}/{messageId}": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "parameters": [
+          {
+            "name": "channelName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/ChatRoomClient/GetChannelMembers": {
       "post": {
         "tags": [
@@ -525,6 +626,13 @@
           "name": {
             "type": "string",
             "nullable": true
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentInfo"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -543,6 +651,10 @@
           "text": {
             "type": "string",
             "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -561,6 +673,24 @@
         "type": "object",
         "properties": {
           "channelName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EditTextMessageRequest": {
+        "type": "object",
+        "properties": {
+          "channelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "messageId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "newText": {
             "type": "string",
             "nullable": true
           }

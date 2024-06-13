@@ -58,7 +58,7 @@ public class ChatRoomClientController : Controller
 
         var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channel);
 
-        await channelGrain.Message(message);
+        await channelGrain.SendMessage(message);
 
         return new OkResult();
     }
@@ -145,6 +145,47 @@ public class ChatRoomClientController : Controller
         var members = await roomGrain.GetMembers();
         return new OkObjectResult(members);
     }
+
+    [HttpGet]
+    [Route("{channelName}")]
+    public async Task<ActionResult<ChannelInfo>> GetChannelInfo(string channelName)
+    {
+        _logger?.LogInformation("Getting info of channel {channelName}", channelName);
+
+        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
+        var info = await channelGrain.GetChannelInfo();
+
+        return new OkObjectResult(info);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> EditTextMessage(
+        [FromBody] EditTextMessageRequest request)
+    {
+        var channelName = request.ChannelName;
+        var messageId = request.MessageId;
+        var newText = request.NewText;
+
+        _logger?.LogInformation("Editing message {messageId} in channel {channelName}", messageId, channelName);
+
+        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
+        await channelGrain.EditTextMessage(messageId, newText);
+
+        return new OkResult();
+    }
+
+    [HttpGet]
+    [Route("{channelName}/{messageId}")]
+    public async Task<ActionResult> DeleteMessage(string channelName, long messageId)
+    {
+        _logger?.LogInformation("Deleting message {messageId} in channel {channelName}", messageId, channelName);
+
+        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
+        await channelGrain.DeleteMessage(messageId);
+
+        return new OkResult();
+    }
+
 
     [HttpPost]
     public async Task<ActionResult<IEnumerable<AgentInfo>>> GetChannelMembers(
@@ -253,7 +294,7 @@ public class ChatRoomClientController : Controller
         _logger?.LogInformation("Adding agent {agentName} to channel {channelName}", agentName, channelName);
 
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await roomGrain.AddAgentToChannel(new ChannelInfo(channelName), agentName);
+        await roomGrain.AddAgentToChannel(channelName, agentName);
 
         return new OkResult();
     }
@@ -267,7 +308,7 @@ public class ChatRoomClientController : Controller
         _logger?.LogInformation("Removing agent {agentName} from channel {channelName}", agentName, channelName);
 
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await roomGrain.RemoveAgentFromChannel(new ChannelInfo(channelName), agentName);
+        await roomGrain.RemoveAgentFromChannel(channelName, agentName);
 
         return new OkResult();
     }

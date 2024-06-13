@@ -57,10 +57,10 @@ export function ChatLayout({
   }, []);
 
   const reloadChannels = async () => {
-    var channels = await getApiChatRoomClientGetChannels();
-    setChannels(channels);
+    var _channels = await getApiChatRoomClientGetChannels();
+    setChannels(_channels);
     var selectedChannelName = selectedChannel?.name;
-    setSelectedChannel(channels.find(channel => channel.name === selectedChannelName));
+    setSelectedChannel(_channels.find(channel => channel.name === selectedChannelName));
   }
 
   if (channels){
@@ -108,6 +108,7 @@ export function ChatLayout({
               await reloadChannels();
             }}
             onEditChannel={async (channel) => {
+              console.log('edit channel')
               console.log(channel);
               await reloadChannels();
             }}
