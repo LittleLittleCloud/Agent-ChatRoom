@@ -321,8 +321,9 @@ public class ConsoleChatRoomService
 
         foreach (var chatMsg in history)
         {
-            var encodedText = chatMsg.Text.Replace("[", "[[");
-            encodedText = encodedText.Replace("]", "]]");
+            var encodedText = chatMsg.GetContent()?.Replace("[", "[[");
+            encodedText = encodedText?.Replace("]", "]]");
+            encodedText ??= "unsupported format";
             AnsiConsole.MarkupLine("[[[dim]{0}[/]]] [bold yellow]{1}:[/] {2}",
                 chatMsg.Created.LocalDateTime, chatMsg.From!, encodedText);
         }

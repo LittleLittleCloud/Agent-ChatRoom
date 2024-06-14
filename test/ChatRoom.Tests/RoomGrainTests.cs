@@ -121,7 +121,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         await channelGrain.EditTextMessage(message.ID, "new message");
         history = await channelGrain.ReadHistory(1);
         history.Should().HaveCount(1);
-        history.First().Text.Should().Be("new message");
+        history.First().GetContent().Should().Be("new message");
         // ID needs to be match
         history.First().ID.Should().Be(message.ID);
 

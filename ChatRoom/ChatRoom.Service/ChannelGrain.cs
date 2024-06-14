@@ -149,7 +149,7 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
 
         var graph = new Graph(transitions);
-        var chatHistory = _messages.Select(x => new TextMessage(Role.Assistant, x.Text, x.From)).ToArray();
+        var chatHistory = _messages.Select(x => x.ToAutoGenMessage()).ToArray();
         var lastSpeaker = agents.First(x => x.Name == _messages.Last().From);
         var nextAvailableAgents = await graph.TransitToNextAvailableAgentsAsync(lastSpeaker, _messages);
         if (nextAvailableAgents.Count() == 1 && onlineMembers.Any(x => x.Name == nextAvailableAgents.First().Name))
@@ -211,7 +211,12 @@ internal class ChannelGrain : Grain, IChannelGrain
 
     public Task SendNotification(ChatMsg msg)
     {
-        var content = msg.Text;
+        var content = msg.GetContent();
+        if (content == null)
+        {
+            return Task.CompletedTask;
+        }
+
         _logger.LogInformation("Sending notification: {Content}", content);
 
         foreach (var cb in _agents.Values)
@@ -250,11 +255,11 @@ internal class ChannelGrain : Grain, IChannelGrain
     public Task EditTextMessage(long msgId, string newText)
     {
         var msg = _messages.FirstOrDefault(x => x.ID == msgId);
-        if (msg is not null)
+        if (msg is not null && msg.Parts.Length == 1 && msg.Parts[0].TextPart is not null)
         {
             lock (_lock)
             {
-                msg.Text = newText;
+                msg.Parts[0].TextPart = newText;
             }
         }
 

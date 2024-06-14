@@ -51,9 +51,10 @@ public class ConsoleRoomObserver : IRoomObserver
 
     public Task NewMessage(ChatMsg msg)
     {
-        var text = msg.Text;
-        text = text.Replace("[", "[[");
-        text = text.Replace("]", "]]");
+        var text = msg.GetContent();
+        text = text?.Replace("[", "[[");
+        text = text?.Replace("]", "]]");
+        text ??= "This message type is not supported for preview on console";
         AnsiConsole.MarkupLine(
             "[[[dim]{0}[/]]] [bold yellow]{1}:[/] {2}",
             msg.Created.LocalDateTime, msg.From!, text);
@@ -64,7 +65,7 @@ public class ConsoleRoomObserver : IRoomObserver
 
     public Task Notification(ChatMsg msg)
     {
-        AnsiConsole.MarkupLine($"[grey]{msg.From}[/]: {msg.Text}");
+        AnsiConsole.MarkupLine($"[grey]{msg.From}[/]: {msg.GetContent() ?? "This message type is not supported for preview on console"}");
 
         this.OnNotificationReceived?.Invoke(this, msg);
         return Task.CompletedTask;

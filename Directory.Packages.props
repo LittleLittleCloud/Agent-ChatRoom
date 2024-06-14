@@ -17,11 +17,11 @@
     <PackageVersion Include="Microsoft.Orleans.Streaming" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Orleans.Server" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="8.0.0" />
-    <PackageVersion Include="AutoGen" Version="0.0.14" />
-    <PackageVersion Include="AutoGen.SemanticKernel" Version="0.0.14" />
-    <PackageVersion Include="AutoGen.OpenAI" Version="0.0.14" />
-    <PackageVersion Include="AutoGen.Core" Version="0.0.14" />
-    <PackageVersion Include="AutoGen.SourceGenerator" Version="0.0.14" />
+    <PackageVersion Include="AutoGen" Version="0.0.15" />
+    <PackageVersion Include="AutoGen.SemanticKernel" Version="0.0.15" />
+    <PackageVersion Include="AutoGen.OpenAI" Version="0.0.15" />
+    <PackageVersion Include="AutoGen.Core" Version="0.0.15" />
+    <PackageVersion Include="AutoGen.SourceGenerator" Version="0.0.15" />
     <PackageVersion Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.10.0-alpha" />
     <PackageVersion Include="Microsoft.PowerShell.SDK" Version="7.4.2" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" Version="8.0.0" />
