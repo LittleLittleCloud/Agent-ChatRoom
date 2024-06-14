@@ -9,6 +9,7 @@ import { AgentInfo, ChannelInfo, postApiChatRoomClientGetChannelMembers } from '
 import { AgentAvatar } from '../agent-avatar';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Badge } from '../ui/badge';
 
 interface ChatTopbarProps {
   channel: ChannelInfo;
@@ -77,7 +78,12 @@ export default function ChatTopbar({
 
       <div className='flex gap-2'>
         {members.map((agent, index) => (
-          <AgentAvatar key={index} agent={agent} />
+          <Badge
+            variant={"accent"}
+            className='text-nowrap'
+            key={index}>
+              {agent.name}
+            </Badge>
         ))}
       </div>
     </div>

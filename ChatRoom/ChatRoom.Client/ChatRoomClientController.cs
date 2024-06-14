@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ChatRoom.Client.DTO;
 using ChatRoom.Common;
@@ -10,6 +11,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
+using System.IO;
 
 namespace ChatRoom.Client;
 
@@ -22,12 +25,14 @@ public class ChatRoomClientController : Controller
     private readonly ILogger<ChatRoomClientController>? _logger = null!;
     private readonly IRoomObserver _roomObserverRef = null!;
     private readonly ConsoleRoomObserver _consoleRoomObserver = null!;
+    private readonly ChatRoomClientConfiguration _config = null!;
 
     public ChatRoomClientController(
         IClusterClient clusterClient,
         ClientContext clientContext,
         IRoomObserver roomObserverRef,
         ConsoleRoomObserver consoleRoomObserver,
+        ChatRoomClientConfiguration? config = null,
         ILogger<ChatRoomClientController>? logger = null)
     {
         _clusterClient = clusterClient;
@@ -35,6 +40,7 @@ public class ChatRoomClientController : Controller
         _logger = logger;
         _roomObserverRef = roomObserverRef;
         _consoleRoomObserver = consoleRoomObserver;
+        _config = config ?? new ChatRoomClientConfiguration();
     }
 
     [HttpPost]
@@ -62,6 +68,121 @@ public class ChatRoomClientController : Controller
 
         return new OkResult();
     }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<string>>> GetRoomCheckpoints()
+    {
+        _logger?.LogInformation("Getting checkpoints");
+        var workspace = _config.Workspace;
+        var checkpointDir = Path.Combine(workspace, "checkpoints");
+
+        if (!Directory.Exists(checkpointDir))
+        {
+            return new OkObjectResult(Array.Empty<string>());
+        }
+
+        // checkpoints are a list of json files that in the format of {roomName}_{YYYY-MM-DD_HH-mm-ss}.json
+        var roomName = _config.RoomConfig.Room;
+        var re = new Regex($@"^{roomName}_(\d{{4}}-\d{{2}}-\d{{2}}_\d{{2}}-\d{{2}}-\d{{2}})\.json$");
+        var checkpoints = Directory.GetFiles(checkpointDir, "*.json")
+            .Where(x => re.IsMatch(System.IO.Path.GetFileName(x)))
+            .OrderByDescending(x => x);
+
+        return new OkObjectResult(checkpoints);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult> LoadCheckpoint(string checkpointPath)
+    {
+        _logger?.LogInformation("Loading checkpoint {checkpoint}", checkpointPath);
+        var workspace = _config.Workspace;
+        var checkpointDir = Path.Combine(workspace, "checkpoints");
+        checkpointPath = Path.Combine(checkpointDir, checkpointPath);
+        var room = _clientContext.CurrentRoom;
+        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(room);
+        if (Path.Exists(checkpointPath))
+        {
+            // remove all channels
+            var channels = await roomGrain.GetChannels();
+            foreach (var channel in channels)
+            {
+                await roomGrain.DeleteChannel(channel.Name);
+            }
+
+            var schema = JsonSerializer.Deserialize<ChatRoomContextSchemaV0>(System.IO.File.ReadAllText(checkpointPath))!;
+            var workspaceConfiguration = ChatRoomContext.FromSchema(schema);
+            foreach (var channel in workspaceConfiguration.Channels)
+            {
+                var channelName = channel.Key;
+                var channelMembers = channel.Value;
+                var channelHistory = workspaceConfiguration.ChatHistory.TryGetValue(channelName, out var history) ? history : null;
+                await roomGrain.CreateChannel(channelName, channelMembers, channelHistory);
+                _logger?.LogInformation("Restored channel {ChannelName} with {MemberCount} members and {HistoryCount} history items", channelName, channelMembers.Count(), channelHistory?.Count() ?? 0);
+            }
+        }
+
+        return new OkResult();
+    }
+
+    [HttpGet]
+    public async Task<ActionResult> SaveCheckpoint()
+    {
+        _logger?.LogInformation("Saving checkpoint");
+        var room = _clientContext.CurrentRoom;
+        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(room);
+        var channels = await roomGrain.GetChannels();
+        Dictionary<string, ChatMsg[]> chatHistory = new();
+        Dictionary<string, string[]> channelMembers = new();
+        foreach (var channel in channels)
+        {
+            var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channel.Name);
+            var history = await channelGrain.ReadHistory(100);
+            chatHistory[channel.Name] = history.ToArray();
+            var members = await channelGrain.GetMembers();
+            channelMembers[channel.Name] = members.Select(m => m.Name).ToArray();
+        }
+
+        var workspaceConfiguration = new ChatRoomContext
+        {
+            Channels = channelMembers,
+            ChatHistory = chatHistory,
+        };
+
+        var schema = workspaceConfiguration.ToSchema();
+        var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
+
+        var workspace = _config.Workspace;
+        var checkpointDir = Path.Combine(workspace, "checkpoints");
+        if (!Directory.Exists(checkpointDir))
+        {
+            Directory.CreateDirectory(checkpointDir);
+        }
+
+        var dateTimeNow = DateTime.Now;
+
+        var checkpointPath = Path.Combine(checkpointDir, $"{room}_{dateTimeNow:yyyy-MM-dd_HH-mm-ss}.json");
+
+        await System.IO.File.WriteAllTextAsync(checkpointPath, json);
+
+        return new OkResult();
+    }
+
+    [HttpGet]
+    [Route("{checkpointPath}")]
+    public async Task<ActionResult> DeleteCheckpoint(string checkpointPath)
+    {
+        _logger?.LogInformation("Deleting checkpoint {checkpoint}", checkpointPath);
+        var workspace = _config.Workspace;
+        var checkpointDir = Path.Combine(workspace, "checkpoints");
+        checkpointPath = Path.Combine(checkpointDir, checkpointPath);
+        if (Path.Exists(checkpointPath))
+        {
+            System.IO.File.Delete(checkpointPath);
+        }
+
+        return new OkResult();
+    }
+
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ChannelInfo>>> GetChannels()

@@ -39,26 +39,6 @@ public class ConsoleChatRoomService
         PrintUsage();
         var room = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
-
-        // restore previous state
-        if (File.Exists(_chatRoomContextSchemaPath))
-        {
-            AnsiConsole.MarkupLine("[bold red]Restoring workspace from {0}[/]", _workspacePath);
-            var schema = JsonSerializer.Deserialize<ChatRoomContextSchemaV0>(File.ReadAllText(_chatRoomContextSchemaPath))!;
-            var workspaceConfiguration = new ChatRoomContext(schema);
-            foreach (var channel in workspaceConfiguration.Channels)
-            {
-                var channelName = channel.Key;
-                var channelMembers = channel.Value;
-                var channelHistory = workspaceConfiguration.ChatHistory.TryGetValue(channelName, out var history) ? history : null;
-                await room.CreateChannel(channelName, channelMembers, channelHistory);
-                _logger.LogInformation("Restored channel {ChannelName} with {MemberCount} members and {HistoryCount} history items", channelName, channelMembers.Count(), channelHistory?.Count() ?? 0);
-            }
-
-            _clientContext.CurrentChannel = workspaceConfiguration.CurrentChannel;
-        }
-
-        await JoinChannel(_clientContext.CurrentChannel!);
         await ProcessLoopAsync(_clientContext, cancellationToken);
     }
 
@@ -140,6 +120,7 @@ public class ConsoleChatRoomService
                 "/h" => ShowCurrentChannelHistory(context),
                 "/m" => ShowChannelMembers(),
                 "/s" => SaveContextToWorkspace(context),
+                "/l" => LoadCheckpoint(),
                 _ => null
             } is Task task)
             {
@@ -154,6 +135,29 @@ public class ConsoleChatRoomService
                 await SendMessage(context, input);
             }
         } while (input is not "/exit" && !ct.IsCancellationRequested);
+    }
+
+    private async Task LoadCheckpoint()
+    {
+        // list all checkpoints
+        var checkpointResponses = await _controller.GetRoomCheckpoints();
+        var checkpoints = (checkpointResponses.Result as OkObjectResult)?.Value as IEnumerable<string>;
+
+        if (checkpoints is not null && checkpoints.Any())
+        {
+            AnsiConsole.MarkupLine($"[bold red]Found {checkpoints.Count()} checkpoints[/]");
+            foreach (var checkpoint in checkpoints)
+            {
+                // encode the checkpoint
+                Console.WriteLine(checkpoint);
+            }
+
+            // load the latest checkpoint
+            var latestCheckpoint = checkpoints.First();
+            await _controller.LoadCheckpoint(latestCheckpoint);
+
+            Console.WriteLine("Checkpoint loaded.");
+        }
     }
 
     private void PrintUsage()
@@ -207,32 +211,7 @@ public class ConsoleChatRoomService
 
     public async Task SaveContextToWorkspace(ClientContext context)
     {
-        var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
-        var channels = await room.GetChannels();
-        Dictionary<string, ChatMsg[]> chatHistory = new();
-        Dictionary<string, string[]> channelMembers = new();
-        foreach (var channel in channels)
-        {
-            var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channel.Name);
-            var history = await channelGrain.ReadHistory(100);
-            chatHistory[channel.Name] = history.ToArray();
-            var members = await channelGrain.GetMembers();
-            channelMembers[channel.Name] = members.Select(m => m.Name).ToArray();
-        }
-
-        var workspaceConfiguration = new ChatRoomContext
-        {
-            Channels = channelMembers,
-            ChatHistory = chatHistory,
-            CurrentChannel = context.CurrentChannel!,
-        };
-
-        var schema = workspaceConfiguration.ToSchema();
-        var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
-
-        _logger.LogInformation("Saving workspace to {WorkspacePath}", _workspacePath);
-        AnsiConsole.MarkupLine("[bold red]Saving workspace to {0}[/]", _workspacePath);
-        await File.WriteAllTextAsync(_chatRoomContextSchemaPath, json);
+        await this._controller.SaveCheckpoint();
     }
 
     private async Task ShowChannelMembers()

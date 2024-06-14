@@ -24,7 +24,7 @@ public class ChatRoomClientCommandSettings : CommandSettings
     [CommandOption("-c|--config <CONFIG>")]
     public string? ConfigFile { get; init; } = null;
 
-    [Description("The workspace to store logs and other files. The default value is the current directory.")]
+    [Description("The workspace to store logs, checkpoints and other files. The default value is the current directory.")]
     [CommandOption("-w|--workspace <WORKSPACE>")]
     public string Workspace { get; init; } = Environment.CurrentDirectory;
 }
@@ -54,7 +54,6 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
         var clientContext = new ClientContext()
         {
-            CurrentChannel = "General",
             UserName = config.YourName,
             CurrentRoom = config.RoomConfig.Room,
         };
