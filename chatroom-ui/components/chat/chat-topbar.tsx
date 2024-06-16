@@ -145,7 +145,6 @@ export default function ChatTopbar({
 
         <Link
           href="#"
-          onClick={onContinue}
           className={
             cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
           }>

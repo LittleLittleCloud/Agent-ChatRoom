@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { PostApiChatRoomClientSendTextMessageToChannelData, PostApiChatRoomClientSendTextMessageToChannelResponse, GetApiChatRoomClientGetRoomCheckpointsResponse, GetApiChatRoomClientLoadCheckpointData, GetApiChatRoomClientLoadCheckpointResponse, GetApiChatRoomClientSaveCheckpointResponse, GetApiChatRoomClientDeleteCheckpointByCheckpointPathData, GetApiChatRoomClientDeleteCheckpointByCheckpointPathResponse, GetApiChatRoomClientGetChannelsResponse, GetApiChatRoomClientGetUserInfoResponse, GetApiChatRoomClientClearHistoryByChannelNameData, GetApiChatRoomClientClearHistoryByChannelNameResponse, GetApiChatRoomClientNewMessageSseByChannelNameData, GetApiChatRoomClientNewMessageSseByChannelNameResponse, PostApiChatRoomClientGenerateNextReplyData, PostApiChatRoomClientGenerateNextReplyResponse, GetApiChatRoomClientGetRoomMembersResponse, GetApiChatRoomClientGetChannelInfoByChannelNameData, GetApiChatRoomClientGetChannelInfoByChannelNameResponse, PostApiChatRoomClientEditTextMessageData, PostApiChatRoomClientEditTextMessageResponse, GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdData, GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdResponse, PostApiChatRoomClientGetChannelMembersData, PostApiChatRoomClientGetChannelMembersResponse, PostApiChatRoomClientGetChannelChatHistoryData, PostApiChatRoomClientGetChannelChatHistoryResponse, PostApiChatRoomClientCreateChannelData, PostApiChatRoomClientCreateChannelResponse, PostApiChatRoomClientJoinChannelData, PostApiChatRoomClientJoinChannelResponse, PostApiChatRoomClientLeaveChannelData, PostApiChatRoomClientLeaveChannelResponse, PostApiChatRoomClientDeleteChannelData, PostApiChatRoomClientDeleteChannelResponse, PostApiChatRoomClientAddAgentToChannelData, PostApiChatRoomClientAddAgentToChannelResponse, PostApiChatRoomClientRemoveAgentFromChannelData, PostApiChatRoomClientRemoveAgentFromChannelResponse } from './types.gen';
+import type { PostApiChatRoomClientSendTextMessageToChannelData, PostApiChatRoomClientSendTextMessageToChannelResponse, GetApiChatRoomClientGetRoomCheckpointsResponse, GetApiChatRoomClientUnloadCheckpointResponse, GetApiChatRoomClientLoadCheckpointData, GetApiChatRoomClientLoadCheckpointResponse, GetApiChatRoomClientSaveCheckpointResponse, GetApiChatRoomClientDeleteCheckpointByCheckpointPathData, GetApiChatRoomClientDeleteCheckpointByCheckpointPathResponse, GetApiChatRoomClientGetChannelsResponse, GetApiChatRoomClientGetUserInfoResponse, GetApiChatRoomClientClearHistoryByChannelNameData, GetApiChatRoomClientClearHistoryByChannelNameResponse, GetApiChatRoomClientNewMessageSseByChannelNameData, GetApiChatRoomClientNewMessageSseByChannelNameResponse, PostApiChatRoomClientGenerateNextReplyData, PostApiChatRoomClientGenerateNextReplyResponse, GetApiChatRoomClientGetRoomMembersResponse, GetApiChatRoomClientGetChannelInfoByChannelNameData, GetApiChatRoomClientGetChannelInfoByChannelNameResponse, PostApiChatRoomClientEditTextMessageData, PostApiChatRoomClientEditTextMessageResponse, GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdData, GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdResponse, PostApiChatRoomClientGetChannelMembersData, PostApiChatRoomClientGetChannelMembersResponse, PostApiChatRoomClientGetChannelChatHistoryData, PostApiChatRoomClientGetChannelChatHistoryResponse, PostApiChatRoomClientCreateChannelData, PostApiChatRoomClientCreateChannelResponse, PostApiChatRoomClientJoinChannelData, PostApiChatRoomClientJoinChannelResponse, PostApiChatRoomClientLeaveChannelData, PostApiChatRoomClientLeaveChannelResponse, PostApiChatRoomClientDeleteChannelData, PostApiChatRoomClientDeleteChannelResponse, PostApiChatRoomClientAddAgentToChannelData, PostApiChatRoomClientAddAgentToChannelResponse, PostApiChatRoomClientRemoveAgentFromChannelData, PostApiChatRoomClientRemoveAgentFromChannelResponse } from './types.gen';
 
 /**
  * @param data The data for the request.
@@ -28,8 +28,17 @@ export const getApiChatRoomClientGetRoomCheckpoints = (): CancelablePromise<GetA
 }); };
 
 /**
+ * @returns unknown OK
+ * @throws ApiError
+ */
+export const getApiChatRoomClientUnloadCheckpoint = (): CancelablePromise<GetApiChatRoomClientUnloadCheckpointResponse> => { return __request(OpenAPI, {
+    method: 'GET',
+    url: '/api/ChatRoomClient/UnloadCheckpoint'
+}); };
+
+/**
  * @param data The data for the request.
- * @param data.checkpointPath
+ * @param data.checkpointName
  * @returns unknown OK
  * @throws ApiError
  */
@@ -37,7 +46,7 @@ export const getApiChatRoomClientLoadCheckpoint = (data: GetApiChatRoomClientLoa
     method: 'GET',
     url: '/api/ChatRoomClient/LoadCheckpoint',
     query: {
-        checkpointPath: data.checkpointPath
+        checkpointName: data.checkpointName
     }
 }); };
 

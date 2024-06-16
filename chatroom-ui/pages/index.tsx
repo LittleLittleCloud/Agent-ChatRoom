@@ -9,7 +9,7 @@ import { Label } from "@radix-ui/react-label";
 const inter = Inter({ subsets: ["latin"] });
 
 interface HomeProps {
-  checkpoint?: string;
+  checkpoint: string | "None";
 }
 export default function Home(
   {

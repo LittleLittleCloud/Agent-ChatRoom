@@ -1,9 +1,11 @@
-import { getApiChatRoomClientGetRoomCheckpoints, getApiChatRoomClientLoadCheckpoint, getApiChatRoomClientSaveCheckpoint } from "@/chatroom-client";
+import { getApiChatRoomClientDeleteCheckpointByCheckpointPath, getApiChatRoomClientGetRoomCheckpoints, getApiChatRoomClientLoadCheckpoint, getApiChatRoomClientSaveCheckpoint, getApiChatRoomClientUnloadCheckpoint } from "@/chatroom-client";
 import { useEffect, useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "./ui/select";
 import { Button } from "./ui/button";
 import { toast } from "sonner"
 import { on } from "events";
+import { Trash } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface CheckpointSelectorProps {
     onSelectedCheckpoint?: (checkpoint: string | undefined) => void;
@@ -15,7 +17,7 @@ export function CheckpointSelector({
     onSaveCheckpoint,
 }: CheckpointSelectorProps) {
     const [checkpoints, setCheckpoints] = useState<string[]>([]);
-    const [selectedCheckpointPath, setSelectedCheckpoint] = useState<string | undefined>(undefined);
+    const [selectedCheckpointPath, setSelectedCheckpoint] = useState<string | "None">("None");
 
     useEffect(() => {
         getApiChatRoomClientGetRoomCheckpoints()
@@ -27,15 +29,20 @@ export function CheckpointSelector({
             });
     }, []);
 
-    const selectCheckpointHandler = async (checkpoint: string) => {
-        if (checkpoint !== undefined) {
+    const selectCheckpointHandler = async (checkpoint: string | "None") => {
+        if (checkpoint !== "None") {
             console.log("Loading checkpoint", checkpoint);
             await getApiChatRoomClientLoadCheckpoint({
-                checkpointPath: checkpoint,
+                checkpointName: checkpoint,
             });
 
             setSelectedCheckpoint(checkpoint);
             onSelectedCheckpoint?.(checkpoint);
+        }
+        else {
+            await getApiChatRoomClientUnloadCheckpoint();
+            setSelectedCheckpoint("None");
+            onSelectedCheckpoint?.("None");
         }
     }
 
@@ -49,24 +56,64 @@ export function CheckpointSelector({
         onSaveCheckpoint?.();
     }
 
+    const handleDelete = async (checkpoint: string) => {
+        if (confirm("Are you sure you want to delete this checkpoint?") === false) {
+            return;
+        }
+        await getApiChatRoomClientDeleteCheckpointByCheckpointPath({
+            checkpointPath: checkpoint,
+        });
+
+        var checkpoints = await getApiChatRoomClientGetRoomCheckpoints();
+        setCheckpoints(checkpoints);
+    }
+
     return (
         <div className="flex items-center">
             <Select
+                value={selectedCheckpointPath}
                 onValueChange={(value) => selectCheckpointHandler(value)}
             >
                 <SelectTrigger>
-                    <SelectValue placeholder={selectedCheckpointPath || "Select Checkpoint"} />
-                </SelectTrigger>
-                <SelectContent>
-                    {checkpoints.map((checkpoint) => (
-                        <SelectItem
-                            key={checkpoint}
-                            value={checkpoint}
+                    <SelectValue placeholder={selectedCheckpointPath === "None" ? "Select Checkpoint" : selectedCheckpointPath}>
+                        <span
+                            className="overflow-visible whitespace-nowrap"
                         >
-                            {checkpoint}
-                        </SelectItem>
+                            {selectedCheckpointPath === "None" ? "Select Checkpoint" : selectedCheckpointPath}
+                        </span>
+                    </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="overflow-y-auto">
+                    <SelectItem
+                        value="None"
+                    >
+                        None
+                    </SelectItem>
+                    <SelectSeparator />
+                    {checkpoints.map((checkpoint) => (
+
+                        <div
+                            className="pr-2 flex gap-2 overflow-visible whitespace-nowrap group/settings hover:bg-accent">
+                            <SelectItem
+                                key={checkpoint}
+                                value={checkpoint}
+                            >
+                                {checkpoint}
+                            </SelectItem>
+                            <Button
+                                variant={"ghost"}
+                                size={"tiny"}
+                                onClick={() => handleDelete(checkpoint)}
+                                className={cn("invisible",
+                                    selectedCheckpointPath != checkpoint && "group-hover/settings:visible"
+                                )}
+                            >
+                                <Trash size={14} />
+                            </Button>
+                        </div>
                     ))}
                 </SelectContent>
+
             </Select>
             <Button
                 onClick={saveCheckpointHandler}

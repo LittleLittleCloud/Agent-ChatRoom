@@ -17,7 +17,7 @@ interface ChatLayoutProps {
   defaultCollapsed?: boolean;
   navCollapsedSize: number;
   selectedUser: AgentInfo;
-  checkPoint: string | undefined;
+  checkPoint: string | "None";
 }
 
 export function ChatLayout({

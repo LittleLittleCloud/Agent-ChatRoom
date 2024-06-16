@@ -90,8 +90,10 @@ export type PostApiChatRoomClientSendTextMessageToChannelResponse = unknown;
 
 export type GetApiChatRoomClientGetRoomCheckpointsResponse = Array<(string)>;
 
+export type GetApiChatRoomClientUnloadCheckpointResponse = unknown;
+
 export type GetApiChatRoomClientLoadCheckpointData = {
-    checkpointPath?: string;
+    checkpointName?: string;
 };
 
 export type GetApiChatRoomClientLoadCheckpointResponse = unknown;
@@ -214,6 +216,16 @@ export type $OpenApiTs = {
                  * OK
                  */
                 200: Array<(string)>;
+            };
+        };
+    };
+    '/api/ChatRoomClient/UnloadCheckpoint': {
+        get: {
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
             };
         };
     };

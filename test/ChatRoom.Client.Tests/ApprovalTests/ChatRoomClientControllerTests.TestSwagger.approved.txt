@@ -74,6 +74,18 @@
         }
       }
     },
+    "/api/ChatRoomClient/UnloadCheckpoint": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/ChatRoomClient/LoadCheckpoint": {
       "get": {
         "tags": [
@@ -81,7 +93,7 @@
         ],
         "parameters": [
           {
-            "name": "checkpointPath",
+            "name": "checkpointName",
             "in": "query",
             "schema": {
               "type": "string"
