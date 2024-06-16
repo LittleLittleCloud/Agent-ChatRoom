@@ -126,3 +126,29 @@ public record class EditTextMessageRequest
 
     public string NewText { get; init; }
 }
+
+public record class GenerateNextReplyRequest
+{
+    public GenerateNextReplyRequest(string channelName, ChatMsg[] chatMsgs,  string[] candidates)
+    {
+        ChannelName = channelName;
+        ChatMsgs = chatMsgs;
+        Candidates = candidates;
+    }
+
+    public string ChannelName { get; init; }
+
+    public ChatMsg[] ChatMsgs { get; init; }
+
+    public string[] Candidates { get; init; }
+}
+
+public record class GenerateNextReplyResponse
+{
+    public GenerateNextReplyResponse(ChatMsg? message)
+    {
+        Message = message;
+    }
+
+    public ChatMsg? Message { get; init; }
+}

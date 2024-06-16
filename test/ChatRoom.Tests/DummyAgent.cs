@@ -13,6 +13,8 @@ internal class DummyAgent : IAgent
 
     public string Name => _agentInfo.Name;
 
+    public AgentInfo AgentInfo => _agentInfo;
+
     public async Task<IMessage> GenerateReplyAsync(IEnumerable<IMessage> messages, GenerateReplyOptions? options = null, CancellationToken cancellationToken = default)
     {
         return new ChatMsg(

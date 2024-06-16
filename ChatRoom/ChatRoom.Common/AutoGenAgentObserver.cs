@@ -41,14 +41,10 @@ internal class AutoGenAgentObserver : IRoomObserver
     }
 
     public async Task<ChatMsg?> GenerateReplyAsync(
-        AgentInfo agent,
+        AgentInfo _,
         ChatMsg[] messages,
         ChannelInfo channelInfo)
     { 
-        if (agent.Name != _agent.Name)
-        {
-            return null;
-        }
         // convert ChatMsg to TextMessage
         var autogenMessages = messages.Select(msg => msg.ToAutoGenMessage()).ToArray();
         var channel = _client.GetGrain<IChannelGrain>(channelInfo.Name);

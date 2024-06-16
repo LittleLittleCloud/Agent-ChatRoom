@@ -12,6 +12,7 @@ import { CopyToClipboardIcon } from "../copy-to-clipboard-icon";
 import { channel } from "diagnostics_channel";
 import { on } from "events";
 import EmojiPicker from "@emoji-mart/react";
+import { GetTextContent } from "@/chatroom-client/types.extension";
 
 export interface ChatMessageProps {
   message: ChatMsg;
@@ -29,11 +30,14 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
   const [editingText, setEditingText] = React.useState<string>('');
   React.useEffect(() => {
-    if (message.text === undefined || message.text === null) {
+    var textContent = GetTextContent(message);
+
+    if (textContent === undefined) {
       return;
     }
-
-    setMarkdown(message.text);
+    else{
+      setMarkdown(textContent);
+    }
   }, [message]);
 
   const handleDelete = async (msg: ChatMsg) => {
@@ -89,7 +93,7 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
             {
               isFromSelectedUser &&
               <Button variant={"ghost"} size={"tiny"} onClick={() => {
-                setEditingText(message.text || '');
+                setEditingText(GetTextContent(message) ?? '');
                 setIsEditing(true);
               }}>
                 <Edit size={14} />
@@ -102,9 +106,9 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
               </Button>
             }
             {
-              message.text !== undefined && message.text !== null &&
+              GetTextContent(message) != undefined &&
               <Button variant={"ghost"} size={"tiny"}>
-                <CopyToClipboardIcon size={14} textValue={message.text} />
+                <CopyToClipboardIcon size={14} textValue={GetTextContent(message)!} />
               </Button>
             }
             <Button variant={"ghost"} size={"tiny"} onClick={() => handleDelete(message)}>
@@ -124,7 +128,7 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
               <Button
                 variant={"ghost"}
                 size={"tiny"}
-                onClick={() => handleEditing({ ...message, text: editingText })}
+                onClick={() => handleEditing({ ...message, parts: [{ textPart: editingText }]})}
                 >
                 Save
               </Button>

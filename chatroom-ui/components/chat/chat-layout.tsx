@@ -17,6 +17,7 @@ interface ChatLayoutProps {
   defaultCollapsed?: boolean;
   navCollapsedSize: number;
   selectedUser: AgentInfo;
+  checkPoint: string | undefined;
 }
 
 export function ChatLayout({
@@ -24,6 +25,7 @@ export function ChatLayout({
   defaultCollapsed = false,
   navCollapsedSize,
   selectedUser,
+  checkPoint,
 }: ChatLayoutProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
   const [isMobile, setIsMobile] = useState(false);
@@ -55,6 +57,10 @@ export function ChatLayout({
       window.removeEventListener("resize", checkScreenWidth);
     };
   }, []);
+
+  useEffect(() => {
+    reloadChannels();
+  }, [checkPoint]);
 
   const reloadChannels = async () => {
     var _channels = await getApiChatRoomClientGetChannels();

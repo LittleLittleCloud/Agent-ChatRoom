@@ -31,6 +31,13 @@ public record class ChatMsg : IMessage, ICanGetTextContent
         this.Parts = [new() { TextPart = Text }];
     }
 
+    /// <summary>
+    /// For Json deserialization.
+    /// </summary>
+    public ChatMsg()
+    {
+    }
+
     [Id(0)]
     public string? From { get; set; } = "Alexey";
 

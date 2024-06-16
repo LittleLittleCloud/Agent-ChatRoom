@@ -4,10 +4,11 @@ import React, { useEffect, useRef } from "react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ChatBottombar from "./chat-bottombar";
 import { AnimatePresence, motion } from "framer-motion";
-import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, getApiChatRoomClientDeleteMessageByChannelNameByMessageId, postApiChatRoomClientEditTextMessage, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
-import ChatTopbar from "./chat-topbar";
+import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, getApiChatRoomClientDeleteMessageByChannelNameByMessageId, postApiChatRoomClientEditTextMessage, postApiChatRoomClientGenerateNextReply, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
+import ChatTopbar, { OrchestrationSettings } from "./chat-topbar";
 import { ChatMessage } from "./chat-message";
 import { on } from "events";
+import { GetTextContent } from "@/chatroom-client/types.extension";
 
 interface ChatListProps {
   selectedUser: AgentInfo;
@@ -24,6 +25,8 @@ export function ChatList({
   const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [eventSource, setEventSource] = React.useState<EventSource | null>(null);
+  const [orchstratorSettings, setOrchstratorSettings] = React.useState<OrchestrationSettings>({ orchestrator: "llm", maxReply: 10 });
+  const [remainingTurns, setRemainingTurns] = React.useState<number>(0);
   const onReloadMessages = async () => {
     console.log("Reloading messages");
     var data = await postApiChatRoomClientGetChannelChatHistory({
@@ -78,14 +81,21 @@ export function ChatList({
         requestBody: {
           channelName: channel.name,
           messageId: message.id,
-          newText: message.text,
+          newText: GetTextContent(message),
       }
     });
 
     await onReloadMessages();
   };
 
-  useEffect(() => {
+  const onOrchestrationClickNext = async (remainingTurn: number) => {
+    if (remainingTurn <= 0) {
+      return;
+    }
+    console.log("Orchestration next");
+    if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
+      return
+    }
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
     es.addEventListener("message", async (event) => {
       const newMessage: ChatMsg = JSON.parse(event.data);
@@ -101,18 +111,40 @@ export function ChatList({
       console.log("Error", event);
     }
     setEventSource(es);
-    onReloadMessages();
 
-    return () => {
-      console.log("Closing event source");
-      es.close();
+    var response = await postApiChatRoomClientGenerateNextReply({
+      requestBody: {
+        channelName: channel.name,
+        chatMsgs: messages,
+        candidates: channel.members.map((member) => member.name!),
+      },
+    });
+
+    console.log(response);
+    if (response.message === undefined || response.message === null) {
+      console.log("response is null");
+      setRemainingTurns(0);
     }
+    else {
+      console.log("remaining turn", remainingTurn - 1);
+      setRemainingTurns(remainingTurn - 1);
+    }
+
+    eventSource?.close();
+  }
+
+  useEffect(() => {
+    onReloadMessages();
   }, [channel]);
 
   React.useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop =
         messagesContainerRef.current.scrollHeight;
+    }
+
+    if (remainingTurns > 0) {
+      onOrchestrationClickNext(remainingTurns);
     }
   }, [messages]);
 
@@ -124,19 +156,26 @@ export function ChatList({
           message: newMessage,
         },
       }
-    )
-      .then((data) => {
-        setMessages([...messages, newMessage]);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    );
+
+    await onReloadMessages();
+
+    // if  orchestrator is llm, then generate next reply
+    if (orchstratorSettings.orchestrator === "llm") {
+      setRemainingTurns(orchstratorSettings.maxReply);
+    };
   };
 
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto h-full flex flex-col justify-end">
       <div className="static">
-        <ChatTopbar channel={channel} onRefresh={onReloadMessages} onDeleteChatHistory={onDeleteMessages} />
+        <ChatTopbar
+          channel={channel}
+          orchestrationSettings={orchstratorSettings}
+          onContinue={async () => await onOrchestrationClickNext(orchstratorSettings.orchestrator === "llm" ? orchstratorSettings.maxReply : 1)}
+          onOrchestrationChange={setOrchstratorSettings}
+          onRefresh={onReloadMessages}
+          onDeleteChatHistory={onDeleteMessages} />
       </div>
       <div
         ref={messagesContainerRef}

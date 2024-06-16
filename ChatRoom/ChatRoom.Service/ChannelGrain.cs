@@ -1,4 +1,5 @@
-﻿using AutoGen.Core;
+﻿using System;
+using AutoGen.Core;
 using Azure.AI.OpenAI;
 using ChatRoom.Common;
 using ChatRoom.OpenAI;
@@ -29,6 +30,7 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         _channelInfo = new ChannelInfo(this.GetPrimaryKeyString());
         _logger.LogInformation("Channel {ChannelId} activated", _channelInfo.Name);
+        
         await base.OnActivateAsync(cancellationToken);
     }
 
@@ -70,37 +72,26 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
     }
 
-    public async Task<bool> SendMessage(ChatMsg msg)
+    public async Task SendMessage(ChatMsg msg)
     {
         _logger.LogInformation("Received message from {From} in channel {ChannelId}", msg.From, _channelInfo.Name);
+        
+        if (msg.From == "System")
+        {
+            _logger.LogInformation("System message received. Ignoring.");
+            return;
+        }
+
+        lock (_lock)
+        {
+            _messages.Add(msg);
+        }
+        
         foreach (var cb in _agents.Values)
         {
             _logger.LogInformation("Notifying {AgentName} about new message", cb);
             await cb.NewMessage(msg);
         }
-
-        if (msg.From != "System")
-        {
-            _logger.LogInformation("Adding message to history");
-
-            lock (_lock)
-            {
-                _messages.Add(msg);
-            }
-
-            _logger.LogInformation("Getting next agent speaker");
-            var nextSpeaker = await GetNextAgentSpeaker();
-            if (nextSpeaker is not null)
-            {
-                _logger.LogInformation("Next Speaker: {NextSpeaker}", nextSpeaker.Name);
-            }
-            else
-            {
-                _logger.LogInformation("No next speaker found");
-            }
-        }
-
-        return true;
     }
 
     public Task<AgentInfo[]> GetMembers() => Task.FromResult(_agents.Keys.ToArray());
@@ -118,11 +109,10 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
     }
 
-    public async Task<AgentInfo?> GetNextAgentSpeaker()
+    private async Task<AgentInfo?> GetNextAgentSpeaker(AgentInfo[] members, ChatMsg[] messages)
     {
-        var onlineMembers = await GetMembers();
-        var humanMembers = onlineMembers.Where(x => x.IsHuman).ToArray();
-        var notHumanMembers = onlineMembers.Where(x => !x.IsHuman).ToArray();
+        var humanMembers = members.Where(x => x.IsHuman).ToArray();
+        var notHumanMembers = members.Where(x => !x.IsHuman).ToArray();
         var humanAgents = humanMembers.Select(x => new DummyAgent(x)).ToArray();
         var notHumanAgents = notHumanMembers.Select(x => new DummyAgent(x)).ToArray();
         var agents = humanAgents.Concat(notHumanAgents).ToArray();
@@ -149,14 +139,12 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
 
         var graph = new Graph(transitions);
-        var chatHistory = _messages.Select(x => x.ToAutoGenMessage()).ToArray();
-        var lastSpeaker = agents.First(x => x.Name == _messages.Last().From);
+        var chatHistory = messages.Select(x => x.ToAutoGenMessage()).ToArray();
+        var lastSpeaker = agents.First(x => x.Name == messages.Last().From);
         var nextAvailableAgents = await graph.TransitToNextAvailableAgentsAsync(lastSpeaker, _messages);
-        if (nextAvailableAgents.Count() == 1 && onlineMembers.Any(x => x.Name == nextAvailableAgents.First().Name))
+        if (nextAvailableAgents.Count() == 1 && members.Any(x => x.Name == nextAvailableAgents.First().Name))
         {
-            var nextSpeaker = onlineMembers.First(x => x.Name == nextAvailableAgents.First().Name);
-            var cb = _agents[nextSpeaker];
-            var _ = GenerateNextReply(cb, nextSpeaker, _messages.ToArray());
+            var nextSpeaker = members.First(x => x.Name == nextAvailableAgents.First().Name);
             return nextSpeaker;
         }
         else if (nextAvailableAgents.Count() > 1)
@@ -175,11 +163,9 @@ internal class ChannelGrain : Grain, IChannelGrain
 
             var nextMessage = await groupChat.CallAsync(chatHistory, maxRound: 1);
             var lastMessage = nextMessage.Last();
-            var nextSpeaker = onlineMembers.First(x => x.Name == lastMessage.From);
+            var nextSpeaker = members.First(x => x.Name == lastMessage.From);
             if (nextAvailableAgents.Any(x => x.Name == nextSpeaker.Name))
             {
-                var cb = _agents[nextSpeaker];
-                var _ = GenerateNextReply(cb, nextSpeaker, _messages.ToArray());
                 return nextSpeaker;
             }
 
@@ -191,19 +177,9 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
     }
 
-    [OneWay]
-    private async Task GenerateNextReply(IChannelObserver observer, AgentInfo agent, ChatMsg[] msg)
-    {
-        var reply = await observer.GenerateReplyAsync(agent, msg, _channelInfo);
-
-        if (reply is not null)
-        {
-            await this.SendMessage(reply);
-        }
-    }
-
     public Task InitializeChatHistory(ChatMsg[] history)
     {
+        this._messages.Clear();
         this._messages.AddRange(history);
 
         return Task.CompletedTask;
@@ -273,5 +249,34 @@ internal class ChannelGrain : Grain, IChannelGrain
             Members = _agents.Keys.ToList()
         };
         return Task.FromResult(channelInfo);
+    }
+
+    public async Task<ChatMsg?> GenerateNextReply(string[]? candidates = null, ChatMsg[]? msgs = null)
+    {
+        candidates = candidates ??= _agents.Keys.Select(x => x.Name).ToArray();
+        var agents = _agents.Where(x => candidates.Contains(x.Key.Name)).Select(x => x.Key).ToArray();
+        msgs ??= _messages.ToArray();
+
+        _logger.LogInformation("Getting next agent speaker");
+        var nextSpeaker = agents.Length == 1 ? agents[0] : await GetNextAgentSpeaker(agents, msgs);
+        if (nextSpeaker is null)
+        {
+            _logger.LogInformation("No next speaker found");
+            return null;
+        }
+
+        _logger.LogInformation("Next Speaker: {NextSpeaker}", nextSpeaker.Name);
+    
+        var nextSpeakerObserver = _agents[nextSpeaker];
+
+        var reply = await nextSpeakerObserver.GenerateReplyAsync(nextSpeaker, msgs, _channelInfo);
+
+        if (reply is not null)
+        {
+            _logger.LogInformation("Generated reply: {Reply}", reply.GetContent());
+
+            await this.SendMessage(reply);
+        }
+        return reply;
     }
 }

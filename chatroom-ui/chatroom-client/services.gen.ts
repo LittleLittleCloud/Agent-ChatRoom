@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { PostApiChatRoomClientSendTextMessageToChannelData, PostApiChatRoomClientSendTextMessageToChannelResponse, GetApiChatRoomClientGetChannelsResponse, GetApiChatRoomClientGetUserInfoResponse, GetApiChatRoomClientClearHistoryByChannelNameData, GetApiChatRoomClientClearHistoryByChannelNameResponse, GetApiChatRoomClientNewMessageSseByChannelNameData, GetApiChatRoomClientNewMessageSseByChannelNameResponse, GetApiChatRoomClientGetRoomMembersResponse, GetApiChatRoomClientGetChannelInfoByChannelNameData, GetApiChatRoomClientGetChannelInfoByChannelNameResponse, PostApiChatRoomClientEditTextMessageData, PostApiChatRoomClientEditTextMessageResponse, GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdData, GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdResponse, PostApiChatRoomClientGetChannelMembersData, PostApiChatRoomClientGetChannelMembersResponse, PostApiChatRoomClientGetChannelChatHistoryData, PostApiChatRoomClientGetChannelChatHistoryResponse, PostApiChatRoomClientCreateChannelData, PostApiChatRoomClientCreateChannelResponse, PostApiChatRoomClientJoinChannelData, PostApiChatRoomClientJoinChannelResponse, PostApiChatRoomClientLeaveChannelData, PostApiChatRoomClientLeaveChannelResponse, PostApiChatRoomClientDeleteChannelData, PostApiChatRoomClientDeleteChannelResponse, PostApiChatRoomClientAddAgentToChannelData, PostApiChatRoomClientAddAgentToChannelResponse, PostApiChatRoomClientRemoveAgentFromChannelData, PostApiChatRoomClientRemoveAgentFromChannelResponse } from './types.gen';
+import type { PostApiChatRoomClientSendTextMessageToChannelData, PostApiChatRoomClientSendTextMessageToChannelResponse, GetApiChatRoomClientGetRoomCheckpointsResponse, GetApiChatRoomClientLoadCheckpointData, GetApiChatRoomClientLoadCheckpointResponse, GetApiChatRoomClientSaveCheckpointResponse, GetApiChatRoomClientDeleteCheckpointByCheckpointPathData, GetApiChatRoomClientDeleteCheckpointByCheckpointPathResponse, GetApiChatRoomClientGetChannelsResponse, GetApiChatRoomClientGetUserInfoResponse, GetApiChatRoomClientClearHistoryByChannelNameData, GetApiChatRoomClientClearHistoryByChannelNameResponse, GetApiChatRoomClientNewMessageSseByChannelNameData, GetApiChatRoomClientNewMessageSseByChannelNameResponse, PostApiChatRoomClientGenerateNextReplyData, PostApiChatRoomClientGenerateNextReplyResponse, GetApiChatRoomClientGetRoomMembersResponse, GetApiChatRoomClientGetChannelInfoByChannelNameData, GetApiChatRoomClientGetChannelInfoByChannelNameResponse, PostApiChatRoomClientEditTextMessageData, PostApiChatRoomClientEditTextMessageResponse, GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdData, GetApiChatRoomClientDeleteMessageByChannelNameByMessageIdResponse, PostApiChatRoomClientGetChannelMembersData, PostApiChatRoomClientGetChannelMembersResponse, PostApiChatRoomClientGetChannelChatHistoryData, PostApiChatRoomClientGetChannelChatHistoryResponse, PostApiChatRoomClientCreateChannelData, PostApiChatRoomClientCreateChannelResponse, PostApiChatRoomClientJoinChannelData, PostApiChatRoomClientJoinChannelResponse, PostApiChatRoomClientLeaveChannelData, PostApiChatRoomClientLeaveChannelResponse, PostApiChatRoomClientDeleteChannelData, PostApiChatRoomClientDeleteChannelResponse, PostApiChatRoomClientAddAgentToChannelData, PostApiChatRoomClientAddAgentToChannelResponse, PostApiChatRoomClientRemoveAgentFromChannelData, PostApiChatRoomClientRemoveAgentFromChannelResponse } from './types.gen';
 
 /**
  * @param data The data for the request.
@@ -16,6 +16,52 @@ export const postApiChatRoomClientSendTextMessageToChannel = (data: PostApiChatR
     url: '/api/ChatRoomClient/SendTextMessageToChannel',
     body: data.requestBody,
     mediaType: 'application/json'
+}); };
+
+/**
+ * @returns string OK
+ * @throws ApiError
+ */
+export const getApiChatRoomClientGetRoomCheckpoints = (): CancelablePromise<GetApiChatRoomClientGetRoomCheckpointsResponse> => { return __request(OpenAPI, {
+    method: 'GET',
+    url: '/api/ChatRoomClient/GetRoomCheckpoints'
+}); };
+
+/**
+ * @param data The data for the request.
+ * @param data.checkpointPath
+ * @returns unknown OK
+ * @throws ApiError
+ */
+export const getApiChatRoomClientLoadCheckpoint = (data: GetApiChatRoomClientLoadCheckpointData = {}): CancelablePromise<GetApiChatRoomClientLoadCheckpointResponse> => { return __request(OpenAPI, {
+    method: 'GET',
+    url: '/api/ChatRoomClient/LoadCheckpoint',
+    query: {
+        checkpointPath: data.checkpointPath
+    }
+}); };
+
+/**
+ * @returns unknown OK
+ * @throws ApiError
+ */
+export const getApiChatRoomClientSaveCheckpoint = (): CancelablePromise<GetApiChatRoomClientSaveCheckpointResponse> => { return __request(OpenAPI, {
+    method: 'GET',
+    url: '/api/ChatRoomClient/SaveCheckpoint'
+}); };
+
+/**
+ * @param data The data for the request.
+ * @param data.checkpointPath
+ * @returns unknown OK
+ * @throws ApiError
+ */
+export const getApiChatRoomClientDeleteCheckpointByCheckpointPath = (data: GetApiChatRoomClientDeleteCheckpointByCheckpointPathData): CancelablePromise<GetApiChatRoomClientDeleteCheckpointByCheckpointPathResponse> => { return __request(OpenAPI, {
+    method: 'GET',
+    url: '/api/ChatRoomClient/DeleteCheckpoint/{checkpointPath}',
+    path: {
+        checkpointPath: data.checkpointPath
+    }
 }); };
 
 /**
@@ -62,6 +108,19 @@ export const getApiChatRoomClientNewMessageSseByChannelName = (data: GetApiChatR
     path: {
         channelName: data.channelName
     }
+}); };
+
+/**
+ * @param data The data for the request.
+ * @param data.requestBody
+ * @returns GenerateNextReplyResponse OK
+ * @throws ApiError
+ */
+export const postApiChatRoomClientGenerateNextReply = (data: PostApiChatRoomClientGenerateNextReplyData = {}): CancelablePromise<PostApiChatRoomClientGenerateNextReplyResponse> => { return __request(OpenAPI, {
+    method: 'POST',
+    url: '/api/ChatRoomClient/GenerateNextReply',
+    body: data.requestBody,
+    mediaType: 'application/json'
 }); };
 
 /**

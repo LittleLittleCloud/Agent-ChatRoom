@@ -19,8 +19,15 @@ export type ChannelInfo = {
 export type ChatMsg = {
     from?: string | null;
     created?: string;
-    text?: string | null;
+    parts?: Array<ChatMsgPart> | null;
     id?: number;
+};
+
+export type ChatMsgPart = {
+    textPart?: string | null;
+    imageData?: string | null;
+    imageUrl?: string | null;
+    mimeType?: string | null;
 };
 
 export type CreateChannelRequest = {
@@ -35,6 +42,16 @@ export type EditTextMessageRequest = {
     channelName?: string | null;
     messageId?: number;
     newText?: string | null;
+};
+
+export type GenerateNextReplyRequest = {
+    channelName?: string | null;
+    chatMsgs?: Array<ChatMsg> | null;
+    candidates?: Array<(string)> | null;
+};
+
+export type GenerateNextReplyResponse = {
+    message?: ChatMsg;
 };
 
 export type GetChannelChatHistoryRequest = {
@@ -71,6 +88,22 @@ export type PostApiChatRoomClientSendTextMessageToChannelData = {
 
 export type PostApiChatRoomClientSendTextMessageToChannelResponse = unknown;
 
+export type GetApiChatRoomClientGetRoomCheckpointsResponse = Array<(string)>;
+
+export type GetApiChatRoomClientLoadCheckpointData = {
+    checkpointPath?: string;
+};
+
+export type GetApiChatRoomClientLoadCheckpointResponse = unknown;
+
+export type GetApiChatRoomClientSaveCheckpointResponse = unknown;
+
+export type GetApiChatRoomClientDeleteCheckpointByCheckpointPathData = {
+    checkpointPath: string;
+};
+
+export type GetApiChatRoomClientDeleteCheckpointByCheckpointPathResponse = unknown;
+
 export type GetApiChatRoomClientGetChannelsResponse = Array<ChannelInfo>;
 
 export type GetApiChatRoomClientGetUserInfoResponse = AgentInfo;
@@ -86,6 +119,12 @@ export type GetApiChatRoomClientNewMessageSseByChannelNameData = {
 };
 
 export type GetApiChatRoomClientNewMessageSseByChannelNameResponse = unknown;
+
+export type PostApiChatRoomClientGenerateNextReplyData = {
+    requestBody?: GenerateNextReplyRequest;
+};
+
+export type PostApiChatRoomClientGenerateNextReplyResponse = GenerateNextReplyResponse;
 
 export type GetApiChatRoomClientGetRoomMembersResponse = Array<AgentInfo>;
 
@@ -168,6 +207,48 @@ export type $OpenApiTs = {
             };
         };
     };
+    '/api/ChatRoomClient/GetRoomCheckpoints': {
+        get: {
+            res: {
+                /**
+                 * OK
+                 */
+                200: Array<(string)>;
+            };
+        };
+    };
+    '/api/ChatRoomClient/LoadCheckpoint': {
+        get: {
+            req: GetApiChatRoomClientLoadCheckpointData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/SaveCheckpoint': {
+        get: {
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/DeleteCheckpoint/{checkpointPath}': {
+        get: {
+            req: GetApiChatRoomClientDeleteCheckpointByCheckpointPathData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
     '/api/ChatRoomClient/GetChannels': {
         get: {
             res: {
@@ -207,6 +288,17 @@ export type $OpenApiTs = {
                  * OK
                  */
                 200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/GenerateNextReply': {
+        post: {
+            req: PostApiChatRoomClientGenerateNextReplyData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: GenerateNextReplyResponse;
             };
         };
     };

@@ -25,4 +25,19 @@ const TooltipContent = React.forwardRef<
 ))
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+interface IconTooltipProps {
+  children: React.ReactNode
+  content: string
+}
+const IconTooltip = ({ children, content }: IconTooltipProps) => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="bottom" className="flex items-center gap-4">
+        {content}
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+)
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, IconTooltip }

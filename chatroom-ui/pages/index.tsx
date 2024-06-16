@@ -8,7 +8,14 @@ import { Label } from "@radix-ui/react-label";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
+interface HomeProps {
+  checkpoint?: string;
+}
+export default function Home(
+  {
+    checkpoint,
+  }: HomeProps
+) {
   const [layout, _] = useState(undefined);
   const [user, setUser] = useState<AgentInfo | undefined>(undefined);
 
@@ -29,7 +36,7 @@ export default function Home() {
   if (user){
     return (
       <div className="z-10 border rounded-lg w-full h-full text-sm">
-      <ChatLayout selectedUser={user} defaultCollapsed={true} defaultLayout={defaultLayout} navCollapsedSize={8} />
+      <ChatLayout checkPoint={checkpoint} selectedUser={user} defaultCollapsed={true} defaultLayout={defaultLayout} navCollapsedSize={8} />
     </div>
     );
   }

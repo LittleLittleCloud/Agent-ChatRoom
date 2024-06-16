@@ -240,6 +240,54 @@
         }
       }
     },
+    "/api/ChatRoomClient/GenerateNextReply": {
+      "post": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateNextReplyRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateNextReplyRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateNextReplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateNextReplyResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateNextReplyResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateNextReplyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ChatRoomClient/GetRoomMembers": {
       "get": {
         "tags": [
@@ -741,13 +789,40 @@
             "type": "string",
             "format": "date-time"
           },
-          "text": {
-            "type": "string",
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMsgPart"
+            },
             "nullable": true
           },
           "id": {
             "type": "integer",
             "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatMsgPart": {
+        "type": "object",
+        "properties": {
+          "textPart": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageData": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "mimeType": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -786,6 +861,39 @@
           "newText": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GenerateNextReplyRequest": {
+        "type": "object",
+        "properties": {
+          "channelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "chatMsgs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMsg"
+            },
+            "nullable": true
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GenerateNextReplyResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ChatMsg"
           }
         },
         "additionalProperties": false

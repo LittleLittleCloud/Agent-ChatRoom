@@ -1,4 +1,5 @@
 ﻿using ChatRoom.Common;
+using Orleans.Concurrency;
 using Orleans.Runtime;
 
 namespace ChatRoom;
@@ -16,9 +17,11 @@ public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
 
     Task<ChannelInfo> GetChannelInfo();
 
+    internal Task<ChatMsg?> GenerateNextReply(string[]? candidates = null, ChatMsg[]? msgs = null);
+
     internal Task InitializeChatHistory(ChatMsg[] history);
 
-    internal Task<bool> SendMessage(ChatMsg msg);
+    internal Task SendMessage(ChatMsg msg);
 
     internal Task DeleteMessage(long msgId);
 

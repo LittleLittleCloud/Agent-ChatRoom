@@ -62,14 +62,14 @@ public class RoomGrainTests(ClusterFixture fixture)
         await roomGrain.JoinRoom("observe-agent", "observe-agent", false, observerRef);
         await chatPlatformClient.RegisterAgentAsync(agent);
 
-        await WaitUntilTrue(() => hasCompleted);
+        await Utils.WaitUntilTrue(() => hasCompleted);
         var members = await roomGrain.GetMembers();
         members.Should().HaveCount(2);
         agents.Should().HaveCount(2);
 
         hasCompleted = false;
         await chatPlatformClient.UnregisterAgentAsync(agent);
-        await WaitUntilTrue(() => hasCompleted);
+        await Utils.WaitUntilTrue(() => hasCompleted);
         members = await roomGrain.GetMembers();
         members.Should().HaveCount(1);
     }
@@ -177,12 +177,12 @@ public class RoomGrainTests(ClusterFixture fixture)
 
         var observerRef = _cluster.Client.CreateObjectReference<IRoomObserver>(roomObserver);
         await roomGrain.JoinRoom("observe-agent", "observe-agent", false, observerRef);
-        await WaitUntilTrue(() => hasJoinRoomCompleted);
+        await Utils.WaitUntilTrue(() => hasJoinRoomCompleted);
         hasJoinRoomCompleted = false;
         await chatPlatformClient.RegisterAgentAsync(agent, agentInfo.SelfDescription);
-        await WaitUntilTrue(() => hasJoinRoomCompleted);
+        await Utils.WaitUntilTrue(() => hasJoinRoomCompleted);
         await roomGrain.AddAgentToChannel(testChannelName, "observe-agent");
-        await WaitUntilTrue(() => hasCompleted);
+        await Utils.WaitUntilTrue(() => hasCompleted);
         hasCompleted = false;
         //agentInfoList.Clear();
 
@@ -190,7 +190,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         // join the channel
         await roomGrain.AddAgentToChannel(testChannelName, agentInfo.Name);
 
-        await WaitUntilTrue(() => hasCompleted);
+        await Utils.WaitUntilTrue(() => hasCompleted);
         agentInfoList.Should().HaveCount(2);
 
         // leave the channel
@@ -198,7 +198,7 @@ public class RoomGrainTests(ClusterFixture fixture)
 
         await roomGrain.RemoveAgentFromChannel(testChannelName, agentInfo.Name);
 
-        await WaitUntilTrue(() => hasCompleted);
+        await Utils.WaitUntilTrue(() => hasCompleted);
         agentInfoList.Should().HaveCount(1);
     }
 
@@ -233,7 +233,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         var agentObserverRef = _cluster.Client.CreateObjectReference<IRoomObserver>(agentObserver);
         await roomGrain.JoinRoom("observe-agent", "observe-agent", false, agentObserverRef);
         await roomGrain.AddAgentToChannel(testChannel, observeAgentInfo.Name);
-        await WaitUntilTrue(() => hasCompleted);
+        await Utils.WaitUntilTrue(() => hasCompleted);
 
         hasCompleted = false;
         agentInfoList.Clear();
@@ -242,7 +242,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         // join the channel
         await roomGrain.AddAgentToChannel(testChannel, agentInfo.Name);
 
-        await WaitUntilTrue(() => hasCompleted);
+        await Utils.WaitUntilTrue(() => hasCompleted);
 
         agentInfoList.Should().HaveCount(1);
         agentInfoList.First().Should().BeEquivalentTo(agentInfo);
@@ -251,7 +251,7 @@ public class RoomGrainTests(ClusterFixture fixture)
         // leave the room, in which case the agent should leave the channel as well
         await chatPlatformClient.UnregisterAgentAsync(agent);
 
-        await WaitUntilTrue(() => hasCompleted);
+        await Utils.WaitUntilTrue(() => hasCompleted);
         agentInfoList.Should().BeEmpty();
         var members = await roomGrain.GetMembers();
         members.Should().HaveCount(1);
@@ -274,24 +274,6 @@ public class RoomGrainTests(ClusterFixture fixture)
 
         var channelGrain = _cluster.GrainFactory.GetGrain<IChannelGrain>(testChannel);
         //var alivedMembers = await channelGrain.GetAli();
-    }
-
-    private Task WaitUntilTrue(Func<bool> condition, int maxSeconds = 10)
-    {
-        var timeout = TimeSpan.FromSeconds(maxSeconds);
-        return Task.Run(() =>
-        {
-            while (!condition())
-            {
-                Task.Delay(100).Wait();
-                timeout -= TimeSpan.FromMilliseconds(100);
-
-                if (timeout <= TimeSpan.Zero)
-                {
-                    throw new TimeoutException("Condition was not met within the timeout");
-                }
-            }
-        });
     }
 }
 

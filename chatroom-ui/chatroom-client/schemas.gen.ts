@@ -62,13 +62,41 @@ export const $ChatMsg = {
             type: 'string',
             format: 'date-time'
         },
-        text: {
-            type: 'string',
+        parts: {
+            type: 'array',
+            items: {
+                '$ref': '#/components/schemas/ChatMsgPart'
+            },
             nullable: true
         },
         id: {
             type: 'integer',
             format: 'int64'
+        }
+    },
+    additionalProperties: false
+} as const;
+
+export const $ChatMsgPart = {
+    type: 'object',
+    properties: {
+        textPart: {
+            type: 'string',
+            nullable: true
+        },
+        imageData: {
+            type: 'string',
+            format: 'byte',
+            nullable: true
+        },
+        imageUrl: {
+            type: 'string',
+            format: 'uri',
+            nullable: true
+        },
+        mimeType: {
+            type: 'string',
+            nullable: true
         }
     },
     additionalProperties: false
@@ -110,6 +138,41 @@ export const $EditTextMessageRequest = {
         newText: {
             type: 'string',
             nullable: true
+        }
+    },
+    additionalProperties: false
+} as const;
+
+export const $GenerateNextReplyRequest = {
+    type: 'object',
+    properties: {
+        channelName: {
+            type: 'string',
+            nullable: true
+        },
+        chatMsgs: {
+            type: 'array',
+            items: {
+                '$ref': '#/components/schemas/ChatMsg'
+            },
+            nullable: true
+        },
+        candidates: {
+            type: 'array',
+            items: {
+                type: 'string'
+            },
+            nullable: true
+        }
+    },
+    additionalProperties: false
+} as const;
+
+export const $GenerateNextReplyResponse = {
+    type: 'object',
+    properties: {
+        message: {
+            '$ref': '#/components/schemas/ChatMsg'
         }
     },
     additionalProperties: false

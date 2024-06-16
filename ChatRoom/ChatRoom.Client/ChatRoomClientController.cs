@@ -253,6 +253,22 @@ public class ChatRoomClientController : Controller
         _consoleRoomObserver.OnMessageReceived -= handler;
     }
 
+    [HttpPost]
+    public async Task<ActionResult<GenerateNextReplyResponse>> GenerateNextReply(
+        [FromBody] GenerateNextReplyRequest request)
+    {
+        _logger?.LogInformation("Generating next reply");
+
+        var channelName = request.ChannelName;
+        var chatMsgs = request.ChatMsgs;
+        var candidates = request.Candidates;
+
+        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
+        var reply = await channelGrain.GenerateNextReply(candidates, chatMsgs);
+
+        return new OkObjectResult(new GenerateNextReplyResponse(reply));
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AgentInfo>>> GetRoomMembers()
     {

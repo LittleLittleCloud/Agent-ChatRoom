@@ -18,7 +18,6 @@ public class RoomGrain : Grain, IRoomGrain
     {
         _logger = logger;
     }
-    public new virtual IGrainFactory GrainFactory => base.GrainFactory;
 
     public virtual string GrainKey => this.GetPrimaryKeyString(); 
 

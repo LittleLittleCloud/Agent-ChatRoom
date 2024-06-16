@@ -44,7 +44,9 @@ export default function ChatBottombar({
   const handleThumbsUp = () => {
     const newMessage: ChatMsg = {
       from: user.name,
-      text: "👍",
+      parts: [{
+        textPart: "👍"
+      }],
       created: new Date().toISOString(),
     };
     sendMessage(newMessage);
@@ -55,7 +57,9 @@ export default function ChatBottombar({
     if (message.trim()) {
       const newMessage: ChatMsg = {
         from: user.name,
-        text: message.trim(),
+        parts: [{
+          textPart: message.trim()
+        }],
         created: new Date().toISOString(),
       };
       sendMessage(newMessage);
