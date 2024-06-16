@@ -85,6 +85,7 @@ export function CheckpointSelector({
                 </SelectTrigger>
                 <SelectContent className="overflow-y-auto">
                     <SelectItem
+                        key = "None"
                         value="None"
                     >
                         None
@@ -93,9 +94,9 @@ export function CheckpointSelector({
                     {checkpoints.map((checkpoint) => (
 
                         <div
+                            key={checkpoint}
                             className="pr-2 flex gap-2 overflow-visible whitespace-nowrap group/settings hover:bg-accent">
                             <SelectItem
-                                key={checkpoint}
                                 value={checkpoint}
                             >
                                 {checkpoint}

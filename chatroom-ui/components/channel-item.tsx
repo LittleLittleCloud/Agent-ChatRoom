@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -63,8 +63,7 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onEditChannel, o
     );
   } else {
     return (
-      <Link
-        href="#"
+      <div
         className={cn(
           buttonVariants({ variant: channel.variant, size: "xl" }),
           isSelected &&
@@ -139,7 +138,7 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onEditChannel, o
             </TooltipProvider>
           </Link>
         </div>
-      </Link>
+      </div>
     );
   }
 }
