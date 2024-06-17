@@ -584,68 +584,6 @@
         }
       }
     },
-    "/api/ChatRoomClient/JoinChannel": {
-      "post": {
-        "tags": [
-          "ChatRoomClient"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JoinChannelRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JoinChannelRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/JoinChannelRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/ChatRoomClient/LeaveChannel": {
-      "post": {
-        "tags": [
-          "ChatRoomClient"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LeaveChannelRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LeaveChannelRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/LeaveChannelRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/ChatRoomClient/DeleteChannel": {
       "post": {
         "tags": [
@@ -1187,29 +1125,6 @@
         "additionalProperties": false
       },
       "GetChannelMembersRequest": {
-        "type": "object",
-        "properties": {
-          "channelName": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "JoinChannelRequest": {
-        "type": "object",
-        "properties": {
-          "channelName": {
-            "type": "string",
-            "nullable": true
-          },
-          "createIfNotExists": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "LeaveChannelRequest": {
         "type": "object",
         "properties": {
           "channelName": {

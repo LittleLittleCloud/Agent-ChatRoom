@@ -1,4 +1,6 @@
 ﻿using AutoGen.Core;
+using Orleans.Runtime;
+using Orleans;
 
 namespace ChatRoom.SDK;
 
@@ -88,5 +90,72 @@ public class ChatPlatformClient
         var room = _client.GetGrain<IRoomGrain>(_room);
         await room.CloneChannel(oldChannelName, newChannelName);
         await room.DeleteChannel(oldChannelName);
+    }
+
+    public async Task DeleteChannel(string channelName)
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        await room.DeleteChannel(channelName);
+    }
+
+    public async Task ClearChannelHistory(string channelName)
+    {
+        var channel = _client.GetGrain<IChannelGrain>(channelName);
+        await channel.ClearHistory();
+    }
+
+    public async Task<ChatMsg?> GenerateNextReply(string channelName, string[]? candidates = null, ChatMsg[]? chatMsgs = null, string? orchestrator = null)
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        var channel = await room.GetChannels();
+
+
+        var channelGrain = _client.GetGrain<IChannelGrain>(channelName);
+        return await channelGrain.GenerateNextReply(candidates, chatMsgs, orchestrator: orchestrator);
+    }
+
+    public async Task<IEnumerable<AgentInfo>> GetRoomMembers()
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        return await room.GetMembers();
+    }
+
+    public async Task<IEnumerable<ChannelInfo>> GetChannels()
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        return await room.GetChannels();
+    }
+
+    public async Task<IEnumerable<AgentInfo>> GetChannelMembers(string channelName)
+    {
+        var channel = _client.GetGrain<IChannelGrain>(channelName);
+        return await channel.GetMembers();
+    }
+
+    public async Task<IEnumerable<ChatMsg>> GetChannelChatHistory(string channelName, int count = 1_000)
+    {
+        var channel = _client.GetGrain<IChannelGrain>(channelName);
+        return await channel.ReadHistory(count);
+    }
+
+    public async Task CreateChannel(
+        string channelName,
+        string[]? members = null,
+        ChatMsg[]? chatHistory = null)
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        await room.CreateChannel(channelName, members, chatHistory);
+    }
+
+    public async Task AddAgentToChannel(string channelName, string agentName)
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        await room.AddAgentToChannel(channelName, agentName);
+    }
+
+    public async Task RemoveAgentFromChannel(string channelName, string agentName)
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        await room.RemoveAgentFromChannel(channelName, agentName);
     }
 }

@@ -260,31 +260,6 @@ export const $GetChannelMembersRequest = {
     additionalProperties: false
 } as const;
 
-export const $JoinChannelRequest = {
-    type: 'object',
-    properties: {
-        channelName: {
-            type: 'string',
-            nullable: true
-        },
-        createIfNotExists: {
-            type: 'boolean'
-        }
-    },
-    additionalProperties: false
-} as const;
-
-export const $LeaveChannelRequest = {
-    type: 'object',
-    properties: {
-        channelName: {
-            type: 'string',
-            nullable: true
-        }
-    },
-    additionalProperties: false
-} as const;
-
 export const $RemoveAgentFromChannelRequest = {
     type: 'object',
     properties: {

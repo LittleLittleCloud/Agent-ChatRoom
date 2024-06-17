@@ -93,7 +93,7 @@ public class ChatRoomClientController : Controller
         var channels = await roomGrain.GetChannels();
         foreach (var channel in channels)
         {
-            await roomGrain.DeleteChannel(channel.Name);
+            await _chatPlatformClient.DeleteChannel(channel.Name);
         }
 
         return new OkResult();
@@ -116,7 +116,7 @@ public class ChatRoomClientController : Controller
         var channels = await roomGrain.GetChannels();
         foreach (var channel in channels)
         {
-            await roomGrain.DeleteChannel(channel.Name);
+            await _chatPlatformClient.DeleteChannel(channel.Name);
         }
 
         var schema = JsonSerializer.Deserialize<ChatRoomContextSchemaV0>(System.IO.File.ReadAllText(checkpointPath))!;
@@ -220,8 +220,7 @@ public class ChatRoomClientController : Controller
     {
         _logger?.LogInformation("Deleting messages in channel {channelName}", channelName);
 
-        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        await channelGrain.ClearHistory();
+        await _chatPlatformClient.ClearChannelHistory(channelName);
 
         return new OkResult();
     }
@@ -272,9 +271,7 @@ public class ChatRoomClientController : Controller
         var chatMsgs = request.ChatMsgs;
         var candidates = request.Candidates;
 
-        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        var reply = await channelGrain.GenerateNextReply(candidates, chatMsgs, orchestrator: request.Orchestrator);
-
+        var reply = await _chatPlatformClient.GenerateNextReply(channelName, candidates, chatMsgs, request.Orchestrator);
         return new OkObjectResult(new GenerateNextReplyResponse(reply));
     }
 
@@ -287,8 +284,7 @@ public class ChatRoomClientController : Controller
             return new BadRequestObjectResult("You are not in a room");
         }
 
-        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        var members = await roomGrain.GetMembers();
+        var members = await _chatPlatformClient.GetRoomMembers();
         return new OkObjectResult(members);
     }
 
@@ -339,10 +335,8 @@ public class ChatRoomClientController : Controller
     {
         var channelName = request.ChannelName;
         _logger?.LogInformation("Getting members of channel {channelName}", channelName);
-
-        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        var members = await channelGrain.GetMembers();
-
+        
+        var members = await _chatPlatformClient.GetChannelMembers(channelName);
         return new OkObjectResult(members);
     }
 
@@ -358,8 +352,7 @@ public class ChatRoomClientController : Controller
 
         _logger?.LogInformation("Getting history of channel {channelName}", channelName);
 
-        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        var history = await channelGrain.ReadHistory(request.Count);
+        var history = await _chatPlatformClient.GetChannelChatHistory(channelName, request.Count);
 
         return new OkObjectResult(history);
     }
@@ -371,52 +364,50 @@ public class ChatRoomClientController : Controller
         var channelName = request.ChannelName;
         _logger?.LogInformation("Creating channel {channelName}", channelName);
 
-        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await roomGrain.CreateChannel(channelName);
+        await _chatPlatformClient.CreateChannel(channelName);
 
         return new OkResult();
     }
 
-    [HttpPost]
-    public async Task<ActionResult> JoinChannel(
-        [FromBody] JoinChannelRequest request)
-    {
-        var channelName = request.ChannelName;
-        _logger?.LogInformation("Joining channel {channelName}", channelName);
-        var channelResponse = await GetChannels();
-        var channels = (channelResponse.Result as OkObjectResult)?.Value as IEnumerable<ChannelInfo>;
-        if (channels?.All(x => x.Name != channelName) is true)
-        {
-            if (request.CreateIfNotExists)
-            {
-                _logger?.LogInformation("Channel {channelName} does not exist, creating it", channelName);
-                await CreateChannel(new CreateChannelRequest(channelName));
-            }
-            else
-            {
-                _logger?.LogWarning("Channel {channelName} does not exist", channelName);
-                return new BadRequestObjectResult("Channel does not exist");
-            }
-        }
+    //[HttpPost]
+    //public async Task<ActionResult> JoinChannel(
+    //    [FromBody] JoinChannelRequest request)
+    //{
+    //    var channelName = request.ChannelName;
+    //    _logger?.LogInformation("Joining channel {channelName}", channelName);
+    //    var channelResponse = await GetChannels();
+    //    var channels = await _chatPlatformClient.GetChannels();
+    //    if (channels?.All(x => x.Name != channelName) is true)
+    //    {
+    //        if (request.CreateIfNotExists)
+    //        {
+    //            _logger?.LogInformation("Channel {channelName} does not exist, creating it", channelName);
+    //            await CreateChannel(new CreateChannelRequest(channelName));
+    //        }
+    //        else
+    //        {
+    //            _logger?.LogWarning("Channel {channelName} does not exist", channelName);
+    //            return new BadRequestObjectResult("Channel does not exist");
+    //        }
+    //    }
 
-        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        await channelGrain.AddAgentToChannel(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
+    //    await _chatPlatformClient.AddAgentToChannel(channelName, request.);
 
-        return new OkResult();
-    }
+    //    return new OkResult();
+    //}
 
-    [HttpPost]
-    public async Task<ActionResult> LeaveChannel(
-        [FromBody] LeaveChannelRequest request)
-    {
-        var channelName = request.ChannelName;
-        _logger?.LogInformation("Leaving channel {channelName}", channelName);
+    //[HttpPost]
+    //public async Task<ActionResult> LeaveChannel(
+    //    [FromBody] LeaveChannelRequest request)
+    //{
+    //    var channelName = request.ChannelName;
+    //    _logger?.LogInformation("Leaving channel {channelName}", channelName);
 
-        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        await channelGrain.RemoveAgentFromChannel(_clientContext.UserName!);
+    //    var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
+    //    await channelGrain.RemoveAgentFromChannel(_clientContext.UserName!);
 
-        return new OkResult();
-    }
+    //    return new OkResult();
+    //}
 
     [HttpPost]
     public async Task<ActionResult> DeleteChannel(
@@ -425,8 +416,7 @@ public class ChatRoomClientController : Controller
         var channelName = request.ChannelName;
         _logger?.LogInformation("Deleting channel {channelName}", channelName);
 
-        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await roomGrain.DeleteChannel(channelName);
+        await _chatPlatformClient.DeleteChannel(channelName);
 
         return new OkResult();
     }
@@ -439,8 +429,7 @@ public class ChatRoomClientController : Controller
         var agentName = request.AgentName;
         _logger?.LogInformation("Adding agent {agentName} to channel {channelName}", agentName, channelName);
 
-        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await roomGrain.AddAgentToChannel(channelName, agentName);
+        await _chatPlatformClient.AddAgentToChannel(channelName, agentName);
 
         return new OkResult();
     }
@@ -453,8 +442,7 @@ public class ChatRoomClientController : Controller
         var agentName = request.AgentName;
         _logger?.LogInformation("Removing agent {agentName} from channel {channelName}", agentName, channelName);
 
-        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await roomGrain.RemoveAgentFromChannel(channelName, agentName);
+        await _chatPlatformClient.RemoveAgentFromChannel(channelName, agentName);
 
         return new OkResult();
     }
@@ -463,9 +451,8 @@ public class ChatRoomClientController : Controller
     public async Task<ActionResult<IEnumerable<string>>> GetOrchestrators()
     {
         _logger?.LogInformation("Getting orchestrators");
-        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        var orchestrators = await roomGrain.GetOrchestrators();
 
+        var orchestrators = await _chatPlatformClient.GetOrchestrators();
         return new OkObjectResult(orchestrators);
     }
 

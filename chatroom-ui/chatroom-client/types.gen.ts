@@ -80,15 +80,6 @@ export type GetChannelMembersRequest = {
     channelName?: string | null;
 };
 
-export type JoinChannelRequest = {
-    channelName?: string | null;
-    createIfNotExists?: boolean;
-};
-
-export type LeaveChannelRequest = {
-    channelName?: string | null;
-};
-
 export type RemoveAgentFromChannelRequest = {
     channelName?: string | null;
     agentName?: string | null;
@@ -188,18 +179,6 @@ export type PostApiChatRoomClientCreateChannelData = {
 };
 
 export type PostApiChatRoomClientCreateChannelResponse = unknown;
-
-export type PostApiChatRoomClientJoinChannelData = {
-    requestBody?: JoinChannelRequest;
-};
-
-export type PostApiChatRoomClientJoinChannelResponse = unknown;
-
-export type PostApiChatRoomClientLeaveChannelData = {
-    requestBody?: LeaveChannelRequest;
-};
-
-export type PostApiChatRoomClientLeaveChannelResponse = unknown;
 
 export type PostApiChatRoomClientDeleteChannelData = {
     requestBody?: DeleteChannelRequest;
@@ -436,28 +415,6 @@ export type $OpenApiTs = {
     '/api/ChatRoomClient/CreateChannel': {
         post: {
             req: PostApiChatRoomClientCreateChannelData;
-            res: {
-                /**
-                 * OK
-                 */
-                200: unknown;
-            };
-        };
-    };
-    '/api/ChatRoomClient/JoinChannel': {
-        post: {
-            req: PostApiChatRoomClientJoinChannelData;
-            res: {
-                /**
-                 * OK
-                 */
-                200: unknown;
-            };
-        };
-    };
-    '/api/ChatRoomClient/LeaveChannel': {
-        post: {
-            req: PostApiChatRoomClientLeaveChannelData;
             res: {
                 /**
                  * OK

@@ -388,7 +388,19 @@ internal class ChatRoomConsoleApp
     {
         await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
         {
-            await _controller.JoinChannel(new JoinChannelRequest(channelName, true));
+            var channels = await _chatPlatformClient.GetChannels();
+            if (!channels.Any(x => x.Name == channelName))
+            {
+                // create the channel
+                await _chatPlatformClient.CreateChannel(channelName);
+            }
+
+            var members = await _chatPlatformClient.GetChannelMembers(channelName);
+            if (!members.Any(x => x.Name == _clientContext.UserName))
+            {
+                await _chatPlatformClient.AddAgentToChannel(channelName, _clientContext.UserName!);
+            }
+
             _clientContext.CurrentChannel = channelName;
         });
     }
