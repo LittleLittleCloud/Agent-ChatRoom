@@ -129,11 +129,16 @@ public record class EditTextMessageRequest
 
 public record class GenerateNextReplyRequest
 {
-    public GenerateNextReplyRequest(string channelName, ChatMsg[] chatMsgs,  string[] candidates)
+    public GenerateNextReplyRequest(
+        string channelName,
+        ChatMsg[] chatMsgs, 
+        string[] candidates,
+        string? orchestrator = null)
     {
         ChannelName = channelName;
         ChatMsgs = chatMsgs;
         Candidates = candidates;
+        Orchestrator = orchestrator;
     }
 
     public string ChannelName { get; init; }
@@ -141,6 +146,8 @@ public record class GenerateNextReplyRequest
     public ChatMsg[] ChatMsgs { get; init; }
 
     public string[] Candidates { get; init; }
+
+    public string? Orchestrator { get; init; }
 }
 
 public record class GenerateNextReplyResponse
@@ -151,4 +158,30 @@ public record class GenerateNextReplyResponse
     }
 
     public ChatMsg? Message { get; init; }
+}
+
+public record class AddOrchestratorToChannelRequest
+{
+    public AddOrchestratorToChannelRequest(string channelName, string orchestratorName)
+    {
+        ChannelName = channelName;
+        OrchestratorName = orchestratorName;
+    }
+
+    public string ChannelName { get; init; }
+
+    public string OrchestratorName { get; init; }
+}
+
+public record class RemoveOrchestratorFromChannelRequest
+{
+    public RemoveOrchestratorFromChannelRequest(string channelName, string orchestratorName)
+    {
+        ChannelName = channelName;
+        OrchestratorName = orchestratorName;
+    }
+
+    public string ChannelName { get; init; }
+
+    public string OrchestratorName { get; init; }
 }

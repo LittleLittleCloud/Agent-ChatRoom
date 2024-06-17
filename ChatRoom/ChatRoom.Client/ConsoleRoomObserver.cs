@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ChatRoom.Common;
+using ChatRoom.SDK;
 using Spectre.Console;
 
 namespace ChatRoom.Client;

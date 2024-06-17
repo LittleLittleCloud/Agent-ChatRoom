@@ -107,9 +107,7 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
             }
             {
               GetTextContent(message) != undefined &&
-              <Button variant={"ghost"} size={"tiny"}>
-                <CopyToClipboardIcon size={14} textValue={GetTextContent(message)!} />
-              </Button>
+              <CopyToClipboardIcon size={14} textValue={GetTextContent(message)!} />
             }
             <Button variant={"ghost"} size={"tiny"} onClick={() => handleDelete(message)}>
               <Trash size={14} />

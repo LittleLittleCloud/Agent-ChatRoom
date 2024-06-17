@@ -1,11 +1,12 @@
 ﻿using System;
 using AutoGen.Core;
 using Azure.AI.OpenAI;
-using ChatRoom.Common;
+using ChatRoom.SDK;
 using ChatRoom.OpenAI;
 using Microsoft.Extensions.Logging;
 using Orleans.Concurrency;
 using Orleans.Runtime;
+using OrleansCodeGen.Orleans;
 
 namespace ChatRoom.Room;
 
@@ -13,9 +14,9 @@ internal class ChannelGrain : Grain, IChannelGrain
 {
     private static readonly object _lock = new();
     private readonly List<ChatMsg> _messages = new(100);
-    private ChannelInfo _channelInfo = null!;
     private readonly ILogger _logger;
     private readonly Dictionary<AgentInfo, IChannelObserver> _agents = new();
+    private readonly Dictionary<string, IOrchestratorObserver> _orchestrators = new();
     private readonly ChannelConfiguration _config;
 
     public ChannelGrain(
@@ -24,17 +25,17 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         _logger = logger;
         _config = config;
+        var dynamicGroupChatOrchestrator = new DynamicGroupChatOrchestrator(config.OpenAIConfiguration);
     }
 
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
-        _channelInfo = new ChannelInfo(this.GetPrimaryKeyString());
-        _logger.LogInformation("Channel {ChannelId} activated", _channelInfo.Name);
+        _logger.LogInformation("Channel {ChannelId} activated", this.GetPrimaryKeyString());
         
         await base.OnActivateAsync(cancellationToken);
     }
 
-    public async Task JoinChannel(string name, string description, bool isHuman, IChannelObserver callBack)
+    public async Task AddAgentToChannel(string name, string description, bool isHuman, IChannelObserver callBack)
     {
         var agentInfo = new AgentInfo(name, description, isHuman);
         // check if agent is already in _agents
@@ -45,16 +46,17 @@ internal class ChannelGrain : Grain, IChannelGrain
 
         _agents[agentInfo] = callBack;
 
-        _logger.LogInformation("Agent {AgentName} joined channel {ChannelId}", agentInfo.Name, _channelInfo.Name);
+        var channelInfo = await GetChannelInfo();
+        _logger.LogInformation("Agent {AgentName} joined channel {ChannelId}", agentInfo.Name, channelInfo);
 
         foreach (var cb in _agents.Values)
         {
             _logger.LogInformation("Notifying {AgentName} about new agent {NewAgentName}", cb, agentInfo.Name);
-            await cb.JoinChannel(agentInfo, _channelInfo);
+            await cb.JoinChannel(agentInfo, channelInfo);
         }
     }
 
-    public async Task LeaveChannel(string name)
+    public async Task RemoveAgentFromChannel(string name)
     {
         var agentInfo = _agents.Keys.FirstOrDefault(x => x.Name == name);
         if (agentInfo is null)
@@ -63,18 +65,19 @@ internal class ChannelGrain : Grain, IChannelGrain
         }
 
         _agents.Remove(agentInfo);
-        _logger.LogInformation("Agent {AgentName} left channel {ChannelId}", agentInfo.Name, _channelInfo.Name);
-
+        var channelInfo = await GetChannelInfo();
+        _logger.LogInformation("Agent {AgentName} left channel {ChannelId}", agentInfo.Name, channelInfo);
         foreach (var cb in _agents.Values)
         {
             _logger.LogInformation("Notifying {AgentName} about agent {LeavingAgentName} leaving", cb, agentInfo.Name);
-            await cb.LeaveChannel(agentInfo, _channelInfo);
+            await cb.LeaveChannel(agentInfo, channelInfo);
         }
     }
 
     public async Task SendMessage(ChatMsg msg)
     {
-        _logger.LogInformation("Received message from {From} in channel {ChannelId}", msg.From, _channelInfo.Name);
+        var channelInfo = await GetChannelInfo();
+        _logger.LogInformation("Received message from {From} in channel {ChannelId}", msg.From, channelInfo);
         
         if (msg.From == "System")
         {
@@ -106,74 +109,6 @@ internal class ChannelGrain : Grain, IChannelGrain
             .OrderBy(x => x.Created)
             .ToArray();
             return Task.FromResult(response);
-        }
-    }
-
-    private async Task<AgentInfo?> GetNextAgentSpeaker(AgentInfo[] members, ChatMsg[] messages)
-    {
-        var humanMembers = members.Where(x => x.IsHuman).ToArray();
-        var notHumanMembers = members.Where(x => !x.IsHuman).ToArray();
-        var humanAgents = humanMembers.Select(x => new DummyAgent(x)).ToArray();
-        var notHumanAgents = notHumanMembers.Select(x => new DummyAgent(x)).ToArray();
-        var agents = humanAgents.Concat(notHumanAgents).ToArray();
-        // create agents
-        var openaiClient = _config.OpenAIConfiguration?.ToOpenAIClient();
-        var deployModelName = _config.OpenAIConfiguration?.ModelId;
-
-        if (openaiClient is null || deployModelName is null)
-        {
-            throw new ArgumentException("channel is not configured properly. Please check the configuration file.");
-        }
-        
-
-        // create graph chat
-        // allow not human agents <-> human agents 
-        var transitions = new List<Transition>();
-        foreach (var humanAgent in humanAgents)
-        {
-            foreach (var notHumanAgent in notHumanAgents)
-            {
-                transitions.Add(Transition.Create(notHumanAgent, humanAgent));
-                transitions.Add(Transition.Create(humanAgent, notHumanAgent));
-            }
-        }
-
-        var graph = new Graph(transitions);
-        var chatHistory = messages.Select(x => x.ToAutoGenMessage()).ToArray();
-        var lastSpeaker = agents.First(x => x.Name == messages.Last().From);
-        var nextAvailableAgents = await graph.TransitToNextAvailableAgentsAsync(lastSpeaker, _messages);
-        if (nextAvailableAgents.Count() == 1 && members.Any(x => x.Name == nextAvailableAgents.First().Name))
-        {
-            var nextSpeaker = members.First(x => x.Name == nextAvailableAgents.First().Name);
-            return nextSpeaker;
-        }
-        else if (nextAvailableAgents.Count() > 1)
-        {
-            IAgent admin = AgentFactory.CreateGroupChatAdmin(openaiClient, modelName: deployModelName);
-            var groupChat = new GroupChat(
-                workflow: graph,
-                members: humanAgents.Concat(notHumanAgents),
-                admin: admin);
-
-            // add initial messages
-            foreach (var agent in humanMembers.Concat(notHumanMembers))
-            {
-                groupChat.AddInitializeMessage(new TextMessage(Role.Assistant, agent.SelfDescription!, agent.Name));
-            }
-
-            var nextMessage = await groupChat.CallAsync(chatHistory, maxRound: 1);
-            var lastMessage = nextMessage.Last();
-            var nextSpeaker = members.First(x => x.Name == lastMessage.From);
-            if (nextAvailableAgents.Any(x => x.Name == nextSpeaker.Name))
-            {
-                return nextSpeaker;
-            }
-
-            return null;
-        }
-        else
-        {
-            return null;
         }
     }
 
@@ -246,19 +181,30 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         var channelInfo = new ChannelInfo(this.GetPrimaryKeyString())
         {
-            Members = _agents.Keys.ToList()
+            Members = _agents.Keys.ToList(),
+            Orchestrators = _orchestrators.Keys.ToList(),
         };
         return Task.FromResult(channelInfo);
     }
 
-    public async Task<ChatMsg?> GenerateNextReply(string[]? candidates = null, ChatMsg[]? msgs = null)
+    public async Task<ChatMsg?> GenerateNextReply(string[]? candidates = null, ChatMsg[]? msgs = null, string? orchestrator = null)
     {
         candidates = candidates ??= _agents.Keys.Select(x => x.Name).ToArray();
         var agents = _agents.Where(x => candidates.Contains(x.Key.Name)).Select(x => x.Key).ToArray();
+        
+        if (orchestrator is null || !_orchestrators.ContainsKey(orchestrator))
+        {
+            _logger?.LogInformation($"Generate null reply because orchestrator {orchestrator} is not found");
+            return null;
+        }
+        
+        var orchestratorObserver = _orchestrators[orchestrator];
         msgs ??= _messages.ToArray();
 
         _logger.LogInformation("Getting next agent speaker");
-        var nextSpeaker = agents.Length == 1 ? agents[0] : await GetNextAgentSpeaker(agents, msgs);
+        var nextSpeakerName = agents.Length == 1 ? agents[0].Name : await orchestratorObserver.GetNextSpeaker(agents, msgs);
+        
+        var nextSpeaker = agents.FirstOrDefault(x => x.Name == nextSpeakerName);
         if (nextSpeaker is null)
         {
             _logger.LogInformation("No next speaker found");
@@ -268,8 +214,8 @@ internal class ChannelGrain : Grain, IChannelGrain
         _logger.LogInformation("Next Speaker: {NextSpeaker}", nextSpeaker.Name);
     
         var nextSpeakerObserver = _agents[nextSpeaker];
-
-        var reply = await nextSpeakerObserver.GenerateReplyAsync(nextSpeaker, msgs, _channelInfo);
+        var channelInfo = await GetChannelInfo();
+        var reply = await nextSpeakerObserver.GenerateReplyAsync(nextSpeaker, msgs, channelInfo);
 
         if (reply is not null)
         {
@@ -278,5 +224,30 @@ internal class ChannelGrain : Grain, IChannelGrain
             await this.SendMessage(reply);
         }
         return reply;
+    }
+
+    public Task AddOrchestratorToChannel(string name, IOrchestratorObserver orchestrator)
+    {
+        _logger.LogInformation("Adding orchestrator {OrchestratorName} to channel {ChannelId}", name, this.GetPrimaryKeyString());
+
+        if (_orchestrators.ContainsKey(name))
+        {
+            return Task.CompletedTask;
+        }
+
+        _orchestrators[name] = orchestrator;
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveOrchestratorFromChannel(string name)
+    {
+        _logger.LogInformation("Removing orchestrator {OrchestratorName} from channel {ChannelId}", name, this.GetPrimaryKeyString());
+
+        if (_orchestrators.ContainsKey(name))
+        {
+            _orchestrators.Remove(name);
+        }
+
+        return Task.CompletedTask;
     }
 }

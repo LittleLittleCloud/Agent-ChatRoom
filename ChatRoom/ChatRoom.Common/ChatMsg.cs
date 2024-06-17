@@ -95,18 +95,3 @@ public record class ChatMsg : IMessage, ICanGetTextContent
         }
     }
 }
-
-[GenerateSerializer]
-public record class ChannelInfo
-{
-    public ChannelInfo(string name)
-    {
-        Name = name;
-    }
-
-    [Id(0)]
-    public string Name { get; init; }
-
-    [Id(1)]
-    public List<AgentInfo> Members { get; init; } = new();
-}

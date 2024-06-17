@@ -24,7 +24,6 @@ export function ChatList({
 }: ChatListProps) {
   const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const [eventSource, setEventSource] = React.useState<EventSource | null>(null);
   const [orchstratorSettings, setOrchstratorSettings] = React.useState<OrchestrationSettings>({ orchestrator: "llm", maxReply: 10 });
   const [remainingTurns, setRemainingTurns] = React.useState<number>(0);
   const onReloadMessages = async () => {
@@ -55,6 +54,10 @@ export function ChatList({
     await onReloadMessages();
   }
 
+  const onOrchestrationClickPause = async () => {
+    setRemainingTurns(0);
+  };
+
   const deleteMessageHandler = async (message: ChatMsg) => {
     if (confirm(`Are you sure you want to delete this message?`) === false) {
       return;
@@ -82,24 +85,21 @@ export function ChatList({
           channelName: channel.name,
           messageId: message.id,
           newText: GetTextContent(message),
-      }
-    });
+        }
+      });
 
     await onReloadMessages();
   };
 
-  const onOrchestrationClickNext = async (remainingTurn: number) => {
-    if (remainingTurn <= 0) {
-      return;
-    }
+  const onOrchestrationClickNext = async (remainingTurn: number, msgs: ChatMsg[]) => {
     console.log("Orchestration next");
     if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
       return
     }
+    setRemainingTurns(remainingTurn);
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
     es.addEventListener("message", async (event) => {
       const newMessage: ChatMsg = JSON.parse(event.data);
-      console.log(newMessage);
       await onReloadMessages();
     });
 
@@ -110,27 +110,25 @@ export function ChatList({
     es.onerror = (event) => {
       console.log("Error", event);
     }
-    setEventSource(es);
 
     var response = await postApiChatRoomClientGenerateNextReply({
       requestBody: {
         channelName: channel.name,
-        chatMsgs: messages,
+        chatMsgs: msgs,
         candidates: channel.members.map((member) => member.name!),
+        orchestrator: orchstratorSettings.orchestrator,
       },
     });
 
     console.log(response);
-    if (response.message === undefined || response.message === null) {
-      console.log("response is null");
+    es?.close();
+    if (response.message === undefined || response.message === null || remainingTurn <= 0) {
       setRemainingTurns(0);
     }
-    else {
-      console.log("remaining turn", remainingTurn - 1);
+    else
+    {
       setRemainingTurns(remainingTurn - 1);
     }
-
-    eventSource?.close();
   }
 
   useEffect(() => {
@@ -143,8 +141,9 @@ export function ChatList({
         messagesContainerRef.current.scrollHeight;
     }
 
-    if (remainingTurns > 0) {
-      onOrchestrationClickNext(remainingTurns);
+    if (orchstratorSettings.maxReply > 0 && remainingTurns > 0) {
+      console.log("message received, calling next");
+      onOrchestrationClickNext(remainingTurns, messages);
     }
   }, [messages]);
 
@@ -157,22 +156,22 @@ export function ChatList({
         },
       }
     );
-
+    setRemainingTurns(orchstratorSettings.maxReply);
     await onReloadMessages();
-
-    // if  orchestrator is llm, then generate next reply
-    if (orchstratorSettings.orchestrator === "llm") {
-      setRemainingTurns(orchstratorSettings.maxReply);
-    };
   };
 
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto h-full flex flex-col justify-end">
       <div className="static">
         <ChatTopbar
+          onPause={onOrchestrationClickPause}
+          remainingTurns={remainingTurns}
           channel={channel}
           orchestrationSettings={orchstratorSettings}
-          onContinue={async () => await onOrchestrationClickNext(orchstratorSettings.orchestrator === "llm" ? orchstratorSettings.maxReply : 1)}
+          onContinue={async () => {
+            var remainingTurn = orchstratorSettings.maxReply > 0 ? orchstratorSettings.maxReply : 1;
+            await onOrchestrationClickNext(remainingTurn, messages);
+          }}
           onOrchestrationChange={setOrchstratorSettings}
           onRefresh={onReloadMessages}
           onDeleteChatHistory={onDeleteMessages} />
@@ -210,7 +209,7 @@ export function ChatList({
                 message={message}
                 selectedUser={selectedUser}
                 onEdit={editMessageHandler}
-                onDeleted={deleteMessageHandler}/>
+                onDeleted={deleteMessageHandler} />
             </motion.div>
           ))}
         </AnimatePresence>

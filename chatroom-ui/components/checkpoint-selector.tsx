@@ -121,7 +121,7 @@ export function CheckpointSelector({
                 variant="outline"
                 className="ml-4"
             >
-                Save Checkpoint
+                Create Checkpoint
             </Button>
         </div>
     );

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Avatar, AvatarImage } from '../ui/avatar'
 import { UserData } from '@/types/Message';
-import { ArrowRight, Info, Phone, RotateCcw, StepForward, Trash, Video } from 'lucide-react';
+import { ArrowRight, Info, Pause, Phone, RotateCcw, StepForward, Trash, Video } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '../ui/button';
@@ -23,10 +23,12 @@ export interface OrchestrationProps {
   orchestrationSettings: OrchestrationSettings;
   onOrchestrationChange?: (settings: OrchestrationSettings) => void;
   onContinue?: () => void;
+  onPause?: () => void;
 }
 
 export interface ChatTopbarProps extends OrchestrationProps {
   channel: ChannelInfo;
+  remainingTurns: number;
   onRefresh?: () => void;
   onDeleteChatHistory?: () => void;
 }
@@ -35,18 +37,22 @@ export const TopbarIcons = [{ icon: Phone }, { icon: Video }, { icon: Info }];
 
 export default function ChatTopbar({
   channel,
+  remainingTurns,
   onRefresh,
   onDeleteChatHistory,
   orchestrationSettings,
   onOrchestrationChange,
   onContinue,
+  onPause,
 }: ChatTopbarProps) {
   const [members, setMembers] = React.useState<AgentInfo[]>(channel.members || []);
+  const [orchestrators, setOrchestrators] = React.useState<string[]>(channel.orchestrators || []);
 
   useEffect(() => {
     setMembers(channel.members || []);
+    setOrchestrators(channel.orchestrators || []);
   }
-  , [channel]);
+    , [channel]);
 
   return (
     <div className="w-full h-20 flex p-4 pl-8 justify-start gap-10 items-center border-b">
@@ -111,20 +117,19 @@ export default function ChatTopbar({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel
-                        className='text-primary/50'
-                      >Built-in orchestrator</SelectLabel>
-                      <SelectItem value="llm">LLM</SelectItem>
-                      <SelectItem value="manual">Manual</SelectItem>
-                      <SelectLabel
-                        className='text-primary/50'>Custom orchestrator</SelectLabel>
-                      <SelectItem value="custom">Custom</SelectItem>
+                      {orchestrators.map((orchestrator, index) => (
+                        <SelectItem
+                          key={index}
+                          value={orchestrator}>
+                          {orchestrator}
+                        </SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <span>Max Reply</span>
+                <span>Max AutoReply</span>
               </div>
               <div className='col-span-2'>
                 <Input
@@ -132,9 +137,14 @@ export default function ChatTopbar({
                   defaultValue={orchestrationSettings.maxReply}
                   className="w-full"
                   onChange={(e) => {
+                    var autoReply = parseInt(e.target.value);
+                    if (autoReply < 0) {
+                      alert("Max AutoReply must be equal or greater than 0");
+                      autoReply = 0;
+                    }
                     onOrchestrationChange?.({
                       ...orchestrationSettings,
-                      maxReply: parseInt(e.target.value),
+                      maxReply: autoReply,
                     });
                   }}
                 />
@@ -142,16 +152,32 @@ export default function ChatTopbar({
             </div>
           </PopoverContent>
         </Popover>
-
-        <Link
-          href="#"
-          className={
-            cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
-          }>
-          <IconTooltip content="Continue">
-            <StepForward size={15} />
-          </IconTooltip>
-        </Link>
+        {
+          remainingTurns === 0 &&
+          <Link
+            href="#"
+            onClick={onContinue}
+            className={
+              cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
+            }>
+            <IconTooltip content="Continue">
+              <StepForward size={15} />
+            </IconTooltip>
+          </Link>
+        }
+        {
+          remainingTurns > 0 &&
+          <Link
+            href="#"
+            onClick={onPause}
+            className={
+              cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
+            }>
+            <IconTooltip content="Pause">
+              <Pause size={15} />
+            </IconTooltip>
+          </Link>
+        }
       </div>
 
       <div className='flex gap-2 w-full justify-end'>

@@ -15,6 +15,21 @@ export const $AddAgentToChannelRequest = {
     additionalProperties: false
 } as const;
 
+export const $AddOrchestratorToChannelRequest = {
+    type: 'object',
+    properties: {
+        channelName: {
+            type: 'string',
+            nullable: true
+        },
+        orchestratorName: {
+            type: 'string',
+            nullable: true
+        }
+    },
+    additionalProperties: false
+} as const;
+
 export const $AgentInfo = {
     type: 'object',
     properties: {
@@ -44,6 +59,13 @@ export const $ChannelInfo = {
             type: 'array',
             items: {
                 '$ref': '#/components/schemas/AgentInfo'
+            },
+            nullable: true
+        },
+        orchestrators: {
+            type: 'array',
+            items: {
+                type: 'string'
             },
             nullable: true
         }
@@ -163,6 +185,10 @@ export const $GenerateNextReplyRequest = {
                 type: 'string'
             },
             nullable: true
+        },
+        orchestrator: {
+            type: 'string',
+            nullable: true
         }
     },
     additionalProperties: false
@@ -237,6 +263,21 @@ export const $RemoveAgentFromChannelRequest = {
             nullable: true
         },
         agentName: {
+            type: 'string',
+            nullable: true
+        }
+    },
+    additionalProperties: false
+} as const;
+
+export const $RemoveOrchestratorFromChannelRequest = {
+    type: 'object',
+    properties: {
+        channelName: {
+            type: 'string',
+            nullable: true
+        },
+        orchestratorName: {
             type: 'string',
             nullable: true
         }

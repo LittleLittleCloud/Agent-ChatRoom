@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/sidebar";
 import { Chat } from "./chat";
-import { AgentInfo, ChannelInfo, getApiChatRoomClientGetChannels } from "@/chatroom-client";
+import { AgentInfo, ChannelInfo, getApiChatRoomClientGetChannels, getApiChatRoomClientGetOrchestrators } from "@/chatroom-client";
 
 interface ChatLayoutProps {
   defaultLayout: number[] | undefined;
@@ -31,7 +31,6 @@ export function ChatLayout({
   const [isMobile, setIsMobile] = useState(false);
   const [channels, setChannels] = useState<ChannelInfo[] | undefined>(undefined);
   const [selectedChannel, setSelectedChannel] = useState<ChannelInfo | undefined>(undefined);
-
   useEffect(() => {
     const checkScreenWidth = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -128,7 +127,8 @@ export function ChatLayout({
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
           {
-            selectedChannel && <Chat
+            selectedChannel &&
+            <Chat
             selectedUser={selectedUser}
             isMobile={isMobile}
             channel={selectedChannel} />

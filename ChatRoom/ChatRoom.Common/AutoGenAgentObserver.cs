@@ -1,7 +1,7 @@
 ﻿using AutoGen.Core;
 using ChatRoom.SDK;
 
-namespace ChatRoom.Common;
+namespace ChatRoom.SDK;
 
 internal class AutoGenAgentObserver : IRoomObserver
 {

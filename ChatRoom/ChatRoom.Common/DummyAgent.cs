@@ -1,6 +1,6 @@
 ﻿using AutoGen.Core;
 
-namespace ChatRoom.Room;
+namespace ChatRoom.SDK;
 
 internal class DummyAgent : IAgent
 {

@@ -6,7 +6,8 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ChatRoom.Common;
+using ChatRoom.OpenAI;
+using ChatRoom.SDK;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -91,6 +92,21 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
                 serviceCollection.AddSingleton(clientContext);
                 serviceCollection.AddSingleton<ConsoleRoomObserver>();
+                serviceCollection.AddSingleton<ManualOrchestartor>();
+                serviceCollection.AddSingleton<RoundRobinOrchestrator>();
+                serviceCollection.AddSingleton(sp =>
+                {
+                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
+
+                    return new DynamicGroupChatOrchestrator(settings.ChannelConfig.OpenAIConfiguration);
+                });
+                serviceCollection.AddSingleton(sp =>
+                {
+                    var clusterClient = sp.GetRequiredService<IClusterClient>();
+                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
+                    var chatPlatformClient = new ChatPlatformClient(clusterClient, settings.RoomConfig.Room);
+                    return chatPlatformClient;
+                });
                 serviceCollection.AddSingleton(sp =>
                 {
                     var roomObserver = sp.GetRequiredService<ConsoleRoomObserver>();
@@ -99,7 +115,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                     return roomObserverRef;
                 });
                 serviceCollection.AddSingleton<ChatRoomClientController>();
-                serviceCollection.AddSingleton<ConsoleChatRoomService>();
+                serviceCollection.AddSingleton<ChatRoomConsoleApp>();
             });
 
         if (config.ServerConfig is ServerConfiguration serverConfig)
@@ -145,7 +161,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 }
                 while (!lifetimeManager.ApplicationStarted.IsCancellationRequested);
             });
-        var consoleChatRoomService = sp.GetRequiredService<ConsoleChatRoomService>();
+        var consoleChatRoomService = sp.GetRequiredService<ChatRoomConsoleApp>();
         await consoleChatRoomService.StartAsync(CancellationToken.None);
 
         await AnsiConsole.Status()

@@ -738,6 +738,106 @@
           }
         }
       }
+    },
+    "/api/ChatRoomClient/GetOrchestrators": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ChatRoomClient/AddOrchestratorToChannel": {
+      "post": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrchestratorToChannelRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrchestratorToChannelRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOrchestratorToChannelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ChatRoomClient/RemoveOrchestratorFromChannel": {
+      "post": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveOrchestratorFromChannelRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveOrchestratorFromChannelRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveOrchestratorFromChannelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -750,6 +850,20 @@
             "nullable": true
           },
           "agentName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AddOrchestratorToChannelRequest": {
+        "type": "object",
+        "properties": {
+          "channelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "orchestratorName": {
             "type": "string",
             "nullable": true
           }
@@ -784,6 +898,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AgentInfo"
+            },
+            "nullable": true
+          },
+          "orchestrators": {
+            "type": "array",
+            "items": {
+              "type": "string"
             },
             "nullable": true
           }
@@ -897,6 +1018,10 @@
               "type": "string"
             },
             "nullable": true
+          },
+          "orchestrator": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -965,6 +1090,20 @@
             "nullable": true
           },
           "agentName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RemoveOrchestratorFromChannelRequest": {
+        "type": "object",
+        "properties": {
+          "channelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "orchestratorName": {
             "type": "string",
             "nullable": true
           }

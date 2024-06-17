@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ChatRoom.Client.DTO;
-using ChatRoom.Common;
+using ChatRoom.SDK;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +25,7 @@ public class ChatRoomClientController : Controller
     private readonly ILogger<ChatRoomClientController>? _logger = null!;
     private readonly IRoomObserver _roomObserverRef = null!;
     private readonly ConsoleRoomObserver _consoleRoomObserver = null!;
+    private readonly ChatPlatformClient _chatPlatformClient = null!;
     private readonly ChatRoomClientConfiguration _config = null!;
 
     public ChatRoomClientController(
@@ -32,6 +33,7 @@ public class ChatRoomClientController : Controller
         ClientContext clientContext,
         IRoomObserver roomObserverRef,
         ConsoleRoomObserver consoleRoomObserver,
+        ChatPlatformClient? chatPlatformClient = null!,
         ChatRoomClientConfiguration? config = null,
         ILogger<ChatRoomClientController>? logger = null)
     {
@@ -41,6 +43,7 @@ public class ChatRoomClientController : Controller
         _roomObserverRef = roomObserverRef;
         _consoleRoomObserver = consoleRoomObserver;
         _config = config ?? new ChatRoomClientConfiguration();
+        _chatPlatformClient = chatPlatformClient ?? new ChatPlatformClient(_clusterClient, _config.RoomConfig.Room);
     }
 
     [HttpPost]
@@ -270,7 +273,7 @@ public class ChatRoomClientController : Controller
         var candidates = request.Candidates;
 
         var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        var reply = await channelGrain.GenerateNextReply(candidates, chatMsgs);
+        var reply = await channelGrain.GenerateNextReply(candidates, chatMsgs, orchestrator: request.Orchestrator);
 
         return new OkObjectResult(new GenerateNextReplyResponse(reply));
     }
@@ -397,7 +400,7 @@ public class ChatRoomClientController : Controller
         }
 
         var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        await channelGrain.JoinChannel(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
+        await channelGrain.AddAgentToChannel(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
 
         return new OkResult();
     }
@@ -410,7 +413,7 @@ public class ChatRoomClientController : Controller
         _logger?.LogInformation("Leaving channel {channelName}", channelName);
 
         var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-        await channelGrain.LeaveChannel(_clientContext.UserName!);
+        await channelGrain.RemoveAgentFromChannel(_clientContext.UserName!);
 
         return new OkResult();
     }
@@ -453,6 +456,51 @@ public class ChatRoomClientController : Controller
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await roomGrain.RemoveAgentFromChannel(channelName, agentName);
 
+        return new OkResult();
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<string>>> GetOrchestrators()
+    {
+        _logger?.LogInformation("Getting orchestrators");
+        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
+        var orchestrators = await roomGrain.GetOrchestrators();
+
+        return new OkObjectResult(orchestrators);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<string>>> GetChannelOrchestrators(string channel)
+    {
+        _logger?.LogInformation("Getting orchestrators of channel");
+
+        var orchestrators = await _chatPlatformClient.GetOrchestrators();
+
+        return new OkObjectResult(orchestrators);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> AddOrchestratorToChannel(
+        [FromBody] AddOrchestratorToChannelRequest request)
+    {
+        var channelName = request.ChannelName;
+        var orchestratorName = request.OrchestratorName;
+        _logger?.LogInformation("Adding orchestrator {orchestratorName} to channel {channelName}", orchestratorName, channelName);
+        
+        await _chatPlatformClient.AddOrchestratorToChannel(channelName, orchestratorName);
+
+        return new OkResult();
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> RemoveOrchestratorFromChannel(
+        [FromBody] RemoveOrchestratorFromChannelRequest request)
+    {
+        var channelName = request.ChannelName;
+        var orchestratorName = request.OrchestratorName;
+        _logger?.LogInformation("Removing orchestrator {orchestratorName} from channel {channelName}", orchestratorName, channelName);
+
+        await _chatPlatformClient.RemoveOrchestratorFromChannel(channelName, orchestratorName);
         return new OkResult();
     }
 

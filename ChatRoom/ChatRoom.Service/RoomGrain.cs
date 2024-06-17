@@ -1,4 +1,4 @@
-﻿using ChatRoom.Common;
+﻿using ChatRoom.SDK;
 using Microsoft.Extensions.Logging;
 using Orleans.Runtime;
 using Orleans.Streams;
@@ -10,6 +10,7 @@ public class RoomGrain : Grain, IRoomGrain
 {
     private readonly List<string> _channelNames = new(100);
     private readonly Dictionary<AgentInfo, IRoomObserver> _agents = [];
+    private readonly Dictionary<string, IOrchestratorObserver> _orchestrators = [];
     private readonly ILogger<RoomGrain>? _logger;
 
     public RoomGrain(
@@ -23,7 +24,7 @@ public class RoomGrain : Grain, IRoomGrain
 
     public Task<AgentInfo[]> GetMembers() => Task.FromResult(_agents.Keys.ToArray());
 
-    public async Task JoinRoom(string name, string description, bool isHuman, IRoomObserver observer)
+    public async Task AddAgentToRoom(string name, string description, bool isHuman, IRoomObserver observer)
     {
         var agent = new AgentInfo(name, description, isHuman);
         if (_agents.ContainsKey(agent))
@@ -39,7 +40,7 @@ public class RoomGrain : Grain, IRoomGrain
         }
     }
 
-    public async Task LeaveRoom(string nickname)
+    public async Task RemoveAgentFromRoom(string nickname)
     {
         if (!_agents.Any(kv => kv.Key.Name == nickname))
         {
@@ -58,7 +59,7 @@ public class RoomGrain : Grain, IRoomGrain
         foreach (var channel in _channelNames)
         {
             var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
-            await channelGrain.LeaveChannel(agent.Name);
+            await channelGrain.RemoveAgentFromChannel(agent.Name);
         }
     }
 
@@ -130,7 +131,7 @@ public class RoomGrain : Grain, IRoomGrain
         var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
         var agent = _agents.First(x => x.Key.Name == agentName).Key;
 
-        await channelGrain.JoinChannel(agent.Name, agent.SelfDescription, agent.IsHuman, _agents[agent]);
+        await channelGrain.AddAgentToChannel(agent.Name, agent.SelfDescription, agent.IsHuman, _agents[agent]);
     }
 
     public async Task RemoveAgentFromChannel(string channelName, string agentName)
@@ -139,6 +140,52 @@ public class RoomGrain : Grain, IRoomGrain
         var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
         var agent = _agents.First(x => x.Key.Name == agentName).Key;
 
-        await channelGrain.LeaveChannel(agent.Name);
+        await channelGrain.RemoveAgentFromChannel(agent.Name);
+    }
+
+    public Task AddOrchestratorToRoom(string name, IOrchestratorObserver orchestrator)
+    {
+        _logger?.LogInformation("Adding orchestrator {OrchestratorName} to room {RoomName}", name, this.GrainKey);
+        if (_orchestrators.ContainsKey(name))
+        {
+            return Task.CompletedTask;
+        }
+
+        _orchestrators[name] = orchestrator;
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveOrchestratorFromRoom(string name)
+    {
+        _logger?.LogInformation("Removing orchestrator {OrchestratorName} from room {RoomName}", name, this.GrainKey);
+        if (!_orchestrators.ContainsKey(name))
+        {
+            return Task.CompletedTask;
+        }
+
+        _orchestrators.Remove(name);
+
+        return Task.CompletedTask;
+    }
+
+    public Task AddOrchestratorToChannel(string channelName, string orchestratorName)
+    {
+        var channel = _channelNames.First(x => x == channelName);
+        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
+
+        return channelGrain.AddOrchestratorToChannel(orchestratorName, _orchestrators[orchestratorName]);
+    }
+
+    public Task RemoveOrchestratorFromChannel(string channelName, string orchestratorName)
+    {
+        var channel = _channelNames.First(x => x == channelName);
+        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
+
+        return channelGrain.RemoveOrchestratorFromChannel(orchestratorName);
+    }
+
+    public Task<string[]> GetOrchestrators()
+    {
+        return Task.FromResult(_orchestrators.Keys.ToArray());
     }
 }

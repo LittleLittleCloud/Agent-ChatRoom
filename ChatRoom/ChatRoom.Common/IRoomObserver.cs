@@ -1,6 +1,6 @@
 ﻿using Orleans.Concurrency;
 
-namespace ChatRoom.Common;
+namespace ChatRoom.SDK;
 
 public interface INotificationObserver : IGrainObserver
 {

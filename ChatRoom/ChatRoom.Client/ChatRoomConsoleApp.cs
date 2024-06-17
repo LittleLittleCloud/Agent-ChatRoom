@@ -1,13 +1,14 @@
 ﻿using System.Text.Json;
 using ChatRoom.Client.DTO;
-using ChatRoom.Common;
+using ChatRoom.OpenAI;
+using ChatRoom.SDK;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
 namespace ChatRoom.Client;
 
-public class ConsoleChatRoomService
+internal class ChatRoomConsoleApp
 {
     private readonly IClusterClient _clusterClient;
     private ClientContext _clientContext;
@@ -16,14 +17,22 @@ public class ConsoleChatRoomService
     private readonly string _workspacePath = null!;
     private readonly string _chatRoomContextSchemaPath = null!;
     private readonly ChatRoomClientController _controller;
+    private readonly ManualOrchestartor _manualOrchestartor;
+    private readonly RoundRobinOrchestrator _roundRobinOrchestrator;
+    private readonly DynamicGroupChatOrchestrator _dynamicGroupChatOrchestrator;
+    private readonly ChatPlatformClient _chatPlatformClient;
 
-    public ConsoleChatRoomService(
+    public ChatRoomConsoleApp(
         ClientContext clientContext,
         ChatRoomClientCommandSettings settings,
         IRoomObserver roomObserver,
         IClusterClient clsterClient,
         ChatRoomClientController controller,
-        ILogger<ConsoleChatRoomService> logger)
+        ChatPlatformClient chatPlatformClient,
+        ManualOrchestartor manualOrchestartor,
+        RoundRobinOrchestrator roundRobinOrchestrator,
+        DynamicGroupChatOrchestrator dynamicGroupChatOrchestrator,
+        ILogger<ChatRoomConsoleApp> logger)
     {
         _logger = logger;
         _workspacePath = settings.Workspace;
@@ -32,13 +41,20 @@ public class ConsoleChatRoomService
         _clusterClient = clsterClient;
         _clientContext = clientContext;
         _controller = controller;
+        _roundRobinOrchestrator = roundRobinOrchestrator;
+        _manualOrchestartor = manualOrchestartor;
+        _dynamicGroupChatOrchestrator = dynamicGroupChatOrchestrator;
+        _chatPlatformClient = chatPlatformClient;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         PrintUsage();
         var room = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
+        await room.AddAgentToRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
+        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(RoundRobinOrchestrator), _roundRobinOrchestrator);
+        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(ManualOrchestartor), _manualOrchestartor);
+        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(DynamicGroupChatOrchestrator), _dynamicGroupChatOrchestrator);
         await ProcessLoopAsync(_clientContext, cancellationToken);
     }
 
@@ -75,6 +91,7 @@ public class ConsoleChatRoomService
             {
                 "/lm" => ShowCurrentRoomMembers(),
                 "/lc" => ShowCurrentRoomChannels(context),
+                "/lo" => ShowCurrentRoomOrchestrators(),
                 _ => null
             } is Task queryTask)
             {
@@ -137,6 +154,28 @@ public class ConsoleChatRoomService
         } while (input is not "/exit" && !ct.IsCancellationRequested);
     }
 
+    private async Task ShowCurrentRoomOrchestrators()
+    {
+        var orchestrators = await _chatPlatformClient.GetOrchestrators();
+
+        if (orchestrators is null)
+        {
+            AnsiConsole.MarkupLine("[bold red]No orchestrators found[/]");
+            return;
+        }
+
+        AnsiConsole.Write(new Rule($"Orchestrators for '{_clientContext.CurrentRoom}'")
+        {
+            Justification = Justify.Center,
+            Style = Style.Parse("darkgreen")
+        });
+
+        foreach (var orchestrator in orchestrators)
+        {
+            AnsiConsole.MarkupLine("[bold yellow]{0}[/]", orchestrator);
+        }
+    }
+
     private async Task LoadCheckpoint()
     {
         // list all checkpoints
@@ -186,6 +225,7 @@ public class ConsoleChatRoomService
            + "[bold fuchsia]/s[/] to save the channel information and history to the workspace\n"
            + "[bold fuchsia]/lm[/] to query [underline green]members[/] in the room\n"
            + "[bold fuchsia]/lc[/] to query [underline green]all channels[/] in the room\n"
+           + "[bold fuchsia]/lo[/] to query [underline green]orchestrators[/] in the room\n"
            + "[bold fuchsia]/rc[/] [aqua]<channel>[/] to [underline green]remove channel[/] from the room\n"
            + "[bold fuchsia]/am[/] [aqua]<member>[/] to [underline green]add member[/] to the current channel\n"
            + "[bold fuchsia]/rm[/] [aqua]<member>[/] to [underline green]remove member[/] from the current channel\n"

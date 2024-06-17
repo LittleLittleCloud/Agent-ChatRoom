@@ -5,6 +5,11 @@ export type AddAgentToChannelRequest = {
     agentName?: string | null;
 };
 
+export type AddOrchestratorToChannelRequest = {
+    channelName?: string | null;
+    orchestratorName?: string | null;
+};
+
 export type AgentInfo = {
     name?: string | null;
     selfDescription?: string | null;
@@ -14,6 +19,7 @@ export type AgentInfo = {
 export type ChannelInfo = {
     name?: string | null;
     members?: Array<AgentInfo> | null;
+    orchestrators?: Array<(string)> | null;
 };
 
 export type ChatMsg = {
@@ -48,6 +54,7 @@ export type GenerateNextReplyRequest = {
     channelName?: string | null;
     chatMsgs?: Array<ChatMsg> | null;
     candidates?: Array<(string)> | null;
+    orchestrator?: string | null;
 };
 
 export type GenerateNextReplyResponse = {
@@ -75,6 +82,11 @@ export type LeaveChannelRequest = {
 export type RemoveAgentFromChannelRequest = {
     channelName?: string | null;
     agentName?: string | null;
+};
+
+export type RemoveOrchestratorFromChannelRequest = {
+    channelName?: string | null;
+    orchestratorName?: string | null;
 };
 
 export type SendTextMessageToChannelRequest = {
@@ -196,6 +208,20 @@ export type PostApiChatRoomClientRemoveAgentFromChannelData = {
 };
 
 export type PostApiChatRoomClientRemoveAgentFromChannelResponse = unknown;
+
+export type GetApiChatRoomClientGetOrchestratorsResponse = Array<(string)>;
+
+export type PostApiChatRoomClientAddOrchestratorToChannelData = {
+    requestBody?: AddOrchestratorToChannelRequest;
+};
+
+export type PostApiChatRoomClientAddOrchestratorToChannelResponse = unknown;
+
+export type PostApiChatRoomClientRemoveOrchestratorFromChannelData = {
+    requestBody?: RemoveOrchestratorFromChannelRequest;
+};
+
+export type PostApiChatRoomClientRemoveOrchestratorFromChannelResponse = unknown;
 
 export type $OpenApiTs = {
     '/api/ChatRoomClient/SendTextMessageToChannel': {
@@ -437,6 +463,38 @@ export type $OpenApiTs = {
     '/api/ChatRoomClient/RemoveAgentFromChannel': {
         post: {
             req: PostApiChatRoomClientRemoveAgentFromChannelData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/GetOrchestrators': {
+        get: {
+            res: {
+                /**
+                 * OK
+                 */
+                200: Array<(string)>;
+            };
+        };
+    };
+    '/api/ChatRoomClient/AddOrchestratorToChannel': {
+        post: {
+            req: PostApiChatRoomClientAddOrchestratorToChannelData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/RemoveOrchestratorFromChannel': {
+        post: {
+            req: PostApiChatRoomClientRemoveOrchestratorFromChannelData;
             res: {
                 /**
                  * OK

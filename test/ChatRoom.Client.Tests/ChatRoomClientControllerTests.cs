@@ -7,7 +7,7 @@ using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
 using ChatRoom.Client.DTO;
-using ChatRoom.Common;
+using ChatRoom.SDK;
 using ChatRoom.Room;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
@@ -92,7 +92,7 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
         var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock);
         var roomGrain = _cluster.Client.GetGrain<IRoomGrain>(nameof(ChatRoomClientControllerTests));
         var testAgentName = "testAgent";
-        await roomGrain.JoinRoom(testAgentName, "test", true, observerRef);
+        await roomGrain.AddAgentToRoom(testAgentName, "test", true, observerRef);
 
         var members = await controller.GetRoomMembers();
         var membersList = (members.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
@@ -118,7 +118,7 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
         channelMembersList!.Any(m => m.Name == testAgentName).Should().BeFalse();
 
         // test remove agent from room
-        await roomGrain.LeaveRoom(testAgentName);
+        await roomGrain.RemoveAgentFromRoom(testAgentName);
 
         members = await controller.GetRoomMembers();
         membersList = (members.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
