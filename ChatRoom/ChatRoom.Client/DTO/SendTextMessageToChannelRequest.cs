@@ -185,3 +185,29 @@ public record class RemoveOrchestratorFromChannelRequest
 
     public string OrchestratorName { get; init; }
 }
+
+public record class CloneChannelRequest
+{
+    public CloneChannelRequest(string channelName, string newChannelName)
+    {
+        ChannelName = channelName;
+        NewChannelName = newChannelName;
+    }
+
+    public string ChannelName { get; init; }
+
+    public string NewChannelName { get; init; }
+}
+
+public record class EditChannelNameRequest
+{
+    public EditChannelNameRequest(string oldChannelName, string newChannelName)
+    {
+        OldChannelName = oldChannelName;
+        NewChannelName = newChannelName;
+    }
+
+    public string OldChannelName { get; init; }
+
+    public string NewChannelName { get; init; }
+}

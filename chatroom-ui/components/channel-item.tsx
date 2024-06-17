@@ -10,18 +10,19 @@ import {
 } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ChannelInfo } from "@/chatroom-client";
-import { Settings, Trash } from "lucide-react";
+import { Copy, Settings, Trash } from "lucide-react";
 
 interface ChannelItemProps {
   channel: ChannelInfo & { avatar?: string; variant: "grey" | "ghost" };
   isCollapsed: boolean;
   isSelected: boolean;
   onClickChannel?: (channel: ChannelInfo) => void;
+  onCloneChannel?: (channel: ChannelInfo) => void;
   onEditChannel?: (channel: ChannelInfo) => void;
   onDeleteChannel?: (channel: ChannelInfo) => void;
 }
 
-export function ChannelItem({ channel, isSelected, isCollapsed, onEditChannel, onDeleteChannel, onClickChannel }: ChannelItemProps) {
+export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, onEditChannel, onDeleteChannel, onClickChannel }: ChannelItemProps) {
   if (isCollapsed) {
     return (
       <TooltipProvider>
@@ -67,23 +68,14 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onEditChannel, o
         className={cn(
           buttonVariants({ variant: channel.variant, size: "xl" }),
           isSelected &&
-          "dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
-          "justify-start gap-4"
+          "flex w-full dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
+          "justify-start gap-1"
         )}
         onClick={(e) => {
           onClickChannel?.(channel);
           e.preventDefault();
         }}
       >
-        <Avatar className="flex justify-center items-center">
-          <AvatarImage
-            src={channel.avatar}
-            alt={channel.avatar}
-            width={6}
-            height={6}
-            className="w-10 h-10 " />
-          {channel.name && <AvatarFallback className="w-10 h-10">{channel.name.charAt(0)}</AvatarFallback>}
-        </Avatar>
         <div
           className="flex w-full items-center justify-between group/channel">
           <span
@@ -91,8 +83,29 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onEditChannel, o
           >
             {channel.name}
           </span>
-          <Link
-            href="#"
+          <div
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "invisible h-9 w-9 group-hover/channel:visible"
+            )}
+          >
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Copy
+                    size={15}
+                    onClick={(e) => {
+                      onCloneChannel?.(channel);
+                      e.stopPropagation();
+                    }} />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="flex items-center gap-10">
+                  Clone Channel
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <div
             className={cn(
               buttonVariants({ variant: "ghost", size: "icon" }),
               "invisible h-9 w-9 group-hover/channel:visible"
@@ -113,9 +126,8 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onEditChannel, o
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </Link>
-          <Link
-            href="#"
+          </div>
+          <div
             className={cn(
               buttonVariants({ variant: "ghost", size: "icon" }),
               "invisible h-9 w-9 group-hover/channel:visible"
@@ -136,7 +148,7 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onEditChannel, o
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </Link>
+          </div>
         </div>
       </div>
     );

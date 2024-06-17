@@ -36,12 +36,22 @@ export type ChatMsgPart = {
     mimeType?: string | null;
 };
 
+export type CloneChannelRequest = {
+    channelName?: string | null;
+    newChannelName?: string | null;
+};
+
 export type CreateChannelRequest = {
     channelName?: string | null;
 };
 
 export type DeleteChannelRequest = {
     channelName?: string | null;
+};
+
+export type EditChannelNameRequest = {
+    oldChannelName?: string | null;
+    newChannelName?: string | null;
 };
 
 export type EditTextMessageRequest = {
@@ -211,6 +221,12 @@ export type PostApiChatRoomClientRemoveAgentFromChannelResponse = unknown;
 
 export type GetApiChatRoomClientGetOrchestratorsResponse = Array<(string)>;
 
+export type GetApiChatRoomClientGetChannelOrchestratorsData = {
+    channel?: string;
+};
+
+export type GetApiChatRoomClientGetChannelOrchestratorsResponse = Array<(string)>;
+
 export type PostApiChatRoomClientAddOrchestratorToChannelData = {
     requestBody?: AddOrchestratorToChannelRequest;
 };
@@ -222,6 +238,18 @@ export type PostApiChatRoomClientRemoveOrchestratorFromChannelData = {
 };
 
 export type PostApiChatRoomClientRemoveOrchestratorFromChannelResponse = unknown;
+
+export type PostApiChatRoomClientCloneChannelData = {
+    requestBody?: CloneChannelRequest;
+};
+
+export type PostApiChatRoomClientCloneChannelResponse = unknown;
+
+export type PostApiChatRoomClientEditChannelNameData = {
+    requestBody?: EditChannelNameRequest;
+};
+
+export type PostApiChatRoomClientEditChannelNameResponse = unknown;
 
 export type $OpenApiTs = {
     '/api/ChatRoomClient/SendTextMessageToChannel': {
@@ -481,6 +509,17 @@ export type $OpenApiTs = {
             };
         };
     };
+    '/api/ChatRoomClient/GetChannelOrchestrators': {
+        get: {
+            req: GetApiChatRoomClientGetChannelOrchestratorsData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: Array<(string)>;
+            };
+        };
+    };
     '/api/ChatRoomClient/AddOrchestratorToChannel': {
         post: {
             req: PostApiChatRoomClientAddOrchestratorToChannelData;
@@ -495,6 +534,28 @@ export type $OpenApiTs = {
     '/api/ChatRoomClient/RemoveOrchestratorFromChannel': {
         post: {
             req: PostApiChatRoomClientRemoveOrchestratorFromChannelData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/CloneChannel': {
+        post: {
+            req: PostApiChatRoomClientCloneChannelData;
+            res: {
+                /**
+                 * OK
+                 */
+                200: unknown;
+            };
+        };
+    };
+    '/api/ChatRoomClient/EditChannelName': {
+        post: {
+            req: PostApiChatRoomClientEditChannelNameData;
             res: {
                 /**
                  * OK

@@ -777,6 +777,53 @@
         }
       }
     },
+    "/api/ChatRoomClient/GetChannelOrchestrators": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ChatRoomClient/AddOrchestratorToChannel": {
       "post": {
         "tags": [
@@ -828,6 +875,68 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/RemoveOrchestratorFromChannelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ChatRoomClient/CloneChannel": {
+      "post": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloneChannelRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloneChannelRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloneChannelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ChatRoomClient/EditChannelName": {
+      "post": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditChannelNameRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditChannelNameRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditChannelNameRequest"
               }
             }
           }
@@ -960,6 +1069,20 @@
         },
         "additionalProperties": false
       },
+      "CloneChannelRequest": {
+        "type": "object",
+        "properties": {
+          "channelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "newChannelName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CreateChannelRequest": {
         "type": "object",
         "properties": {
@@ -974,6 +1097,20 @@
         "type": "object",
         "properties": {
           "channelName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EditChannelNameRequest": {
+        "type": "object",
+        "properties": {
+          "oldChannelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "newChannelName": {
             "type": "string",
             "nullable": true
           }

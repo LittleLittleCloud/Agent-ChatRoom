@@ -84,7 +84,7 @@ export function ChatLayout({
           collapsedSize={navCollapsedSize}
           collapsible={true}
           minSize={isMobile ? 0 : 24}
-          maxSize={isMobile ? 8 : 30}
+          maxSize={isMobile ? 8 : 35}
           onCollapse={() => {
             setIsCollapsed(true);
             document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
@@ -116,6 +116,11 @@ export function ChatLayout({
               console.log('edit channel')
               console.log(channel);
               await reloadChannels();
+            }}
+            onCloneChannel={
+              async (channel) => {
+                console.log(channel);
+                await reloadChannels();
             }}
             onDeleteChannel={async (channel) => {
               console.log(channel);

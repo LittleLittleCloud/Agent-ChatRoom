@@ -15,12 +15,12 @@ public class RoomGrain : Grain, IRoomGrain
 
     public RoomGrain(
         ILogger<RoomGrain>? logger = null)
-        :base()
+        : base()
     {
         _logger = logger;
     }
 
-    public virtual string GrainKey => this.GetPrimaryKeyString(); 
+    public virtual string GrainKey => this.GetPrimaryKeyString();
 
     public Task<AgentInfo[]> GetMembers() => Task.FromResult(_agents.Keys.ToArray());
 
@@ -187,5 +187,26 @@ public class RoomGrain : Grain, IRoomGrain
     public Task<string[]> GetOrchestrators()
     {
         return Task.FromResult(_orchestrators.Keys.ToArray());
+    }
+
+    public async Task CloneChannel(string channelName, string newChannelName)
+    {
+        if (_channelNames.Any(x => x == newChannelName))
+        {
+            _logger?.LogWarning("Channel {ChannelName} already exists", newChannelName);
+
+            return;
+        }
+        var oldChannel = _channelNames.First(x => x == channelName);
+        var oldChannelGrain = this.GrainFactory.GetGrain<IChannelGrain>(oldChannel);
+        var oldChannelInfo = await oldChannelGrain.GetChannelInfo();
+        var chatHistory = await oldChannelGrain.ReadHistory(1_000);
+
+        await this.CreateChannel(newChannelName, oldChannelInfo.Members.Select(m => m.Name).ToArray(), chatHistory);
+
+        foreach (var orchestrator in oldChannelInfo.Orchestrators)
+        {
+            await this.AddOrchestratorToChannel(newChannelName, orchestrator);
+        }
     }
 }

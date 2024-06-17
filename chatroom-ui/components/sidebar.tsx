@@ -5,7 +5,7 @@ import { MoreHorizontal, SquarePen, SquarePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Message } from "@/types/Message";
-import { ChannelInfo, postApiChatRoomClientCreateChannel, postApiChatRoomClientDeleteChannel } from "@/chatroom-client";
+import { ChannelInfo, postApiChatRoomClientCloneChannel, postApiChatRoomClientCreateChannel, postApiChatRoomClientDeleteChannel } from "@/chatroom-client";
 import { ChannelItem } from "@/components/channel-item";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 import { useState } from "react";
@@ -19,16 +19,27 @@ interface SidebarProps {
   })[];
   onClick?: (channel: ChannelInfo) => void;
   onAddChannel?: (channel: ChannelInfo) => void;
+  onCloneChannel?: (channel: ChannelInfo) => void;
   onEditChannel?: (channel: ChannelInfo) => void;
   onDeleteChannel?: (channel: ChannelInfo) => void;
   onSelectedChannel?: (channel: ChannelInfo) => void;
   isMobile: boolean;
 }
 
-export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onAddChannel, onDeleteChannel, onSelectedChannel }: SidebarProps) {
+export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onCloneChannel, onAddChannel, onDeleteChannel, onSelectedChannel }: SidebarProps) {
   const [channelConfigModalChannel, setChannelConfigModalChannel] = useState<ChannelInfo | undefined>(undefined);
   const [selectedChannel, setSelectedChannel] = useState<ChannelInfo | undefined>(undefined);
 
+  const handleCloneChannelClick = async (channel: ChannelInfo) => {
+    await postApiChatRoomClientCloneChannel({
+      requestBody: {
+        channelName: channel.name,
+        newChannelName: `${channel.name}-clone`,
+      }
+    });
+
+    onCloneChannel?.(channel);
+  }
   const handleEditChannelClick = (channel: ChannelInfo | undefined) => {
     setChannelConfigModalChannel(channel);
   }
@@ -70,7 +81,7 @@ export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onAddCh
         onClose={() => setChannelConfigModalChannel(undefined)} />}
       {!isCollapsed && (
         <div className="flex justify-between p-2 items-center">
-          <div className="flex gap-2 items-center text-2xl">
+          <div className="flex gap-2 items-center text-xl">
             <p className="font-medium">Channels</p>
             <span className="text-zinc-300">({channels.length})</span>
           </div>
@@ -106,6 +117,7 @@ export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onAddCh
             channel={channel}
             isSelected={selectedChannel?.name === channel.name}
             isCollapsed={isCollapsed}
+            onCloneChannel={handleCloneChannelClick}
             onClickChannel={handleSelectedChannel}
             onEditChannel={handleEditChannelClick}
             onDeleteChannel={handleDeleteChannelClick} />

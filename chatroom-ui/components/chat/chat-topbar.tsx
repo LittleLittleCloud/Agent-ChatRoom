@@ -15,7 +15,7 @@ import { Select, SelectGroup, SelectLabel, SelectTrigger, SelectValue, SelectCon
 import { Input } from '../ui/input';
 
 export interface OrchestrationSettings {
-  orchestrator: "llm" | "manual" | string;
+  orchestrator: string | undefined;
   maxReply: number;
 }
 
@@ -57,7 +57,7 @@ export default function ChatTopbar({
   return (
     <div className="w-full h-20 flex p-4 pl-8 justify-start gap-10 items-center border-b">
       <div className="flex flex-col">
-        <span className="font-medium">{channel.name}</span>
+        <span className="font-medium text-nowrap">{channel.name}</span>
       </div>
       <div className="flex items-center gap-2">
         {/* // refresh button */}

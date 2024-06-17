@@ -504,6 +504,32 @@ public class ChatRoomClientController : Controller
         return new OkResult();
     }
 
+    [HttpPost]
+    public async Task<ActionResult> CloneChannel(
+        [FromBody] CloneChannelRequest request)
+    {
+        var oldChannelName = request.ChannelName;
+        var newChannelName = request.NewChannelName;
+        _logger?.LogInformation("Cloning channel {oldChannelName} to {newChannelName}", oldChannelName, newChannelName);
+
+        await _chatPlatformClient.CloneChannel(oldChannelName, newChannelName);
+
+        return new OkResult();
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> EditChannelName(
+        [FromBody] EditChannelNameRequest request)
+    {
+        var oldChannelName = request.OldChannelName;
+        var newChannelName = request.NewChannelName;
+        _logger?.LogInformation("Editing channel name from {oldChannelName} to {newChannelName}", oldChannelName, newChannelName);
+
+        await _chatPlatformClient.EditChannelName(oldChannelName, newChannelName);
+
+        return new OkResult();
+    }
+
     private Task<IOrderedEnumerable<string>> ListCheckpoints()
     {
         var workspace = _config.Workspace;

@@ -16,6 +16,8 @@ public interface IRoomGrain : IGrainWithStringKey
 
     Task CreateChannel(string channelName, string[]? members = null, ChatMsg[]? chatHistory = null);
 
+    Task CloneChannel(string oldChannelName, string newChannelName);
+
     Task DeleteChannel(string channelName);
 
     Task AddAgentToChannel(string channelName, string agentName);

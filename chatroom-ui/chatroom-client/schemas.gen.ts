@@ -124,6 +124,21 @@ export const $ChatMsgPart = {
     additionalProperties: false
 } as const;
 
+export const $CloneChannelRequest = {
+    type: 'object',
+    properties: {
+        channelName: {
+            type: 'string',
+            nullable: true
+        },
+        newChannelName: {
+            type: 'string',
+            nullable: true
+        }
+    },
+    additionalProperties: false
+} as const;
+
 export const $CreateChannelRequest = {
     type: 'object',
     properties: {
@@ -139,6 +154,21 @@ export const $DeleteChannelRequest = {
     type: 'object',
     properties: {
         channelName: {
+            type: 'string',
+            nullable: true
+        }
+    },
+    additionalProperties: false
+} as const;
+
+export const $EditChannelNameRequest = {
+    type: 'object',
+    properties: {
+        oldChannelName: {
+            type: 'string',
+            nullable: true
+        },
+        newChannelName: {
             type: 'string',
             nullable: true
         }

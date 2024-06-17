@@ -1,4 +1,4 @@
-import { AgentInfo, ChannelInfo, getApiChatRoomClientGetChannels, getApiChatRoomClientGetRoomMembers, postApiChatRoomClientAddAgentToChannel, postApiChatRoomClientCreateChannel, postApiChatRoomClientLeaveChannel, postApiChatRoomClientGetChannelMembers, postApiChatRoomClientRemoveAgentFromChannel, getApiChatRoomClientGetOrchestrators, postApiChatRoomClientAddOrchestratorToChannel, getApiChatRoomClientGetChannelInfoByChannelName, postApiChatRoomClientRemoveOrchestratorFromChannel } from "@/chatroom-client";
+import { AgentInfo, ChannelInfo, getApiChatRoomClientGetChannels, getApiChatRoomClientGetRoomMembers, postApiChatRoomClientAddAgentToChannel, postApiChatRoomClientCreateChannel, postApiChatRoomClientLeaveChannel, postApiChatRoomClientGetChannelMembers, postApiChatRoomClientRemoveAgentFromChannel, getApiChatRoomClientGetOrchestrators, postApiChatRoomClientAddOrchestratorToChannel, getApiChatRoomClientGetChannelInfoByChannelName, postApiChatRoomClientRemoveOrchestratorFromChannel, postApiChatRoomClientEditChannelName } from "@/chatroom-client";
 import { Separator } from "@radix-ui/react-separator";
 import { StarIcon, ChevronDownIcon, PlusIcon, CircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,12 +8,12 @@ import { Label } from "@radix-ui/react-label";
 
 interface ChannelConfigModalProps {
     onClose: () => void;
-    channel?: ChannelInfo;
+    channel: ChannelInfo;
     onSave: (channel: ChannelInfo) => void;
 }
 
 export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigModalProps) {
-    const [channelName, setChannelName] = useState(channel?.name ?? '');
+    const [channelName, setChannelName] = useState(channel.name ?? '');
     const [members, setMembers] = useState<AgentInfo[]>([]);
     const [availableMembers, setAvailableMembers] = useState<AgentInfo[] | undefined>(undefined);
     const [orchestrators, setOrchestrators] = useState<string[]>([]);
@@ -67,7 +67,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
         var channels = await getApiChatRoomClientGetChannels();
 
         var channelExists = channels.map(channel => channel.name).includes(channelName);
-        if (channel?.name == undefined) {
+        if (channel.name == undefined) {
             // create a new channel
             if (channelExists) {
                 alert("Channel already exists, please choose a different name.");
@@ -115,7 +115,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
                 {
                     requestBody: {
                         agentName: member.name,
-                        channelName: channel?.name ?? channelName
+                        channelName: channel.name,
                     }
                 })));
 
@@ -123,7 +123,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
                 {
                     requestBody: {
                         agentName: member.name,
-                        channelName: channel?.name ?? channelName
+                        channelName: channel.name,
                     }
                 })));
 
@@ -134,7 +134,7 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
                 {
                     requestBody: {
                         orchestratorName: orchestrator,
-                        channelName: channel?.name ?? channelName
+                        channelName: channel.name,
                     }
                 })));
 
@@ -142,9 +142,18 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
                 {
                     requestBody: {
                         orchestratorName: orchestrator,
-                        channelName: channel?.name ?? channelName
+                        channelName: channel.name,
                     }
                 })));
+
+            if (channelName != channel.name) {
+                await postApiChatRoomClientEditChannelName({
+                    requestBody: {
+                        oldChannelName: channel.name,
+                        newChannelName: channelName,
+                    }
+                });
+            }
         }
 
         onSave({

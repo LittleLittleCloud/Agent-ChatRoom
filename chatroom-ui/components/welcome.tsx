@@ -16,7 +16,7 @@ export function Welcome() {
     }, []);
 
     return (
-        <div className="h-full items-center space-x-5">
+        <div className="h-full items-center">
             {user && (
                 <label className="text-nowrap font-bold">Welcome {user?.name}</label>)
             }

@@ -76,4 +76,17 @@ public class ChatPlatformClient
         var room = _client.GetGrain<IRoomGrain>(_room);
         await room.RemoveOrchestratorFromChannel(channelName, orchestratorName);
     }
+
+    public async Task CloneChannel(string channelName, string newChannelName)
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        await room.CloneChannel(channelName, newChannelName);
+    }
+
+    public async Task EditChannelName(string oldChannelName, string newChannelName)
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        await room.CloneChannel(oldChannelName, newChannelName);
+        await room.DeleteChannel(oldChannelName);
+    }
 }
