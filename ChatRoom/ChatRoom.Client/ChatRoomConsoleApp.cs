@@ -17,9 +17,9 @@ internal class ChatRoomConsoleApp
     private readonly string _workspacePath = null!;
     private readonly string _chatRoomContextSchemaPath = null!;
     private readonly ChatRoomClientController _controller;
-    private readonly ManualOrchestartor _manualOrchestartor;
+    private readonly DynamicGroupChat dynamicGroupChat;
     private readonly RoundRobinOrchestrator _roundRobinOrchestrator;
-    private readonly DynamicGroupChatOrchestrator _dynamicGroupChatOrchestrator;
+    private readonly HumanToAgent humanToAgent;
     private readonly ChatPlatformClient _chatPlatformClient;
 
     public ChatRoomConsoleApp(
@@ -29,9 +29,9 @@ internal class ChatRoomConsoleApp
         IClusterClient clsterClient,
         ChatRoomClientController controller,
         ChatPlatformClient chatPlatformClient,
-        ManualOrchestartor manualOrchestartor,
+        DynamicGroupChat dynamicGroupChatOrchestrator,
         RoundRobinOrchestrator roundRobinOrchestrator,
-        DynamicGroupChatOrchestrator dynamicGroupChatOrchestrator,
+        HumanToAgent humanToAgentOrchestrator,
         ILogger<ChatRoomConsoleApp> logger)
     {
         _logger = logger;
@@ -42,8 +42,8 @@ internal class ChatRoomConsoleApp
         _clientContext = clientContext;
         _controller = controller;
         _roundRobinOrchestrator = roundRobinOrchestrator;
-        _manualOrchestartor = manualOrchestartor;
-        _dynamicGroupChatOrchestrator = dynamicGroupChatOrchestrator;
+        dynamicGroupChat = dynamicGroupChatOrchestrator;
+        humanToAgent = humanToAgentOrchestrator;
         _chatPlatformClient = chatPlatformClient;
     }
 
@@ -53,8 +53,8 @@ internal class ChatRoomConsoleApp
         var room = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
         await room.AddAgentToRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
         await _chatPlatformClient.RegisterOrchestratorAsync(nameof(RoundRobinOrchestrator), _roundRobinOrchestrator);
-        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(ManualOrchestartor), _manualOrchestartor);
-        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(DynamicGroupChatOrchestrator), _dynamicGroupChatOrchestrator);
+        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(DynamicGroupChat), dynamicGroupChat);
+        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(HumanToAgent), humanToAgent);
         await ProcessLoopAsync(_clientContext, cancellationToken);
     }
 

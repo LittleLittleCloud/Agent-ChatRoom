@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoGen.Core;
 using ChatRoom.SDK;
+using Orleans;
 
 namespace ChatRoom.OpenAI;
 
-public class DynamicGroupChatOrchestrator : IOrchestrator
+public class HumanToAgent : IOrchestrator
 {
     private readonly OpenAIClientConfiguration _config;
-    public DynamicGroupChatOrchestrator(OpenAIClientConfiguration llmConfig)
+    public HumanToAgent(OpenAIClientConfiguration llmConfig)
     {
         _config = llmConfig;
     }

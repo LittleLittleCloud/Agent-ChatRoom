@@ -9,6 +9,7 @@ import ChatTopbar, { OrchestrationSettings } from "./chat-topbar";
 import { ChatMessage } from "./chat-message";
 import { on } from "events";
 import { GetTextContent } from "@/chatroom-client/types.extension";
+import { toast } from "sonner";
 
 interface ChatListProps {
   selectedUser: AgentInfo;
@@ -24,7 +25,7 @@ export function ChatList({
 }: ChatListProps) {
   const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const [orchstratorSettings, setOrchstratorSettings] = React.useState<OrchestrationSettings>({ orchestrator: "llm", maxReply: 10 });
+  const [orchstratorSettings, setOrchstratorSettings] = React.useState<OrchestrationSettings>({ orchestrator: undefined, maxReply: 10 });
   const [remainingTurns, setRemainingTurns] = React.useState<number>(0);
   const onReloadMessages = async () => {
     console.log("Reloading messages");
@@ -96,6 +97,12 @@ export function ChatList({
     if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
       return
     }
+
+    if (orchstratorSettings.orchestrator == undefined) {
+      setRemainingTurns(0);
+      toast("The orchestrator is not selected, please select an orchestrator first.");
+      return;
+    }
     setRemainingTurns(remainingTurn);
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
     es.addEventListener("message", async (event) => {
@@ -123,6 +130,7 @@ export function ChatList({
     console.log(response);
     es?.close();
     if (response.message === undefined || response.message === null || remainingTurn <= 0) {
+      toast("No more received messages, it's your turn to reply now.");
       setRemainingTurns(0);
     }
     else

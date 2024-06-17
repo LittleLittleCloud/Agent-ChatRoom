@@ -25,7 +25,7 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         _logger = logger;
         _config = config;
-        var dynamicGroupChatOrchestrator = new DynamicGroupChatOrchestrator(config.OpenAIConfiguration);
+        var dynamicGroupChatOrchestrator = new HumanToAgent(config.OpenAIConfiguration);
     }
 
     public override async Task OnActivateAsync(CancellationToken cancellationToken)

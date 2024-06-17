@@ -92,13 +92,18 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
                 serviceCollection.AddSingleton(clientContext);
                 serviceCollection.AddSingleton<ConsoleRoomObserver>();
-                serviceCollection.AddSingleton<ManualOrchestartor>();
                 serviceCollection.AddSingleton<RoundRobinOrchestrator>();
                 serviceCollection.AddSingleton(sp =>
                 {
                     var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
 
-                    return new DynamicGroupChatOrchestrator(settings.ChannelConfig.OpenAIConfiguration);
+                    return new HumanToAgent(settings.ChannelConfig.OpenAIConfiguration);
+                });
+                serviceCollection.AddSingleton(sp =>
+                {
+                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
+
+                    return new DynamicGroupChat(settings.ChannelConfig.OpenAIConfiguration);
                 });
                 serviceCollection.AddSingleton(sp =>
                 {
