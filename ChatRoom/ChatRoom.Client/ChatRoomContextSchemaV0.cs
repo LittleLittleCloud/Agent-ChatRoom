@@ -19,7 +19,7 @@ public class ChatRoomContextSchemaV0 : Schema
     public override string SchemaType => nameof(ChatRoomContextSchemaV0);
 
     [JsonPropertyName("channels")]
-    public Dictionary<string, string[]> Channels { get; set; } = new();
+    public Dictionary<string, ChannelInfo> Channels { get; set; } = new();
 
     [JsonPropertyName("chat_history")]
     public Dictionary<string, ChatMsg[]> ChatHistory { get; set; } = new();
@@ -44,7 +44,7 @@ public class ChatRoomContext
         this.CurrentChannel = "General";
     }
 
-    public Dictionary<string, string[]> Channels { get; set; }
+    public Dictionary<string, ChannelInfo> Channels { get; set; }
 
     public Dictionary<string, ChatMsg[]> ChatHistory { get; set; }
     

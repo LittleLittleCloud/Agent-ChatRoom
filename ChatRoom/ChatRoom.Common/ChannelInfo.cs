@@ -8,8 +8,13 @@ public record class ChannelInfo
         Name = name;
     }
 
+    // This constructor is required for deserialization
+    internal ChannelInfo()
+    {
+    }
+
     [Id(0)]
-    public string Name { get; init; }
+    public string Name { get; init; } = null!;
 
     [Id(1)]
     public List<AgentInfo> Members { get; init; } = new();

@@ -79,7 +79,8 @@ public class RoomGrain : Grain, IRoomGrain
     public async Task CreateChannel(
         string channelName,
         string[]? members = null,
-        ChatMsg[]? history = null)
+        ChatMsg[]? history = null,
+        string[]? orchestrators = null)
     {
         if (_channelNames.Any(x => x == channelName))
         {
@@ -108,6 +109,20 @@ public class RoomGrain : Grain, IRoomGrain
                 }
 
                 await AddAgentToChannel(channelName, member);
+            }
+        }
+
+        if (orchestrators is { Length: > 0 })
+        {
+            _logger?.LogInformation("Adding orchestrators to channel {ChannelName}", channelName);
+            foreach (var orchestrator in orchestrators)
+            {
+                if (_orchestrators.All(x => x.Key != orchestrator))
+                {
+                    continue;
+                }
+
+                await AddOrchestratorToChannel(channelName, orchestrator);
             }
         }
 

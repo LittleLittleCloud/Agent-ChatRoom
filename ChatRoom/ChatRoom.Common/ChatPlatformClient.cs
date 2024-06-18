@@ -141,10 +141,11 @@ public class ChatPlatformClient
     public async Task CreateChannel(
         string channelName,
         string[]? members = null,
-        ChatMsg[]? chatHistory = null)
+        ChatMsg[]? chatHistory = null,
+        string[]? orchestrators = null)
     {
         var room = _client.GetGrain<IRoomGrain>(_room);
-        await room.CreateChannel(channelName, members, chatHistory);
+        await room.CreateChannel(channelName, members, chatHistory, orchestrators);
     }
 
     public async Task AddAgentToChannel(string channelName, string agentName)
