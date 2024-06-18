@@ -33,6 +33,12 @@ public class ChatPlatformClient
         _observers.Remove(agent.Name);
     }
 
+    public async Task RegisterAgentAsync(string name, string description, bool isHuman, IRoomObserver observer)
+    {
+        var room = _client.GetGrain<IRoomGrain>(_room);
+        await room.AddAgentToRoom(name, description, isHuman, observer);
+    }
+
     public async Task RegisterOrchestratorAsync(string name, IOrchestrator orchestrator)
     {
         var observer = new OrchestratorObserver(orchestrator);

@@ -29,6 +29,11 @@ public class ChatRoomClientConfiguration
     [JsonPropertyName("workspace")]
     [Description("The workspace to store logs, checkpoints and other files. The default value is the current directory.")]
     public string Workspace { get; set; } = Environment.CurrentDirectory;
+
+    [JsonPropertyName("enable_console_app")]
+    [Description("Enable the console app for the chat room")]
+    [Default(true)]
+    public bool EnableConsoleApp { get; set; } = false;
 }
 
 public class ServerConfiguration
