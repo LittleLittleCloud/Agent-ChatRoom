@@ -5,11 +5,14 @@ import { Switch } from "./ui/switch";
 
 export function ThemeSwitch() {
     const [mounted, setMounted] = useState(false)
-    const { theme, setTheme } = useTheme()
+    const { theme, setTheme, systemTheme } = useTheme()
 
     // useEffect only runs on the client, so now we can safely show the UI
     useEffect(() => {
         setMounted(true)
+        if (theme === null && systemTheme) {
+            setTheme(systemTheme)
+        }
     }, [])
 
     if (!mounted) {

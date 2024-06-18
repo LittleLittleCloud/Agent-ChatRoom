@@ -1,4 +1,6 @@
-﻿namespace ChatRoom;
+﻿using System.Text.Json.Serialization;
+
+namespace ChatRoom;
 
 [GenerateSerializer]
 public record class AgentInfo
@@ -10,11 +12,17 @@ public record class AgentInfo
         IsHuman = isHuman;
     }
 
+    [JsonConstructor]
+    // This constructor is required for deserialization
+    private AgentInfo()
+    {
+    }
+
     [Id(0)]
-    public string Name { get; init; }
+    public string Name { get; init; } = null!;
 
     [Id(1)]
-    public string SelfDescription { get; init; }
+    public string SelfDescription { get; init; } = null!;
 
     [Id(2)]
     public bool IsHuman { get; init; } = false;

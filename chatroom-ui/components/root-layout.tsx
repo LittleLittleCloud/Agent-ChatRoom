@@ -28,7 +28,7 @@ export default function RootLayout({
             defaultTheme="light"
             attribute="class"
         >
-            <div className="justify-between px-10 py-4 w-full h-screen">
+            <div className="justify-between px-10 py-4 w-screen h-screen">
                 <TopBar onSelectedCheckpoint={onSelectedCheckpoint}  />
                 <main
                     className="h-[calc(100vh-80px)] items-center py-4 relative w-full">

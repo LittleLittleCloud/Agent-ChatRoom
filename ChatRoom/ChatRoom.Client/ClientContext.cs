@@ -8,7 +8,7 @@ public class ClientContext
 
     public string? UserName { get; set; }
 
-    public string? Description { get; set; } = "Human user";
+    public string Description { get; set; } = "Human user";
 
     /// <summary>
     /// Check if the client is connected to a channel.

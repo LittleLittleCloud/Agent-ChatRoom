@@ -3,6 +3,7 @@ using ChatRoom.Client.DTO;
 using ChatRoom.OpenAI;
 using ChatRoom.SDK;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
@@ -17,21 +18,15 @@ internal class ChatRoomConsoleApp
     private readonly string _workspacePath = null!;
     private readonly string _chatRoomContextSchemaPath = null!;
     private readonly ChatRoomClientController _controller;
-    private readonly DynamicGroupChat dynamicGroupChat;
-    private readonly RoundRobinOrchestrator _roundRobinOrchestrator;
-    private readonly HumanToAgent humanToAgent;
     private readonly ChatPlatformClient _chatPlatformClient;
-
+    private readonly ChatRoomClientConfiguration _chatRoomClientConfiguration;
     public ChatRoomConsoleApp(
         ClientContext clientContext,
-        ChatRoomClientCommandSettings settings,
+        ChatRoomClientConfiguration settings,
         IRoomObserver roomObserver,
         IClusterClient clsterClient,
         ChatRoomClientController controller,
         ChatPlatformClient chatPlatformClient,
-        DynamicGroupChat dynamicGroupChatOrchestrator,
-        RoundRobinOrchestrator roundRobinOrchestrator,
-        HumanToAgent humanToAgentOrchestrator,
         ILogger<ChatRoomConsoleApp> logger)
     {
         _logger = logger;
@@ -41,20 +36,17 @@ internal class ChatRoomConsoleApp
         _clusterClient = clsterClient;
         _clientContext = clientContext;
         _controller = controller;
-        _roundRobinOrchestrator = roundRobinOrchestrator;
-        dynamicGroupChat = dynamicGroupChatOrchestrator;
-        humanToAgent = humanToAgentOrchestrator;
         _chatPlatformClient = chatPlatformClient;
+        _chatRoomClientConfiguration = settings;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         PrintUsage();
-        var room = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await room.AddAgentToRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
-        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(RoundRobinOrchestrator), _roundRobinOrchestrator);
-        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(DynamicGroupChat), dynamicGroupChat);
-        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(HumanToAgent), humanToAgent);
+        //await _chatPlatformClient.RegisterAgentAsync(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
+        //await _chatPlatformClient.RegisterOrchestratorAsync(nameof(RoundRobinOrchestrator), _roundRobinOrchestrator);
+        //await _chatPlatformClient.RegisterOrchestratorAsync(nameof(DynamicGroupChat), dynamicGroupChat);
+        //await _chatPlatformClient.RegisterOrchestratorAsync(nameof(HumanToAgent), humanToAgent);
         await ProcessLoopAsync(_clientContext, cancellationToken);
     }
 
@@ -247,6 +239,13 @@ internal class ChatRoomConsoleApp
 
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine("[bold green]Client started.[/]");
+        AnsiConsole.MarkupLine($"[bold green]Workspace:[/] {_workspacePath}");
+        if (_chatRoomClientConfiguration.ServerConfig is ServerConfiguration)
+        {
+            AnsiConsole.MarkupLine($"[bold green]web ui is available at: {_chatRoomClientConfiguration.ServerConfig.Urls}[/]");
+        }
     }
 
     public async Task SaveContextToWorkspace(ClientContext context)

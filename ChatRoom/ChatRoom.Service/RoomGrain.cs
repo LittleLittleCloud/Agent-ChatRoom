@@ -18,6 +18,7 @@ public class RoomGrain : Grain, IRoomGrain
         : base()
     {
         _logger = logger;
+        this.DelayDeactivation(TimeSpan.MaxValue);
     }
 
     public virtual string GrainKey => this.GetPrimaryKeyString();
@@ -79,7 +80,8 @@ public class RoomGrain : Grain, IRoomGrain
     public async Task CreateChannel(
         string channelName,
         string[]? members = null,
-        ChatMsg[]? history = null)
+        ChatMsg[]? history = null,
+        string[]? orchestrators = null)
     {
         if (_channelNames.Any(x => x == channelName))
         {
@@ -111,6 +113,20 @@ public class RoomGrain : Grain, IRoomGrain
             }
         }
 
+        if (orchestrators is { Length: > 0 })
+        {
+            _logger?.LogInformation("Adding orchestrators to channel {ChannelName}", channelName);
+            foreach (var orchestrator in orchestrators)
+            {
+                if (_orchestrators.All(x => x.Key != orchestrator))
+                {
+                    continue;
+                }
+
+                await AddOrchestratorToChannel(channelName, orchestrator);
+            }
+        }
+
         _logger?.LogInformation("Channel {ChannelName} created", channelName);
     }
 
@@ -135,6 +151,7 @@ public class RoomGrain : Grain, IRoomGrain
             await channelGrain.RemoveAgentFromChannel(agent.Key.Name);
         }
 
+        await channelGrain.Delete();
         _channelNames.Remove(channel);
     }
 

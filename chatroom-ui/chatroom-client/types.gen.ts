@@ -95,6 +95,8 @@ export type SendTextMessageToChannelRequest = {
     message?: ChatMsg;
 };
 
+export type GetApiChatRoomClientVersionResponse = string;
+
 export type PostApiChatRoomClientSendTextMessageToChannelData = {
     requestBody?: SendTextMessageToChannelRequest;
 };
@@ -231,6 +233,16 @@ export type PostApiChatRoomClientEditChannelNameData = {
 export type PostApiChatRoomClientEditChannelNameResponse = unknown;
 
 export type $OpenApiTs = {
+    '/api/ChatRoomClient/Version': {
+        get: {
+            res: {
+                /**
+                 * OK
+                 */
+                200: string;
+            };
+        };
+    };
     '/api/ChatRoomClient/SendTextMessageToChannel': {
         post: {
             req: PostApiChatRoomClientSendTextMessageToChannelData;

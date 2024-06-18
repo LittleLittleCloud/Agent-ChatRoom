@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using System.IO;
+using System.Reflection;
 
 namespace ChatRoom.Client;
 
@@ -44,6 +45,21 @@ public class ChatRoomClientController : Controller
         _consoleRoomObserver = consoleRoomObserver;
         _config = config ?? new ChatRoomClientConfiguration();
         _chatPlatformClient = chatPlatformClient ?? new ChatPlatformClient(_clusterClient, _config.RoomConfig.Room);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<string>> Version()
+    {
+        _logger?.LogInformation("Getting version");
+
+        var assembly = Assembly.GetExecutingAssembly();
+        var version = assembly.GetName().Version;
+
+        // return major.minor.patch
+
+        var versionString = $"{version!.Major}.{version.Minor}.{version.Build}";
+
+        return new OkObjectResult(versionString);
     }
 
     [HttpPost]
@@ -124,10 +140,10 @@ public class ChatRoomClientController : Controller
         foreach (var channel in workspaceConfiguration.Channels)
         {
             var channelName = channel.Key;
-            var channelMembers = channel.Value;
+            var channelInfo = channel.Value;
             var channelHistory = workspaceConfiguration.ChatHistory.TryGetValue(channelName, out var history) ? history : null;
-            await roomGrain.CreateChannel(channelName, channelMembers, channelHistory);
-            _logger?.LogInformation("Restored channel {ChannelName} with {MemberCount} members and {HistoryCount} history items", channelName, channelMembers.Count(), channelHistory?.Count() ?? 0);
+            await _chatPlatformClient.CreateChannel(channelName, channelInfo.Members.Select(m => m.Name).ToArray(), channelHistory, channelInfo.Orchestrators.ToArray());
+            _logger?.LogInformation("Restored channel {ChannelName} with {MemberCount} members and {HistoryCount} history items", channelName, channelInfo.Members.Count(), channelHistory?.Count() ?? 0);
         }
 
         return new OkResult();
@@ -141,19 +157,18 @@ public class ChatRoomClientController : Controller
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(room);
         var channels = await roomGrain.GetChannels();
         Dictionary<string, ChatMsg[]> chatHistory = new();
-        Dictionary<string, string[]> channelMembers = new();
+        Dictionary<string, ChannelInfo> channelInfos = new();
         foreach (var channel in channels)
         {
-            var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channel.Name);
-            var history = await channelGrain.ReadHistory(100);
+            var history = await _chatPlatformClient.GetChannelChatHistory(channel.Name, 1000); // TODO: make this configurable (e.g. 1000 messages per channel
             chatHistory[channel.Name] = history.ToArray();
-            var members = await channelGrain.GetMembers();
-            channelMembers[channel.Name] = members.Select(m => m.Name).ToArray();
+            var members = await _chatPlatformClient.GetChannelMembers(channel.Name);
+            channelInfos[channel.Name] = await _chatPlatformClient.GetChannelInfo(channel.Name);
         }
 
         var workspaceConfiguration = new ChatRoomContext
         {
-            Channels = channelMembers,
+            Channels = channelInfos,
             ChatHistory = chatHistory,
         };
 

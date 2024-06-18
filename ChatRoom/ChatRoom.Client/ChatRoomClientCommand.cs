@@ -24,10 +24,6 @@ public class ChatRoomClientCommandSettings : CommandSettings
     [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json")]
     [CommandOption("-c|--config <CONFIG>")]
     public string? ConfigFile { get; init; } = null;
-
-    [Description("The workspace to store logs, checkpoints and other files. The default value is the current directory.")]
-    [CommandOption("-w|--workspace <WORKSPACE>")]
-    public string Workspace { get; init; } = Environment.CurrentDirectory;
 }
 
 public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
@@ -47,7 +43,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             ? JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(command.ConfigFile))!
             : new ChatRoomClientConfiguration();
 
-        var workspace = command.Workspace;
+        var workspace = config.Workspace;
         if (!Directory.Exists(workspace))
         {
             Directory.CreateDirectory(workspace);
@@ -137,24 +133,14 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                  .UseEnvironment(serverConfig.Environment)
                  .UseUrls(serverConfig.Urls)
                  .UseStartup<Startup>();
-
-                 AnsiConsole.MarkupLine($"web ui is available at: [bold blue]{serverConfig.Urls}[/]");
              });
         }
 
         var host = hostBuilder.Build();
 
-        await host.StartAsync();
         var sp = host.Services;
-        var logger = sp.GetRequiredService<ILogger<ChatRoomClientCommand>>();
-        logger.LogInformation("Client started.");
-        logger.LogInformation($"Workspace: {workspace}");
-        logger.LogInformation($"client log is saved to: {Path.Combine(workspace, "logs", clientLogPath)}");
-        AnsiConsole.MarkupLine("[bold green]Client started.[/]");
-        AnsiConsole.MarkupLine($"[bold green]Workspace:[/] {workspace}");
-        AnsiConsole.MarkupLine($"[bold green]client log is saved to:[/] {Path.Combine(workspace, "logs", clientLogPath)}");
         var lifetimeManager = sp.GetRequiredService<IHostApplicationLifetime>();
-
+        await host.StartAsync();
         await AnsiConsole.Status()
             .StartAsync("initializing...", async ctx =>
             {
@@ -166,8 +152,38 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 }
                 while (!lifetimeManager.ApplicationStarted.IsCancellationRequested);
             });
-        var consoleChatRoomService = sp.GetRequiredService<ChatRoomConsoleApp>();
-        await consoleChatRoomService.StartAsync(CancellationToken.None);
+
+
+        var logger = sp.GetRequiredService<ILogger<ChatRoomClientCommand>>();
+
+        // configure chatroom client
+        var chatPlatformClient = sp.GetRequiredService<ChatPlatformClient>();
+        var observerRef = sp.GetRequiredService<IRoomObserver>();
+        var roudRobinOrchestrator = sp.GetRequiredService<RoundRobinOrchestrator>();
+        var humanToAgent = sp.GetRequiredService<HumanToAgent>();
+        var dynamicGroupChat = sp.GetRequiredService<DynamicGroupChat>();
+
+        await chatPlatformClient.RegisterOrchestratorAsync("RoundRobin", roudRobinOrchestrator);
+        await chatPlatformClient.RegisterOrchestratorAsync("HumanToAgent", humanToAgent);
+        await chatPlatformClient.RegisterOrchestratorAsync("DynamicGroupChat", dynamicGroupChat);
+        await chatPlatformClient.RegisterAgentAsync(config.YourName, clientContext.Description, true, observerRef);
+        logger.LogInformation("Client started.");
+        logger.LogInformation($"Workspace: {workspace}");
+        logger.LogInformation($"client log is saved to: {Path.Combine(workspace, "logs", clientLogPath)}");
+        if (config.ServerConfig is ServerConfiguration)
+        {
+            logger.LogInformation($"web ui is available at: {config.ServerConfig.Urls}");
+        }
+
+        if (config.EnableConsoleApp)
+        {
+            var consoleApp = sp.GetRequiredService<ChatRoomConsoleApp>();
+            await consoleApp.StartAsync(CancellationToken.None);
+        }
+        else
+        {
+            await host.WaitForShutdownAsync();
+        }
 
         await AnsiConsole.Status()
             .StartAsync("shutting down...", async ctx =>

@@ -62,6 +62,11 @@
     "workspace": {
       "type": "string",
       "description": "The workspace to store logs, checkpoints and other files. The default value is the current directory."
+    },
+    "enable_console_app": {
+      "type": "boolean",
+      "description": "Enable the console app for the chat room",
+      "default": true
     }
   },
   "$defs": {

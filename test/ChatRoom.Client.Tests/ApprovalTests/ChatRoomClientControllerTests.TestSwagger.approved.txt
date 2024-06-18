@@ -5,6 +5,35 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/ChatRoomClient/Version": {
+      "get": {
+        "tags": [
+          "ChatRoomClient"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ChatRoomClient/SendTextMessageToChannel": {
       "post": {
         "tags": [
