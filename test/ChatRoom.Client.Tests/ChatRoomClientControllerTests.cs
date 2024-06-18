@@ -89,7 +89,8 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     {
         var observerMock = Mock.Of<ConsoleRoomObserver>();
         var observerRef = _cluster.Client.CreateObjectReference<IRoomObserver>(observerMock);
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock);
+        var client = new ChatPlatformClient(_cluster.Client, nameof(ChatRoomClientControllerTests));
+        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock, client);
         var roomGrain = _cluster.Client.GetGrain<IRoomGrain>(nameof(ChatRoomClientControllerTests));
         var testAgentName = "testAgent";
         await roomGrain.AddAgentToRoom(testAgentName, "test", true, observerRef);

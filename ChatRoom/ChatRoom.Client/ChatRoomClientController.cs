@@ -202,8 +202,8 @@ public class ChatRoomClientController : Controller
             return new BadRequestObjectResult("You are not in a room");
         }
 
-        var roomGrain = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        var channels = await roomGrain.GetChannels();
+        var channels = await _chatPlatformClient.GetChannels();
+
         return new OkObjectResult(channels);
     }
 
