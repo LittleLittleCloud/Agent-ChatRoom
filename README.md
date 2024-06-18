@@ -3,13 +3,15 @@
 
 [![NuGet version](https://badge.fury.io/nu/ChatRoom.SDK.svg)](https://badge.fury.io/nu/ChatRoom.Client) | [website](https://littlelittlecloud.github.io/Agent-ChatRoom/) | Join our [Discord](https://discord.gg/UYwcVfGaeq)
 
+![Agent Chatroom](website/images/chatroom-webui.png)
+
 ## 🌟 Highlights
-- **Multi-Agent Chat**: Chat with multiple agents simultaneously.
+- **Multi-Agent WebUI**: Chat with multiple agents simultaneously in a web browser.
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 - **Extensible**: Create your own agents and integrate them into the chatroom.
 
 ## 🚀 Quick Start
-We provide the following quick-start configuration to help you get started quickly. More configurations will be added in the future.
+We provide the following configuration to help you get started quickly. More configurations will be added in the future.
 - [Powershell-Chatroom](https://github.com/LittleLittleCloud/Powershell-ChatRoom): chat with `ps-gpt` and `ps-runner` to help you write and run PowerShell scripts.
 
 ## 🌐 Server mode
