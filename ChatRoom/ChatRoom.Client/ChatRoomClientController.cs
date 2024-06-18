@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using System.IO;
+using System.Reflection;
 
 namespace ChatRoom.Client;
 
@@ -44,6 +45,21 @@ public class ChatRoomClientController : Controller
         _consoleRoomObserver = consoleRoomObserver;
         _config = config ?? new ChatRoomClientConfiguration();
         _chatPlatformClient = chatPlatformClient ?? new ChatPlatformClient(_clusterClient, _config.RoomConfig.Room);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<string>> Version()
+    {
+        _logger?.LogInformation("Getting version");
+
+        var assembly = Assembly.GetExecutingAssembly();
+        var version = assembly.GetName().Version;
+
+        // return major.minor.patch
+
+        var versionString = $"{version!.Major}.{version.Minor}.{version.Build}";
+
+        return new OkObjectResult(versionString);
     }
 
     [HttpPost]
