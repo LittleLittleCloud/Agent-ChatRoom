@@ -18,10 +18,43 @@ dotnet tool install -g ChatRoom.OpenAI
 ```
 
 2. Create configuration file for `ChatRoom.OpenAI` and save it to `chatroom-openai.json`
-[!code-json[](./configuration/chatroom-openai.json)]
+
+```json
+{
+    "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_openai_configuration_schema.json",
+    "name": "openai",
+    "system_message": "You are a helpful AI assistant",
+    "openai_config": {
+        "llm_type": "OpenAI",
+        "openai_api_key": "xxx",
+        "openai_model_id": "gpt-3.5-turbo"
+    }
+}
+```
 
 3. Create configuration file for `ChatRoom.Client` and save it to `chatroom-client.json`
-[!code-json[](./configuration/chatroom-client.json)]
+```json
+{
+    "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "xxx",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "enable_console_app": true,
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
+    "agent_extensions": [
+        {
+            "name": "OpenAI",
+            "command": "chatroom-openai -c chatroom-openai.json"
+        }
+    ]
+}
+```
 
 4. Start the `ChatRoom.Client` with the following command:
 ```bash
