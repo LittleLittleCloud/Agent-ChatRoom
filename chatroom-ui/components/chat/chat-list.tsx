@@ -27,6 +27,7 @@ export function ChatList({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [orchstratorSettings, setOrchstratorSettings] = React.useState<OrchestrationSettings>({ orchestrator: undefined, maxReply: 10 });
   const [remainingTurns, setRemainingTurns] = React.useState<number>(0);
+  const [eventSource, setEventSource] = React.useState<EventSource | undefined>(undefined);
   const onReloadMessages = async () => {
     console.log("Reloading messages");
     var data = await postApiChatRoomClientGetChannelChatHistory({
@@ -104,6 +105,28 @@ export function ChatList({
       return;
     }
     setRemainingTurns(remainingTurn);
+
+    var response = await postApiChatRoomClientGenerateNextReply({
+      requestBody: {
+        channelName: channel.name,
+        chatMsgs: msgs,
+        candidates: channel.members.map((member) => member.name!),
+        orchestrator: orchstratorSettings.orchestrator,
+      },
+    });
+
+    console.log(response);
+    if (response.message === undefined || response.message === null || remainingTurn <= 0) {
+      toast("No more received messages, it's your turn to reply now.");
+      setRemainingTurns(0);
+    }
+    else
+    {
+      setRemainingTurns(remainingTurn - 1);
+    }
+  }
+
+  useEffect(() => {
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
     es.addEventListener("message", async (event) => {
       const newMessage: ChatMsg = JSON.parse(event.data);
@@ -118,29 +141,13 @@ export function ChatList({
       console.log("Error", event);
     }
 
-    var response = await postApiChatRoomClientGenerateNextReply({
-      requestBody: {
-        channelName: channel.name,
-        chatMsgs: msgs,
-        candidates: channel.members.map((member) => member.name!),
-        orchestrator: orchstratorSettings.orchestrator,
-      },
-    });
-
-    console.log(response);
-    es?.close();
-    if (response.message === undefined || response.message === null || remainingTurn <= 0) {
-      toast("No more received messages, it's your turn to reply now.");
-      setRemainingTurns(0);
-    }
-    else
-    {
-      setRemainingTurns(remainingTurn - 1);
-    }
-  }
-
-  useEffect(() => {
+    setEventSource(es);
     onReloadMessages();
+
+    return () => {
+      console.log("Closing event source");
+      es.close();
+    }
   }, [channel]);
 
   React.useEffect(() => {
