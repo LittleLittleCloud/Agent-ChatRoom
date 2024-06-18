@@ -25,7 +25,7 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         _logger = logger;
         _config = config;
-        var dynamicGroupChatOrchestrator = new HumanToAgent(config.OpenAIConfiguration);
+        this.DelayDeactivation(TimeSpan.MaxValue);
     }
 
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
@@ -33,6 +33,12 @@ internal class ChannelGrain : Grain, IChannelGrain
         _logger.LogInformation("Channel {ChannelId} activated", this.GetPrimaryKeyString());
         
         await base.OnActivateAsync(cancellationToken);
+    }
+
+    public async Task Delete()
+    {
+       _logger.LogInformation("Channel {ChannelId} deactivated", this.GetPrimaryKeyString());
+        this.DeactivateOnIdle();
     }
 
     public async Task AddAgentToChannel(string name, string description, bool isHuman, IChannelObserver callBack)

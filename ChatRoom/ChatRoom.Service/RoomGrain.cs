@@ -18,6 +18,7 @@ public class RoomGrain : Grain, IRoomGrain
         : base()
     {
         _logger = logger;
+        this.DelayDeactivation(TimeSpan.MaxValue);
     }
 
     public virtual string GrainKey => this.GetPrimaryKeyString();
@@ -150,6 +151,7 @@ public class RoomGrain : Grain, IRoomGrain
             await channelGrain.RemoveAgentFromChannel(agent.Key.Name);
         }
 
+        await channelGrain.Delete();
         _channelNames.Remove(channel);
     }
 

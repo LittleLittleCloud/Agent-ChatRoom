@@ -34,4 +34,6 @@ public interface IChannelGrain : IGrainWithStringKey
     internal Task<ChatMsg[]> ReadHistory(int numberOfMessages);
 
     internal Task<AgentInfo[]> GetMembers();
+
+    internal Task Delete();
 }
