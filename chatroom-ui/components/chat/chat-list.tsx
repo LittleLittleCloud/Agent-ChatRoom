@@ -194,7 +194,6 @@ export function ChatList({
       }
     );
     setRemainingTurns(orchstratorSettings.maxReply);
-    await onReloadMessages(messages);
   };
 
   return (
