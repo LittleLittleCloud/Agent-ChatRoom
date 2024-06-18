@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ChatRoom.Common;
+using ChatRoom.SDK;
 using Spectre.Console;
 
 namespace ChatRoom.Client;
 
-internal class ConsoleRoomObserver : IRoomObserver
+public class ConsoleRoomObserver : IRoomObserver
 {
+    public event EventHandler<ChatMsg>? OnMessageReceived;
+    public event EventHandler<ChatMsg>? OnNotificationReceived;
+
     public Task AddMemberToChannel(ChannelInfo channel, AgentInfo agent)
     {
         return Task.CompletedTask;
@@ -48,20 +51,23 @@ internal class ConsoleRoomObserver : IRoomObserver
 
     public Task NewMessage(ChatMsg msg)
     {
-        var text = msg.Text;
-        text = text.Replace("[", "[[");
-        text = text.Replace("]", "]]");
+        var text = msg.GetContent();
+        text = text?.Replace("[", "[[");
+        text = text?.Replace("]", "]]");
+        text ??= "This message type is not supported for preview on console";
         AnsiConsole.MarkupLine(
             "[[[dim]{0}[/]]] [bold yellow]{1}:[/] {2}",
             msg.Created.LocalDateTime, msg.From!, text);
 
+        this.OnMessageReceived?.Invoke(this, msg);
         return Task.CompletedTask;
     }
 
     public Task Notification(ChatMsg msg)
     {
-        AnsiConsole.MarkupLine($"[grey]{msg.From}[/]: {msg.Text}");
+        AnsiConsole.MarkupLine($"[grey]{msg.From}[/]: {msg.GetContent() ?? "This message type is not supported for preview on console"}");
 
+        this.OnNotificationReceived?.Invoke(this, msg);
         return Task.CompletedTask;
     }
 

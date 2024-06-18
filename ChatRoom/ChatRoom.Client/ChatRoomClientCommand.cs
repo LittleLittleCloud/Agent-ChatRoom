@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ChatRoom.Common;
+using ChatRoom.OpenAI;
+using ChatRoom.SDK;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,7 +25,7 @@ public class ChatRoomClientCommandSettings : CommandSettings
     [CommandOption("-c|--config <CONFIG>")]
     public string? ConfigFile { get; init; } = null;
 
-    [Description("The workspace to store logs and other files. The default value is the current directory.")]
+    [Description("The workspace to store logs, checkpoints and other files. The default value is the current directory.")]
     [CommandOption("-w|--workspace <WORKSPACE>")]
     public string Workspace { get; init; } = Environment.CurrentDirectory;
 }
@@ -53,7 +55,6 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
         var clientContext = new ClientContext()
         {
-            CurrentChannel = "General",
             UserName = config.YourName,
             CurrentRoom = config.RoomConfig.Room,
         };
@@ -90,25 +91,54 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
 
                 serviceCollection.AddSingleton(clientContext);
+                serviceCollection.AddSingleton<ConsoleRoomObserver>();
+                serviceCollection.AddSingleton<RoundRobinOrchestrator>();
                 serviceCollection.AddSingleton(sp =>
                 {
-                    var roomObserver = new ConsoleRoomObserver();
+                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
+
+                    return new HumanToAgent(settings.ChannelConfig.OpenAIConfiguration);
+                });
+                serviceCollection.AddSingleton(sp =>
+                {
+                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
+
+                    return new DynamicGroupChat(settings.ChannelConfig.OpenAIConfiguration);
+                });
+                serviceCollection.AddSingleton(sp =>
+                {
+                    var clusterClient = sp.GetRequiredService<IClusterClient>();
+                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
+                    var chatPlatformClient = new ChatPlatformClient(clusterClient, settings.RoomConfig.Room);
+                    return chatPlatformClient;
+                });
+                serviceCollection.AddSingleton(sp =>
+                {
+                    var roomObserver = sp.GetRequiredService<ConsoleRoomObserver>();
                     var clusterClient = sp.GetRequiredService<IClusterClient>();
                     var roomObserverRef = clusterClient.CreateObjectReference<IRoomObserver>(roomObserver);
                     return roomObserverRef;
                 });
                 serviceCollection.AddSingleton<ChatRoomClientController>();
-                serviceCollection.AddSingleton<ConsoleChatRoomService>();
+                serviceCollection.AddSingleton<ChatRoomConsoleApp>();
             });
 
         if (config.ServerConfig is ServerConfiguration serverConfig)
         {
             hostBuilder.ConfigureWebHostDefaults(builder =>
              {
+                 var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                 var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? Environment.CurrentDirectory;
+                 var webRoot = Path.Combine(assemblyDirectory, "wwwroot");
+                 Console.WriteLine($"web root: {webRoot}");
                  builder
+                 .UseWebRoot(webRoot)
+                 .UseContentRoot(workspace)
                  .UseEnvironment(serverConfig.Environment)
                  .UseUrls(serverConfig.Urls)
                  .UseStartup<Startup>();
+
+                 AnsiConsole.MarkupLine($"web ui is available at: [bold blue]{serverConfig.Urls}[/]");
              });
         }
 
@@ -121,6 +151,8 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         logger.LogInformation($"Workspace: {workspace}");
         logger.LogInformation($"client log is saved to: {Path.Combine(workspace, "logs", clientLogPath)}");
         AnsiConsole.MarkupLine("[bold green]Client started.[/]");
+        AnsiConsole.MarkupLine($"[bold green]Workspace:[/] {workspace}");
+        AnsiConsole.MarkupLine($"[bold green]client log is saved to:[/] {Path.Combine(workspace, "logs", clientLogPath)}");
         var lifetimeManager = sp.GetRequiredService<IHostApplicationLifetime>();
 
         await AnsiConsole.Status()
@@ -134,7 +166,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 }
                 while (!lifetimeManager.ApplicationStarted.IsCancellationRequested);
             });
-        var consoleChatRoomService = sp.GetRequiredService<ConsoleChatRoomService>();
+        var consoleChatRoomService = sp.GetRequiredService<ChatRoomConsoleApp>();
         await consoleChatRoomService.StartAsync(CancellationToken.None);
 
         await AnsiConsole.Status()

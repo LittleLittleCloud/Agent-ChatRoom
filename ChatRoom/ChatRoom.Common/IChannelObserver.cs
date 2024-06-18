@@ -1,8 +1,8 @@
 ﻿using Orleans.Concurrency;
 
-namespace ChatRoom.Common;
+namespace ChatRoom.SDK;
 
-public interface IChannelObserver : IOrchestratorObserver, INotificationObserver
+public interface IChannelObserver : INotificationObserver
 {
     [OneWay]
     Task JoinChannel(AgentInfo agent, ChannelInfo channelInfo);

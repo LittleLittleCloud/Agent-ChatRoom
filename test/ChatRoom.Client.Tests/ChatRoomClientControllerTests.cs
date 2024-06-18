@@ -7,7 +7,7 @@ using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
 using ChatRoom.Client.DTO;
-using ChatRoom.Common;
+using ChatRoom.SDK;
 using ChatRoom.Room;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
@@ -51,9 +51,10 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
 
                 var schemaFile = "chatroom_client_swagger_schema.json";
                 var schemaFilePath = Path.Join("Schema", schemaFile);
-                var schema = File.ReadAllText(schemaFilePath);
-
-                result.Trim().Should().BeEquivalentTo(schema.Trim());
+                var schemaJson = File.ReadAllText(schemaFilePath);
+                var schema = JObject.Parse(schemaJson).ToString();
+                var resultJson = JObject.Parse(result).ToString();
+                resultJson.Should().BeEquivalentTo(schema);
             }
         }
     }
@@ -61,8 +62,8 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     [Fact]
     public async Task ItCreateAndRemoveChannelTestAsync()
     {
-        var observerMock = Mock.Of<IRoomObserver>();
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock);
+        var observerMock = Mock.Of<ConsoleRoomObserver>();
+        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock);
 
         // create nameof(ChatRoomClientControllerTests) channel
         await controller.CreateChannel(new CreateChannelRequest(nameof(ChatRoomClientControllerTests)));
@@ -86,12 +87,13 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     [Fact]
     public async Task ItAddAndRemoveAgentToChannelTestAsync()
     {
-        var observerMock = Mock.Of<IRoomObserver>();
+        var observerMock = Mock.Of<ConsoleRoomObserver>();
         var observerRef = _cluster.Client.CreateObjectReference<IRoomObserver>(observerMock);
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock);
+        var client = new ChatPlatformClient(_cluster.Client, nameof(ChatRoomClientControllerTests));
+        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock, client);
         var roomGrain = _cluster.Client.GetGrain<IRoomGrain>(nameof(ChatRoomClientControllerTests));
         var testAgentName = "testAgent";
-        await roomGrain.JoinRoom(testAgentName, "test", true, observerRef);
+        await roomGrain.AddAgentToRoom(testAgentName, "test", true, observerRef);
 
         var members = await controller.GetRoomMembers();
         var membersList = (members.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
@@ -117,7 +119,7 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
         channelMembersList!.Any(m => m.Name == testAgentName).Should().BeFalse();
 
         // test remove agent from room
-        await roomGrain.LeaveRoom(testAgentName);
+        await roomGrain.RemoveAgentFromRoom(testAgentName);
 
         members = await controller.GetRoomMembers();
         membersList = (members.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;

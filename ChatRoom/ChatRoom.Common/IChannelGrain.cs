@@ -1,20 +1,35 @@
-﻿using ChatRoom.Common;
+﻿using ChatRoom.SDK;
+using Orleans.Concurrency;
 using Orleans.Runtime;
 
 namespace ChatRoom;
 
 [Alias("IChannelGrain")]
-public interface IChannelGrain : IOrchestratorGrain, IGrainWithStringKey
+public interface IChannelGrain : IGrainWithStringKey
 {
-    Task JoinChannel(string name, string description, bool isHuman, IChannelObserver callBack);
+    Task AddAgentToChannel(string name, string description, bool isHuman, IChannelObserver callBack);
     
-    Task LeaveChannel(string name);
+    Task RemoveAgentFromChannel(string name);
+
+    Task AddOrchestratorToChannel(string name, IOrchestratorObserver orchestrator);
+
+    Task RemoveOrchestratorFromChannel(string name);
 
     Task SendNotification(ChatMsg msg);
 
+    Task ClearHistory();
+
+    Task<ChannelInfo> GetChannelInfo();
+
+    internal Task<ChatMsg?> GenerateNextReply(string[]? candidates = null, ChatMsg[]? msgs = null, string? orchestrator = null);
+
     internal Task InitializeChatHistory(ChatMsg[] history);
 
-    internal Task<bool> Message(ChatMsg msg);
+    internal Task SendMessage(ChatMsg msg);
+
+    internal Task DeleteMessage(long msgId);
+
+    internal Task EditTextMessage(long msgId, string newText);
 
     internal Task<ChatMsg[]> ReadHistory(int numberOfMessages);
 

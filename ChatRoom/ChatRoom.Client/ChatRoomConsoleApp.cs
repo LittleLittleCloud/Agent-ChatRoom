@@ -1,13 +1,14 @@
 ﻿using System.Text.Json;
 using ChatRoom.Client.DTO;
-using ChatRoom.Common;
+using ChatRoom.OpenAI;
+using ChatRoom.SDK;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
 namespace ChatRoom.Client;
 
-public class ConsoleChatRoomService
+internal class ChatRoomConsoleApp
 {
     private readonly IClusterClient _clusterClient;
     private ClientContext _clientContext;
@@ -16,14 +17,22 @@ public class ConsoleChatRoomService
     private readonly string _workspacePath = null!;
     private readonly string _chatRoomContextSchemaPath = null!;
     private readonly ChatRoomClientController _controller;
+    private readonly DynamicGroupChat dynamicGroupChat;
+    private readonly RoundRobinOrchestrator _roundRobinOrchestrator;
+    private readonly HumanToAgent humanToAgent;
+    private readonly ChatPlatformClient _chatPlatformClient;
 
-    public ConsoleChatRoomService(
+    public ChatRoomConsoleApp(
         ClientContext clientContext,
         ChatRoomClientCommandSettings settings,
         IRoomObserver roomObserver,
         IClusterClient clsterClient,
         ChatRoomClientController controller,
-        ILogger<ConsoleChatRoomService> logger)
+        ChatPlatformClient chatPlatformClient,
+        DynamicGroupChat dynamicGroupChatOrchestrator,
+        RoundRobinOrchestrator roundRobinOrchestrator,
+        HumanToAgent humanToAgentOrchestrator,
+        ILogger<ChatRoomConsoleApp> logger)
     {
         _logger = logger;
         _workspacePath = settings.Workspace;
@@ -32,33 +41,20 @@ public class ConsoleChatRoomService
         _clusterClient = clsterClient;
         _clientContext = clientContext;
         _controller = controller;
+        _roundRobinOrchestrator = roundRobinOrchestrator;
+        dynamicGroupChat = dynamicGroupChatOrchestrator;
+        humanToAgent = humanToAgentOrchestrator;
+        _chatPlatformClient = chatPlatformClient;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         PrintUsage();
         var room = _clusterClient.GetGrain<IRoomGrain>(_clientContext.CurrentRoom);
-        await room.JoinRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
-
-        // restore previous state
-        if (File.Exists(_chatRoomContextSchemaPath))
-        {
-            AnsiConsole.MarkupLine("[bold red]Restoring workspace from {0}[/]", _workspacePath);
-            var schema = JsonSerializer.Deserialize<ChatRoomContextSchemaV0>(File.ReadAllText(_chatRoomContextSchemaPath))!;
-            var workspaceConfiguration = new ChatRoomContext(schema);
-            foreach (var channel in workspaceConfiguration.Channels)
-            {
-                var channelName = channel.Key;
-                var channelMembers = channel.Value;
-                var channelHistory = workspaceConfiguration.ChatHistory.TryGetValue(channelName, out var history) ? history : null;
-                await room.CreateChannel(channelName, channelMembers, channelHistory);
-                _logger.LogInformation("Restored channel {ChannelName} with {MemberCount} members and {HistoryCount} history items", channelName, channelMembers.Count(), channelHistory?.Count() ?? 0);
-            }
-
-            _clientContext.CurrentChannel = workspaceConfiguration.CurrentChannel;
-        }
-
-        await JoinChannel(_clientContext.CurrentChannel!);
+        await room.AddAgentToRoom(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
+        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(RoundRobinOrchestrator), _roundRobinOrchestrator);
+        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(DynamicGroupChat), dynamicGroupChat);
+        await _chatPlatformClient.RegisterOrchestratorAsync(nameof(HumanToAgent), humanToAgent);
         await ProcessLoopAsync(_clientContext, cancellationToken);
     }
 
@@ -95,6 +91,7 @@ public class ConsoleChatRoomService
             {
                 "/lm" => ShowCurrentRoomMembers(),
                 "/lc" => ShowCurrentRoomChannels(context),
+                "/lo" => ShowCurrentRoomOrchestrators(),
                 _ => null
             } is Task queryTask)
             {
@@ -140,6 +137,7 @@ public class ConsoleChatRoomService
                 "/h" => ShowCurrentChannelHistory(context),
                 "/m" => ShowChannelMembers(),
                 "/s" => SaveContextToWorkspace(context),
+                "/l" => LoadCheckpoint(),
                 _ => null
             } is Task task)
             {
@@ -154,6 +152,51 @@ public class ConsoleChatRoomService
                 await SendMessage(context, input);
             }
         } while (input is not "/exit" && !ct.IsCancellationRequested);
+    }
+
+    private async Task ShowCurrentRoomOrchestrators()
+    {
+        var orchestrators = await _chatPlatformClient.GetOrchestrators();
+
+        if (orchestrators is null)
+        {
+            AnsiConsole.MarkupLine("[bold red]No orchestrators found[/]");
+            return;
+        }
+
+        AnsiConsole.Write(new Rule($"Orchestrators for '{_clientContext.CurrentRoom}'")
+        {
+            Justification = Justify.Center,
+            Style = Style.Parse("darkgreen")
+        });
+
+        foreach (var orchestrator in orchestrators)
+        {
+            AnsiConsole.MarkupLine("[bold yellow]{0}[/]", orchestrator);
+        }
+    }
+
+    private async Task LoadCheckpoint()
+    {
+        // list all checkpoints
+        var checkpointResponses = await _controller.GetRoomCheckpoints();
+        var checkpoints = (checkpointResponses.Result as OkObjectResult)?.Value as IEnumerable<string>;
+
+        if (checkpoints is not null && checkpoints.Any())
+        {
+            AnsiConsole.MarkupLine($"[bold red]Found {checkpoints.Count()} checkpoints[/]");
+            foreach (var checkpoint in checkpoints)
+            {
+                // encode the checkpoint
+                Console.WriteLine(checkpoint);
+            }
+
+            // load the latest checkpoint
+            var latestCheckpoint = checkpoints.First();
+            await _controller.LoadCheckpoint(latestCheckpoint);
+
+            Console.WriteLine("Checkpoint loaded.");
+        }
     }
 
     private void PrintUsage()
@@ -182,6 +225,7 @@ public class ConsoleChatRoomService
            + "[bold fuchsia]/s[/] to save the channel information and history to the workspace\n"
            + "[bold fuchsia]/lm[/] to query [underline green]members[/] in the room\n"
            + "[bold fuchsia]/lc[/] to query [underline green]all channels[/] in the room\n"
+           + "[bold fuchsia]/lo[/] to query [underline green]orchestrators[/] in the room\n"
            + "[bold fuchsia]/rc[/] [aqua]<channel>[/] to [underline green]remove channel[/] from the room\n"
            + "[bold fuchsia]/am[/] [aqua]<member>[/] to [underline green]add member[/] to the current channel\n"
            + "[bold fuchsia]/rm[/] [aqua]<member>[/] to [underline green]remove member[/] from the current channel\n"
@@ -207,32 +251,7 @@ public class ConsoleChatRoomService
 
     public async Task SaveContextToWorkspace(ClientContext context)
     {
-        var room = _clusterClient.GetGrain<IRoomGrain>(context.CurrentRoom);
-        var channels = await room.GetChannels();
-        Dictionary<string, ChatMsg[]> chatHistory = new();
-        Dictionary<string, string[]> channelMembers = new();
-        foreach (var channel in channels)
-        {
-            var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channel.Name);
-            var history = await channelGrain.ReadHistory(100);
-            chatHistory[channel.Name] = history.ToArray();
-            var members = await channelGrain.GetMembers();
-            channelMembers[channel.Name] = members.Select(m => m.Name).ToArray();
-        }
-
-        var workspaceConfiguration = new ChatRoomContext
-        {
-            Channels = channelMembers,
-            ChatHistory = chatHistory,
-            CurrentChannel = context.CurrentChannel!,
-        };
-
-        var schema = workspaceConfiguration.ToSchema();
-        var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
-
-        _logger.LogInformation("Saving workspace to {WorkspacePath}", _workspacePath);
-        AnsiConsole.MarkupLine("[bold red]Saving workspace to {0}[/]", _workspacePath);
-        await File.WriteAllTextAsync(_chatRoomContextSchemaPath, json);
+        await this._controller.SaveCheckpoint();
     }
 
     private async Task ShowChannelMembers()
@@ -313,7 +332,7 @@ public class ConsoleChatRoomService
 
         foreach (var channel in channels)
         {
-            AnsiConsole.MarkupLine("[bold yellow]{0}[/]", channel);
+            AnsiConsole.MarkupLine("[bold yellow]{0}[/]", channel.Name);
         }
 
         AnsiConsole.Write(new Rule()
@@ -342,8 +361,9 @@ public class ConsoleChatRoomService
 
         foreach (var chatMsg in history)
         {
-            var encodedText = chatMsg.Text.Replace("[", "[[");
-            encodedText = encodedText.Replace("]", "]]");
+            var encodedText = chatMsg.GetContent()?.Replace("[", "[[");
+            encodedText = encodedText?.Replace("]", "]]");
+            encodedText ??= "unsupported format";
             AnsiConsole.MarkupLine("[[[dim]{0}[/]]] [bold yellow]{1}:[/] {2}",
                 chatMsg.Created.LocalDateTime, chatMsg.From!, encodedText);
         }
@@ -368,7 +388,19 @@ public class ConsoleChatRoomService
     {
         await AnsiConsole.Status().StartAsync("Joining channel...", async ctx =>
         {
-            await _controller.JoinChannel(new JoinChannelRequest(channelName, true));
+            var channels = await _chatPlatformClient.GetChannels();
+            if (!channels.Any(x => x.Name == channelName))
+            {
+                // create the channel
+                await _chatPlatformClient.CreateChannel(channelName);
+            }
+
+            var members = await _chatPlatformClient.GetChannelMembers(channelName);
+            if (!members.Any(x => x.Name == _clientContext.UserName))
+            {
+                await _chatPlatformClient.AddAgentToChannel(channelName, _clientContext.UserName!);
+            }
+
             _clientContext.CurrentChannel = channelName;
         });
     }

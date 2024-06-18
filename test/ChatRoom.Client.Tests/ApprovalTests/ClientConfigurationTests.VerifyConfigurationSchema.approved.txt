@@ -58,6 +58,10 @@
         }
       },
       "description": "The configuration for the server. If provided, the client will start a server for chatroom service"
+    },
+    "workspace": {
+      "type": "string",
+      "description": "The workspace to store logs, checkpoints and other files. The default value is the current directory."
     }
   },
   "$defs": {

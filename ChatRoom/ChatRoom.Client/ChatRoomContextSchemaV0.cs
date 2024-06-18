@@ -59,4 +59,9 @@ public class ChatRoomContext
             CurrentChannel = this.CurrentChannel
         };
     }
+
+    public static ChatRoomContext FromSchema(ChatRoomContextSchemaV0 schema)
+    {
+        return new ChatRoomContext(schema);
+    }
 }

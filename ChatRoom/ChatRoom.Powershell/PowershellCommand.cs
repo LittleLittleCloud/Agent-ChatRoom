@@ -31,8 +31,8 @@ public class PowershellCommand : ChatRoomAgentCommand
             : new PowershellConfiguration();
 
         var host = Host.CreateDefaultBuilder()
-            .AddAgentAsync(async (_) => AgentFactory.CreatePwshDeveloperAgent(config.GPT), config.GPT.Description)
-            .AddAgentAsync(async (_) => new PowershellRunnerAgent(config.Runner.Name, config.Runner.LastNMessage), config.Runner.Description)
+            .AddAgentAsync(AgentFactory.CreatePwshDeveloperAgent(config.GPT), config.GPT.Description)
+            .AddAgentAsync(new PowershellRunnerAgent(config.Runner.Name, config.Runner.LastNMessage), config.Runner.Description)
             .UseChatRoom(roomName: settings.Room ?? "room", port: settings.Port ?? 30000)
             .Build();
 

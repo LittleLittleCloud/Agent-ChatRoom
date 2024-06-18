@@ -24,7 +24,11 @@ public class ChatRoomClientConfiguration
 
     [JsonPropertyName("server_config")]
     [Description("The configuration for the server. If provided, the client will start a server for chatroom service")]
-    public ServerConfiguration? ServerConfig { get; set; } = null;
+    public ServerConfiguration? ServerConfig { get; set; } = new ServerConfiguration();
+
+    [JsonPropertyName("workspace")]
+    [Description("The workspace to store logs, checkpoints and other files. The default value is the current directory.")]
+    public string Workspace { get; set; } = Environment.CurrentDirectory;
 }
 
 public class ServerConfiguration

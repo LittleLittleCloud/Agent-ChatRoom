@@ -14,4 +14,4 @@ OPTIONS:
     -h, --help                     Prints help information
     -v, --version                  Prints version information
     -c, --config <CONFIG>          Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json
-    -w, --workspace <WORKSPACE>    The workspace to store logs and other files. The default value is the current directory
+    -w, --workspace <WORKSPACE>    The workspace to store logs, checkpoints and other files. The default value is the current directory

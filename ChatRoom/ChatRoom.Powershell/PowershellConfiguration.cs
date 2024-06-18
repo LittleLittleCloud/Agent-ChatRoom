@@ -43,7 +43,7 @@ public class PowershellGPTConfiguration
 
     [Description("OpenAI configuration")]
     [JsonPropertyName("openai_config")]
-    public OpenAIClientConfiguration? OpenAIConfiguration { get; set; }
+    public OpenAIClientConfiguration? OpenAIConfiguration { get; set; } = new OpenAIClientConfiguration();
 }
 
 public class PowershellRunnerConfiguration

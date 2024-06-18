@@ -110,3 +110,104 @@ public record class RemoveAgentFromChannelRequest
 
     public string AgentName { get; init; }
 }
+
+public record class EditTextMessageRequest
+{
+    public EditTextMessageRequest(string channelName, long messageId, string newText)
+    {
+        ChannelName = channelName;
+        MessageId = messageId;
+        NewText = newText;
+    }
+
+    public string ChannelName { get; init; }
+
+    public long MessageId { get; init; }
+
+    public string NewText { get; init; }
+}
+
+public record class GenerateNextReplyRequest
+{
+    public GenerateNextReplyRequest(
+        string channelName,
+        ChatMsg[] chatMsgs, 
+        string[] candidates,
+        string? orchestrator = null)
+    {
+        ChannelName = channelName;
+        ChatMsgs = chatMsgs;
+        Candidates = candidates;
+        Orchestrator = orchestrator;
+    }
+
+    public string ChannelName { get; init; }
+
+    public ChatMsg[] ChatMsgs { get; init; }
+
+    public string[] Candidates { get; init; }
+
+    public string? Orchestrator { get; init; }
+}
+
+public record class GenerateNextReplyResponse
+{
+    public GenerateNextReplyResponse(ChatMsg? message)
+    {
+        Message = message;
+    }
+
+    public ChatMsg? Message { get; init; }
+}
+
+public record class AddOrchestratorToChannelRequest
+{
+    public AddOrchestratorToChannelRequest(string channelName, string orchestratorName)
+    {
+        ChannelName = channelName;
+        OrchestratorName = orchestratorName;
+    }
+
+    public string ChannelName { get; init; }
+
+    public string OrchestratorName { get; init; }
+}
+
+public record class RemoveOrchestratorFromChannelRequest
+{
+    public RemoveOrchestratorFromChannelRequest(string channelName, string orchestratorName)
+    {
+        ChannelName = channelName;
+        OrchestratorName = orchestratorName;
+    }
+
+    public string ChannelName { get; init; }
+
+    public string OrchestratorName { get; init; }
+}
+
+public record class CloneChannelRequest
+{
+    public CloneChannelRequest(string channelName, string newChannelName)
+    {
+        ChannelName = channelName;
+        NewChannelName = newChannelName;
+    }
+
+    public string ChannelName { get; init; }
+
+    public string NewChannelName { get; init; }
+}
+
+public record class EditChannelNameRequest
+{
+    public EditChannelNameRequest(string oldChannelName, string newChannelName)
+    {
+        OldChannelName = oldChannelName;
+        NewChannelName = newChannelName;
+    }
+
+    public string OldChannelName { get; init; }
+
+    public string NewChannelName { get; init; }
+}

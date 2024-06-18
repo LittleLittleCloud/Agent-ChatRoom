@@ -1,7 +1,7 @@
 ﻿using AutoGen.Core;
 using ChatRoom.SDK;
 
-namespace ChatRoom.Common;
+namespace ChatRoom.SDK;
 
 internal class AutoGenAgentObserver : IRoomObserver
 {
@@ -41,16 +41,12 @@ internal class AutoGenAgentObserver : IRoomObserver
     }
 
     public async Task<ChatMsg?> GenerateReplyAsync(
-        AgentInfo agent,
+        AgentInfo _,
         ChatMsg[] messages,
         ChannelInfo channelInfo)
     { 
-        if (agent.Name != _agent.Name)
-        {
-            return null;
-        }
         // convert ChatMsg to TextMessage
-        var textMessages = messages.Select(msg => new TextMessage(Role.Assistant, msg.Text, from: msg.From)).ToArray();
+        var autogenMessages = messages.Select(msg => msg.ToAutoGenMessage()).ToArray();
         var channel = _client.GetGrain<IChannelGrain>(channelInfo.Name);
         var eventHandler = new EventHandler<ChatMsg>(async (sender, msg) => await channel.SendNotification(msg));
         if (_agent is INotifyAgent notifyAgent)
@@ -58,7 +54,7 @@ internal class AutoGenAgentObserver : IRoomObserver
             notifyAgent.Notify += eventHandler;
         }
 
-        var reply = await _agent!.GenerateReplyAsync(textMessages);
+        var reply = await _agent!.GenerateReplyAsync(autogenMessages);
 
         if (_agent is INotifyAgent notifyAgent2)
         {
@@ -75,13 +71,13 @@ internal class AutoGenAgentObserver : IRoomObserver
 
     public Task Notification(ChatMsg msg)
     {
-        Console.WriteLine($"Notification: {msg.Text}");
+        Console.WriteLine($"Notification: {msg.GetContent()}");
         return Task.CompletedTask;
     }
 
     public Task NewMessage(ChatMsg msg)
     {
-        Console.WriteLine($"Message from {msg.From}: {msg.Text}");
+        Console.WriteLine($"Message from {msg.From}: {msg.GetContent()}");
         return Task.CompletedTask;
     }
 

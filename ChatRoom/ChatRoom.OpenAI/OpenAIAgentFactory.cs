@@ -36,4 +36,15 @@ public class OpenAIAgentFactory
 
         return agent;
     }
+
+    public static IAgent CreateGroupChatAdmin(OpenAIClient client, string name = "group chat admin", string modelName = "gpt-35-turbo-0125")
+    {
+        var agent = new OpenAIChatAgent(
+            openAIClient: client,
+            modelName: modelName,
+            name: name)
+            .RegisterMessageConnector();
+
+        return agent;
+    }
 }
