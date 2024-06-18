@@ -38,6 +38,8 @@ export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onClone
       }
     });
 
+    console.log("Cloned channel", channel);
+
     onCloneChannel?.(channel);
   }
   const handleEditChannelClick = (channel: ChannelInfo | undefined) => {

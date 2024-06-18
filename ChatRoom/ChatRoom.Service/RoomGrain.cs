@@ -122,6 +122,19 @@ public class RoomGrain : Grain, IRoomGrain
         }
 
         var channel = _channelNames.First(x => x == channelName);
+
+        var channelGrain = this.GrainFactory.GetGrain<IChannelGrain>(channel);
+        await channelGrain.ClearHistory();
+        foreach (var orchestrator in _orchestrators)
+        {
+            await channelGrain.RemoveOrchestratorFromChannel(orchestrator.Key);
+        }
+
+        foreach (var agent in _agents)
+        {
+            await channelGrain.RemoveAgentFromChannel(agent.Key.Name);
+        }
+
         _channelNames.Remove(channel);
     }
 
@@ -201,7 +214,7 @@ public class RoomGrain : Grain, IRoomGrain
         var oldChannelGrain = this.GrainFactory.GetGrain<IChannelGrain>(oldChannel);
         var oldChannelInfo = await oldChannelGrain.GetChannelInfo();
         var chatHistory = await oldChannelGrain.ReadHistory(1_000);
-
+        await this.DeleteChannel(newChannelName);
         await this.CreateChannel(newChannelName, oldChannelInfo.Members.Select(m => m.Name).ToArray(), chatHistory);
 
         foreach (var orchestrator in oldChannelInfo.Orchestrators)
