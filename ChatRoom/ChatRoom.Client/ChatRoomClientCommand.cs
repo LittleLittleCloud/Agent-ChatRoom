@@ -58,6 +58,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         var dateTimeNow = DateTime.Now;
         var clientLogPath = Path.Combine(workspace, "logs", $"clients-{dateTimeNow:yyyy-MM-dd_HH-mm-ss}.log");
         var debugLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] ({SourceContext}) {Message:lj}{NewLine}{Exception}";
+        var infoLogTemplate = "{Message:lj}{NewLine}{Exception}";
         var hostBuilder = Host.CreateDefaultBuilder()
             .ConfigureLogging(loggingBuilder =>
             {
@@ -68,8 +69,11 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                     .WriteTo.File(clientLogPath, outputTemplate: debugLogTemplate)
 #if DEBUG
                     .WriteTo.Console(outputTemplate: debugLogTemplate)
+#else
+                    .WriteTo.Conditional((le) => le.Level >= Serilog.Events.LogEventLevel.Information, lc => lc.Console(outputTemplate: infoLogTemplate))
 #endif
                     .CreateLogger();
+
                 loggingBuilder.AddSerilog(serilogLogger);
             })
             .UseOrleans(siloBuilder =>

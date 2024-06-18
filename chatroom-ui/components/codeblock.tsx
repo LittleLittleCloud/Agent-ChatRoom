@@ -60,19 +60,6 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
   }
     , []);
 
-  const copyToClipboard = () => {
-    if (!navigator.clipboard || !navigator.clipboard.writeText) {
-      return;
-    }
-
-    navigator.clipboard.writeText(value).then(() => {
-      setIsCopied(true);
-
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    });
-  };
   const downloadAsFile = () => {
     const fileExtension = programmingLanguages[language] || '.file';
     const suggestedFileName = `file-${generateRandomString(
@@ -101,14 +88,14 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
     URL.revokeObjectURL(url);
   };
   return (
-    <div className="relative bg-gray-500 dark:bg-gray-900 rounded-md overflow-hidden">
+    <div className="relative bg-accent rounded-md overflow-hidden">
       <div className="flex items-center justify-between py-1.5 px-4">
-        <span className="text-xs lowercase text-white">{language}</span>
+        <span className="text-xs lowercase">{language}</span>
 
         <div className="flex items-center">
           <CopyToClipboardIcon textValue={value} />
           <button
-            className="flex items-center rounded bg-none py-0.5 pl-2 text-xs text-white focus:outline-none"
+            className="flex items-center rounded bg-none py-0.5 pl-2 text-xs focus:outline-none"
             onClick={downloadAsFile}
           >
             <Download size={18} />

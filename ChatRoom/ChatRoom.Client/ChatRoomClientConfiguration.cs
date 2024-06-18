@@ -32,7 +32,7 @@ public class ChatRoomClientConfiguration
 
     [JsonPropertyName("enable_console_app")]
     [Description("Enable the console app for the chat room")]
-    [Default(true)]
+    [Default(false)]
     public bool EnableConsoleApp { get; set; } = false;
 }
 

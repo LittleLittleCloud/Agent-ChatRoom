@@ -34,7 +34,6 @@ export default function RootLayout({
                     className="h-[calc(100vh-80px)] items-center py-4 relative w-full">
                     {children}
                 </main>
-                <Toaster />
             </div>
         </ThemeProvider>
     );

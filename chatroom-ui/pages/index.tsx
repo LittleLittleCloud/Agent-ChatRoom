@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { useEffect, useState } from "react";
 import { AgentInfo, getApiChatRoomClientGetUserInfo } from "@/chatroom-client";
 import { Label } from "@radix-ui/react-label";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +38,7 @@ export default function Home(
     return (
       <div className="z-10 border rounded-lg w-full h-full text-sm">
       <ChatLayout checkPoint={checkpoint} selectedUser={user} defaultCollapsed={true} defaultLayout={defaultLayout} navCollapsedSize={8} />
+      <Toaster />
     </div>
     );
   }

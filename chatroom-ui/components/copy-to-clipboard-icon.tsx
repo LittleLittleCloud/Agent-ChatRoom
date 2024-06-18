@@ -31,7 +31,7 @@ export const CopyToClipboardIcon: FC<CopyToClipboardIconProps> = ({ textValue, s
 
   return (
     <button
-      className="flex items-center rounded bg-none py-0.5 px-2 text-xs focus:outline-none"
+      className="flex items-center rounded py-0.5 px-2 text-xs focus:outline-none"
       onClick={copyToClipboard}
     >
       {isCopied ? (
