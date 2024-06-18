@@ -30,8 +30,7 @@ export function ChatList({
   const [remainingTurns, setRemainingTurns] = React.useState<number>(0);
   const [eventSource, setEventSource] = React.useState<EventSource | undefined>(undefined);
   const { toast } = useToast();
-  const onReloadMessages = async () => {
-    console.log("Reloading messages");
+  const onReloadMessages = async (currentMessage: ChatMsg[]) => {
     var data = await postApiChatRoomClientGetChannelChatHistory({
       requestBody: {
         channelName: channel.name,
@@ -39,8 +38,16 @@ export function ChatList({
       },
     });
 
-    setMessages(data);
-    console.log(data);
+    // if data != messages, then update messages
+    var dataJson = JSON.stringify(data);
+    var messagesJson = JSON.stringify(currentMessage);
+    if (dataJson === messagesJson) {
+      console.log("No new messages");
+      return;
+    }
+    else{
+      setMessages(data);
+    }
   }
 
   const onDeleteMessages = async () => {
@@ -55,7 +62,7 @@ export function ChatList({
       channelName: channel.name
     });
 
-    await onReloadMessages();
+    await onReloadMessages(messages);
   }
 
   const onOrchestrationClickPause = async () => {
@@ -75,7 +82,7 @@ export function ChatList({
       messageId: message.id
     });
 
-    await onReloadMessages();
+    await onReloadMessages(messages);
   }
 
   const editMessageHandler = async (message: ChatMsg) => {
@@ -92,7 +99,7 @@ export function ChatList({
         }
       });
 
-    await onReloadMessages();
+    await onReloadMessages(messages);
   };
 
   const onOrchestrationClickNext = async (remainingTurn: number, msgs: ChatMsg[]) => {
@@ -143,11 +150,11 @@ export function ChatList({
   useEffect(() => {
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
     es.addEventListener("message", async (event) => {
-      const newMessage: ChatMsg = JSON.parse(event.data);
-      await onReloadMessages();
+      console.log("New message received");
+      await onReloadMessages(messages);
     });
 
-    es.onopen = (event) => {
+    es.onopen = (_) => {
       console.log("Connection opened");
     }
 
@@ -156,7 +163,8 @@ export function ChatList({
     }
 
     setEventSource(es);
-    onReloadMessages();
+    console.log("Event source set");
+    onReloadMessages(messages);
 
     return () => {
       console.log("Closing event source");
@@ -186,7 +194,7 @@ export function ChatList({
       }
     );
     setRemainingTurns(orchstratorSettings.maxReply);
-    await onReloadMessages();
+    await onReloadMessages(messages);
   };
 
   return (
@@ -202,7 +210,7 @@ export function ChatList({
             await onOrchestrationClickNext(remainingTurn, messages);
           }}
           onOrchestrationChange={setOrchstratorSettings}
-          onRefresh={onReloadMessages}
+          onRefresh={() => onReloadMessages(messages)}
           onDeleteChatHistory={onDeleteMessages} />
       </div>
       <div

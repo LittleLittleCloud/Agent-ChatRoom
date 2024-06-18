@@ -55,7 +55,7 @@ export default function ChatTopbar({
     , [channel]);
 
   return (
-    <div className="w-full h-20 flex p-4 pl-8 justify-start gap-10 items-center border-b">
+    <div className="w-full flex flex-wrap h-full p-4 pl-8 justify-start gap-10 items-center border-b">
       <div className="flex flex-col">
         <span className="font-medium text-nowrap">{channel.name}</span>
       </div>
@@ -180,7 +180,7 @@ export default function ChatTopbar({
         }
       </div>
 
-      <div className='flex gap-2 w-full justify-end'>
+      <div className='flex gap-2 grow justify-end'>
         {members.map((agent, index) => (
           <Badge
             variant={"accent"}
