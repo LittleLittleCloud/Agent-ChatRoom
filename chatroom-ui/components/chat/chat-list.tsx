@@ -27,11 +27,10 @@ export function ChatList({
   const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [orchstratorSettings, setOrchstratorSettings] = React.useState<OrchestrationSettings>({ orchestrator: undefined, maxReply: 10 });
-  const [remainingTurns, setRemainingTurns] = React.useState<number>(0);
+  const [remainingTurns, setRemainingTurns] = React.useState<number>(0); // -1 for cancalling, 0 for no more turns, > 0 for remaining turns
   const [eventSource, setEventSource] = React.useState<EventSource | undefined>(undefined);
   const { toast } = useToast();
-  const onReloadMessages = async () => {
-    console.log("Reloading messages");
+  const onReloadMessages = async (currentMessage: ChatMsg[]) => {
     var data = await postApiChatRoomClientGetChannelChatHistory({
       requestBody: {
         channelName: channel.name,
@@ -39,8 +38,16 @@ export function ChatList({
       },
     });
 
-    setMessages(data);
-    console.log(data);
+    // if data != messages, then update messages
+    var dataJson = JSON.stringify(data);
+    var messagesJson = JSON.stringify(currentMessage);
+    if (dataJson === messagesJson) {
+      console.log("No new messages");
+      return;
+    }
+    else{
+      setMessages(data);
+    }
   }
 
   const onDeleteMessages = async () => {
@@ -55,11 +62,11 @@ export function ChatList({
       channelName: channel.name
     });
 
-    await onReloadMessages();
+    await onReloadMessages(messages);
   }
 
   const onOrchestrationClickPause = async () => {
-    setRemainingTurns(0);
+    setRemainingTurns(-1);
   };
 
   const deleteMessageHandler = async (message: ChatMsg) => {
@@ -75,7 +82,7 @@ export function ChatList({
       messageId: message.id
     });
 
-    await onReloadMessages();
+    await onReloadMessages(messages);
   }
 
   const editMessageHandler = async (message: ChatMsg) => {
@@ -92,10 +99,10 @@ export function ChatList({
         }
       });
 
-    await onReloadMessages();
+    await onReloadMessages(messages);
   };
 
-  const onOrchestrationClickNext = async (remainingTurn: number, msgs: ChatMsg[]) => {
+  const onOrchestrationClickNext = async (remainingTurn :number, msgs: ChatMsg[]) => {
     console.log("Orchestration next");
     if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
       return
@@ -113,8 +120,6 @@ export function ChatList({
       );
       return;
     }
-    setRemainingTurns(remainingTurn);
-
     var response = await postApiChatRoomClientGenerateNextReply({
       requestBody: {
         channelName: channel.name,
@@ -136,18 +141,20 @@ export function ChatList({
     }
     else
     {
-      setRemainingTurns(remainingTurn - 1);
+      setRemainingTurns((prev) =>
+        prev > 0 ? remainingTurn - 1 : 0
+      );
     }
   }
 
   useEffect(() => {
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
     es.addEventListener("message", async (event) => {
-      const newMessage: ChatMsg = JSON.parse(event.data);
-      await onReloadMessages();
+      console.log("New message received");
+      await onReloadMessages(messages);
     });
 
-    es.onopen = (event) => {
+    es.onopen = (_) => {
       console.log("Connection opened");
     }
 
@@ -156,7 +163,8 @@ export function ChatList({
     }
 
     setEventSource(es);
-    onReloadMessages();
+    console.log("Event source set");
+    onReloadMessages(messages);
 
     return () => {
       console.log("Closing event source");
@@ -186,7 +194,6 @@ export function ChatList({
       }
     );
     setRemainingTurns(orchstratorSettings.maxReply);
-    await onReloadMessages();
   };
 
   return (
@@ -199,10 +206,12 @@ export function ChatList({
           orchestrationSettings={orchstratorSettings}
           onContinue={async () => {
             var remainingTurn = orchstratorSettings.maxReply > 0 ? orchstratorSettings.maxReply : 1;
+            console.log("remainingTurns", remainingTurn)
+            setRemainingTurns(remainingTurn);
             await onOrchestrationClickNext(remainingTurn, messages);
           }}
           onOrchestrationChange={setOrchstratorSettings}
-          onRefresh={onReloadMessages}
+          onRefresh={() => onReloadMessages(messages)}
           onDeleteChatHistory={onDeleteMessages} />
       </div>
       <div
