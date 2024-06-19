@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { Label } from "@radix-ui/react-label";
+import { Channel } from "@/types/channel";
 
 interface ChannelConfigModalProps {
     onClose: () => void;
-    channel: ChannelInfo;
-    onSave: (channel: ChannelInfo) => void;
+    channel: Channel;
+    onSave: (channel: Channel) => void;
 }
 
 export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigModalProps) {

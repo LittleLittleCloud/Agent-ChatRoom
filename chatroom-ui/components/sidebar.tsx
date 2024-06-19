@@ -4,33 +4,30 @@ import Link from "next/link";
 import { MoreHorizontal, SquarePen, SquarePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Message } from "@/types/Message";
 import { ChannelInfo, postApiChatRoomClientCloneChannel, postApiChatRoomClientCreateChannel, postApiChatRoomClientDeleteChannel } from "@/chatroom-client";
 import { ChannelItem } from "@/components/channel-item";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 import { useState } from "react";
 import { ChannelConfigModal } from "./modal/channel-modal";
+import { Channel } from "@/types/channel";
 
 interface SidebarProps {
   isCollapsed: boolean;
-  channels: (ChannelInfo &{
-    avatar?: string;
-    variant: "grey" | "ghost";
-  })[];
-  onClick?: (channel: ChannelInfo) => void;
-  onAddChannel?: (channel: ChannelInfo) => void;
-  onCloneChannel?: (channel: ChannelInfo) => void;
-  onEditChannel?: (channel: ChannelInfo) => void;
-  onDeleteChannel?: (channel: ChannelInfo) => void;
-  onSelectedChannel?: (channel: ChannelInfo) => void;
+  channels: Channel[];
+  onClick?: (channel: Channel) => void;
+  onAddChannel?: (channel: Channel) => void;
+  onCloneChannel?: (channel: Channel) => void;
+  onEditChannel?: (channel: Channel) => void;
+  onDeleteChannel?: (channel: Channel) => void;
+  onSelectedChannel?: (channel: Channel) => void;
   isMobile: boolean;
 }
 
 export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onCloneChannel, onAddChannel, onDeleteChannel, onSelectedChannel }: SidebarProps) {
-  const [channelConfigModalChannel, setChannelConfigModalChannel] = useState<ChannelInfo | undefined>(undefined);
-  const [selectedChannel, setSelectedChannel] = useState<ChannelInfo | undefined>(undefined);
+  const [channelConfigModalChannel, setChannelConfigModalChannel] = useState<Channel | undefined>(undefined);
+  const [selectedChannel, setSelectedChannel] = useState<Channel | undefined>(undefined);
 
-  const handleCloneChannelClick = async (channel: ChannelInfo) => {
+  const handleCloneChannelClick = async (channel: Channel) => {
     await postApiChatRoomClientCloneChannel({
       requestBody: {
         channelName: channel.name,
@@ -42,16 +39,16 @@ export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onClone
 
     onCloneChannel?.(channel);
   }
-  const handleEditChannelClick = (channel: ChannelInfo | undefined) => {
+  const handleEditChannelClick = (channel: Channel | undefined) => {
     setChannelConfigModalChannel(channel);
   }
 
-  const handleSelectedChannel = (channel: ChannelInfo) => {
+  const handleSelectedChannel = (channel: Channel) => {
     setSelectedChannel(channel);
     onSelectedChannel?.(channel);
   }
 
-  const handleDeleteChannelClick = async (channel: ChannelInfo) => {
+  const handleDeleteChannelClick = async (channel: Channel) => {
     if (confirm(`Are you sure you want to delete ${channel.name}?`) === false) {
       return;
     }
@@ -100,7 +97,7 @@ export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onClone
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <SquarePlus size={20} onClick={() => {
-                      setChannelConfigModalChannel({});
+                      setChannelConfigModalChannel({} as Channel);
                     }} />
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="flex items-center gap-10">

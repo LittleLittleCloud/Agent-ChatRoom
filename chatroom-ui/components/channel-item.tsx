@@ -11,15 +11,16 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ChannelInfo } from "@/chatroom-client";
 import { Copy, Settings, Trash } from "lucide-react";
+import { Channel } from "@/types/channel";
 
 interface ChannelItemProps {
-  channel: ChannelInfo & { avatar?: string; variant: "grey" | "ghost" };
+  channel: Channel;
   isCollapsed: boolean;
   isSelected: boolean;
-  onClickChannel?: (channel: ChannelInfo) => void;
-  onCloneChannel?: (channel: ChannelInfo) => void;
-  onEditChannel?: (channel: ChannelInfo) => void;
-  onDeleteChannel?: (channel: ChannelInfo) => void;
+  onClickChannel?: (channel: Channel) => void;
+  onCloneChannel?: (channel: Channel) => void;
+  onEditChannel?: (channel: Channel) => void;
+  onDeleteChannel?: (channel: Channel) => void;
 }
 
 export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, onEditChannel, onDeleteChannel, onClickChannel }: ChannelItemProps) {
@@ -31,7 +32,9 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
             <Link
               href="#"
               className={cn(
-                buttonVariants({ variant: channel.variant, size: "icon" }),
+                buttonVariants({
+                  variant: isSelected ? "ghost" : "grey",
+                  size: "icon" }),
                 "h-11 w-11 md:h-16 md:w-16",
                 isSelected &&
                 "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
@@ -42,12 +45,6 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
               }}
             >
               <Avatar className="flex justify-center items-center">
-                <AvatarImage
-                  src={channel.avatar}
-                  alt={channel.avatar}
-                  width={6}
-                  height={6}
-                  className="w-10 h-10 " />
                 {channel.name && <AvatarFallback className="w-10 h-10">{channel.name.charAt(0)}</AvatarFallback>}
               </Avatar>{" "}
               <span className="sr-only">{channel.name}</span>
@@ -66,7 +63,9 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
     return (
       <div
         className={cn(
-          buttonVariants({ variant: channel.variant, size: "xl" }),
+          buttonVariants({
+            variant: isSelected ? "ghost" : "grey"
+            , size: "xl" }),
           isSelected &&
           "flex w-full dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
           "justify-start gap-1"

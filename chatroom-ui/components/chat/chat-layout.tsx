@@ -1,6 +1,5 @@
 "use client";
 
-import { userData } from "@/types/Message";
 import React, { useEffect, useState } from "react";
 import {
   ResizableHandle,
@@ -11,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/sidebar";
 import { Chat } from "./chat";
 import { AgentInfo, ChannelInfo, getApiChatRoomClientGetChannels, getApiChatRoomClientGetOrchestrators } from "@/chatroom-client";
+import { Channel } from "@/types/channel";
 
 interface ChatLayoutProps {
   defaultLayout: number[] | undefined;
@@ -29,8 +29,8 @@ export function ChatLayout({
 }: ChatLayoutProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
   const [isMobile, setIsMobile] = useState(false);
-  const [channels, setChannels] = useState<ChannelInfo[] | undefined>(undefined);
-  const [selectedChannel, setSelectedChannel] = useState<ChannelInfo | undefined>(undefined);
+  const [channels, setChannels] = useState<Channel[] | undefined>(undefined);
+  const [selectedChannel, setSelectedChannel] = useState<Channel | undefined>(undefined);
   useEffect(() => {
     const checkScreenWidth = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -43,13 +43,7 @@ export function ChatLayout({
     window.addEventListener("resize", checkScreenWidth);
 
     // fetch all channels from the server
-    getApiChatRoomClientGetChannels()
-    .then((res) => {
-      setChannels(res);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    reloadChannels();
 
     // Cleanup the event listener on component unmount
     return () => {
@@ -62,13 +56,33 @@ export function ChatLayout({
   }, [checkPoint]);
 
   const reloadChannels = async () => {
-    var _channels = await getApiChatRoomClientGetChannels();
+    var _channelInfos = await getApiChatRoomClientGetChannels();
+    var existingChannels = channels ?? [];
+    let _channels = [] as Channel[];
+
+    for (let i = 0; i < _channelInfos.length; i++) {
+      let index = existingChannels.findIndex((_channel) => _channel.name === _channelInfos[i].name);
+      if (index !== -1) {
+        _channels.push({
+          ...existingChannels[index],
+          ..._channelInfos[i],
+        });
+      }
+      else {
+        _channels.push({
+          ..._channelInfos[i],
+          maxReply: 10,
+          orchestrator: undefined,
+        });
+      }
+    }
+
     setChannels(_channels);
     var selectedChannelName = selectedChannel?.name;
     setSelectedChannel(_channels.find(channel => channel.name === selectedChannelName));
   }
 
-  if (channels){
+  if (channels) {
     return (
       <ResizablePanelGroup
         direction="horizontal"
@@ -121,7 +135,7 @@ export function ChatLayout({
               async (channel) => {
                 console.log(channel);
                 await reloadChannels();
-            }}
+              }}
             onDeleteChannel={async (channel) => {
               console.log(channel);
               await reloadChannels();
@@ -134,14 +148,26 @@ export function ChatLayout({
           {
             selectedChannel &&
             <Chat
-            selectedUser={selectedUser}
-            isMobile={isMobile}
-            channel={selectedChannel} />
+              selectedUser={selectedUser}
+              isMobile={isMobile}
+              onChannelChange={
+                async (channel) => {
+                  setChannels((pre) => {
+                    return pre?.map((_channel) => {
+                      if (_channel.name === channel.name) {
+                        return channel;
+                      }
+                      return _channel;
+                    });
+                  })
+                  setSelectedChannel(channel);
+                }}
+              channel={selectedChannel} />
           }
           {
             !selectedChannel && <div className="flex flex-col justify-center items-center h-full">
-            <p className="text-xl font-bold">Select a channel</p>
-          </div>
+              <p className="text-xl font-bold">Select a channel</p>
+            </div>
           }
         </ResizablePanel>
       </ResizablePanelGroup>

@@ -100,12 +100,6 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
               </Button>
             }
             {
-              isFromSelectedUser &&
-              <Button variant={"ghost"} size={"tiny"}>
-                <RotateCcw size={14} />
-              </Button>
-            }
-            {
               GetTextContent(message) != undefined &&
               <CopyToClipboardIcon size={14} textValue={GetTextContent(message)!} />
             }
