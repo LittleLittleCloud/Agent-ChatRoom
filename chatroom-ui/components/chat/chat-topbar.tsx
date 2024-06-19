@@ -153,6 +153,18 @@ export default function ChatTopbar({
           </PopoverContent>
         </Popover>
         {
+          remainingTurns === -1 &&
+          <Link
+            href="#"
+            className={
+              cn(buttonVariants({ variant: "grey", size: "icon" }), "h-9, w-9")
+            }>
+            <IconTooltip content="Cancelling">
+              <StepForward size={15} />
+            </IconTooltip>
+          </Link>
+        }
+        {
           remainingTurns === 0 &&
           <Link
             href="#"

@@ -27,7 +27,7 @@ export function ChatList({
   const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [orchstratorSettings, setOrchstratorSettings] = React.useState<OrchestrationSettings>({ orchestrator: undefined, maxReply: 10 });
-  const [remainingTurns, setRemainingTurns] = React.useState<number>(0);
+  const [remainingTurns, setRemainingTurns] = React.useState<number>(0); // -1 for cancalling, 0 for no more turns, > 0 for remaining turns
   const [eventSource, setEventSource] = React.useState<EventSource | undefined>(undefined);
   const { toast } = useToast();
   const onReloadMessages = async (currentMessage: ChatMsg[]) => {
@@ -66,7 +66,7 @@ export function ChatList({
   }
 
   const onOrchestrationClickPause = async () => {
-    setRemainingTurns(0);
+    setRemainingTurns(-1);
   };
 
   const deleteMessageHandler = async (message: ChatMsg) => {
@@ -102,7 +102,7 @@ export function ChatList({
     await onReloadMessages(messages);
   };
 
-  const onOrchestrationClickNext = async (remainingTurn: number, msgs: ChatMsg[]) => {
+  const onOrchestrationClickNext = async (remainingTurn :number, msgs: ChatMsg[]) => {
     console.log("Orchestration next");
     if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
       return
@@ -120,8 +120,6 @@ export function ChatList({
       );
       return;
     }
-    setRemainingTurns(remainingTurn);
-
     var response = await postApiChatRoomClientGenerateNextReply({
       requestBody: {
         channelName: channel.name,
@@ -143,7 +141,9 @@ export function ChatList({
     }
     else
     {
-      setRemainingTurns(remainingTurn - 1);
+      setRemainingTurns((prev) =>
+        prev > 0 ? remainingTurn - 1 : 0
+      );
     }
   }
 
@@ -206,6 +206,8 @@ export function ChatList({
           orchestrationSettings={orchstratorSettings}
           onContinue={async () => {
             var remainingTurn = orchstratorSettings.maxReply > 0 ? orchstratorSettings.maxReply : 1;
+            console.log("remainingTurns", remainingTurn)
+            setRemainingTurns(remainingTurn);
             await onOrchestrationClickNext(remainingTurn, messages);
           }}
           onOrchestrationChange={setOrchstratorSettings}
