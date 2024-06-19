@@ -12,7 +12,6 @@ import React, { useRef, useState } from "react";
 import { buttonVariants } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Message, loggedInUserData } from "@/types/Message";
 import { Textarea } from "@/components/ui/textarea";
 import { EmojiPicker } from "@/components/emoji-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
