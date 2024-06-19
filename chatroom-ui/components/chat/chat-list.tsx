@@ -1,4 +1,3 @@
-import { Message, UserData } from "@/types/Message";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef } from "react";
 import { Avatar, AvatarImage } from "../ui/avatar";
@@ -11,25 +10,33 @@ import { on } from "events";
 import { GetTextContent } from "@/chatroom-client/types.extension";
 import { useToast } from "@/components/ui/use-toast"
 import { ToastAction } from "../ui/toast";
+import { Channel } from "@/types/channel";
 
 interface ChatListProps {
   selectedUser: AgentInfo;
   isMobile: boolean;
-  channel: ChannelInfo;
+  channel: Channel;
+  onChannelChange?: (channel: Channel) => void;
 }
-
 
 export function ChatList({
   selectedUser,
   isMobile,
   channel,
+  onChannelChange,
 }: ChatListProps) {
   const [messages, setMessages] = React.useState<ChatMsg[]>([]);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const [orchstratorSettings, setOrchstratorSettings] = React.useState<OrchestrationSettings>({ orchestrator: undefined, maxReply: 10 });
   const [remainingTurns, setRemainingTurns] = React.useState<number>(0); // -1 for cancalling, 0 for no more turns, > 0 for remaining turns
   const [eventSource, setEventSource] = React.useState<EventSource | undefined>(undefined);
+  const [currentChannel, setCurrentChannel] = React.useState<Channel>(channel);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    setCurrentChannel(channel);
+  }
+    , [channel]);
+  
   const onReloadMessages = async (currentMessage: ChatMsg[]) => {
     var data = await postApiChatRoomClientGetChannelChatHistory({
       requestBody: {
@@ -103,19 +110,17 @@ export function ChatList({
   };
 
   const onOrchestrationClickNext = async (remainingTurn :number, msgs: ChatMsg[]) => {
-    console.log("Orchestration next");
     if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
       return
     }
 
-    if (orchstratorSettings.orchestrator == undefined) {
+    if (channel.orchestrator == undefined) {
       setRemainingTurns(0);
       toast(
         {
           title: "Orchestrator not selected",
           description: "Please select an orchestrator",
           variant: "default",
-          action: <ToastAction altText="Close" onClick={() => {}} />,
         }
       );
       return;
@@ -125,24 +130,34 @@ export function ChatList({
         channelName: channel.name,
         chatMsgs: msgs,
         candidates: channel.members.map((member) => member.name!),
-        orchestrator: orchstratorSettings.orchestrator,
+        orchestrator: channel.orchestrator,
       },
     });
 
-    console.log(response);
-    if (response.message === undefined || response.message === null || remainingTurn <= 0) {
+    if (response.message === undefined || response.message === null) {
       toast({
         title: "Orchestration complete",
         description: "No more turns left",
         variant: "default",
-        action: <ToastAction altText="Close" onClick={() => {}} />,
       });
       setRemainingTurns(0);
     }
     else
     {
       setRemainingTurns((prev) =>
-        prev > 0 ? remainingTurn - 1 : 0
+        {
+          prev = prev - 1;
+          if (prev <= 0) {
+            toast({
+              title: "Orchestration complete",
+              description: "No more turns left",
+              variant: "default",
+            });
+            return 0;
+          }
+
+          return prev;
+        }
       );
     }
   }
@@ -178,7 +193,7 @@ export function ChatList({
         messagesContainerRef.current.scrollHeight;
     }
 
-    if (orchstratorSettings.maxReply > 0 && remainingTurns > 0) {
+    if (channel.maxReply > 0 && remainingTurns > 0) {
       console.log("message received, calling next");
       onOrchestrationClickNext(remainingTurns, messages);
     }
@@ -193,7 +208,7 @@ export function ChatList({
         },
       }
     );
-    setRemainingTurns(orchstratorSettings.maxReply);
+    setRemainingTurns(channel.maxReply);
   };
 
   return (
@@ -202,15 +217,14 @@ export function ChatList({
         <ChatTopbar
           onPause={onOrchestrationClickPause}
           remainingTurns={remainingTurns}
-          channel={channel}
-          orchestrationSettings={orchstratorSettings}
+          channel={currentChannel}
           onContinue={async () => {
-            var remainingTurn = orchstratorSettings.maxReply > 0 ? orchstratorSettings.maxReply : 1;
+            var remainingTurn = currentChannel.maxReply > 0 ? currentChannel.maxReply : 1;
             console.log("remainingTurns", remainingTurn)
             setRemainingTurns(remainingTurn);
             await onOrchestrationClickNext(remainingTurn, messages);
           }}
-          onOrchestrationChange={setOrchstratorSettings}
+          onChannelChange={onChannelChange}
           onRefresh={() => onReloadMessages(messages)}
           onDeleteChatHistory={onDeleteMessages} />
       </div>

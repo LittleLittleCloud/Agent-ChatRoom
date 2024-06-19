@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { Avatar, AvatarImage } from '../ui/avatar'
-import { UserData } from '@/types/Message';
 import { ArrowRight, Info, Pause, Phone, RotateCcw, StepForward, Trash, Video } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -13,6 +12,7 @@ import { Badge } from '../ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Select, SelectGroup, SelectLabel, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
 import { Input } from '../ui/input';
+import { Channel } from '@/types/channel';
 
 export interface OrchestrationSettings {
   orchestrator: string | undefined;
@@ -20,17 +20,16 @@ export interface OrchestrationSettings {
 }
 
 export interface OrchestrationProps {
-  orchestrationSettings: OrchestrationSettings;
-  onOrchestrationChange?: (settings: OrchestrationSettings) => void;
   onContinue?: () => void;
   onPause?: () => void;
 }
 
 export interface ChatTopbarProps extends OrchestrationProps {
-  channel: ChannelInfo;
+  channel: Channel;
   remainingTurns: number;
   onRefresh?: () => void;
   onDeleteChatHistory?: () => void;
+  onChannelChange?: (channel: Channel) => void;
 }
 
 export const TopbarIcons = [{ icon: Phone }, { icon: Video }, { icon: Info }];
@@ -40,17 +39,15 @@ export default function ChatTopbar({
   remainingTurns,
   onRefresh,
   onDeleteChatHistory,
-  orchestrationSettings,
-  onOrchestrationChange,
+  onChannelChange,
   onContinue,
   onPause,
 }: ChatTopbarProps) {
   const [members, setMembers] = React.useState<AgentInfo[]>(channel.members || []);
-  const [orchestrators, setOrchestrators] = React.useState<string[]>(channel.orchestrators || []);
-
+  const [currentChannel, setCurrentChannel] = React.useState<Channel>(channel);
   useEffect(() => {
     setMembers(channel.members || []);
-    setOrchestrators(channel.orchestrators || []);
+    setCurrentChannel(channel);
   }
     , [channel]);
 
@@ -104,10 +101,10 @@ export default function ChatTopbar({
               </div>
               <div className='col-span-2'>
                 <Select
-                  value={orchestrationSettings.orchestrator}
+                  value={currentChannel.orchestrator}
                   onValueChange={(value) => {
-                    onOrchestrationChange?.({
-                      ...orchestrationSettings,
+                    onChannelChange?.({
+                      ...currentChannel,
                       orchestrator: value,
                     });
                   }}>
@@ -117,7 +114,7 @@ export default function ChatTopbar({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {orchestrators.map((orchestrator, index) => (
+                      {currentChannel.orchestrators?.map((orchestrator, index) => (
                         <SelectItem
                           key={index}
                           value={orchestrator}>
@@ -134,7 +131,7 @@ export default function ChatTopbar({
               <div className='col-span-2'>
                 <Input
                   type="number"
-                  defaultValue={orchestrationSettings.maxReply}
+                  defaultValue={currentChannel.maxReply}
                   className="w-full"
                   onChange={(e) => {
                     var autoReply = parseInt(e.target.value);
@@ -142,8 +139,9 @@ export default function ChatTopbar({
                       alert("Max AutoReply must be equal or greater than 0");
                       autoReply = 0;
                     }
-                    onOrchestrationChange?.({
-                      ...orchestrationSettings,
+                    console.log("autoReply", autoReply);
+                    onChannelChange?.({
+                      ...currentChannel,
                       maxReply: autoReply,
                     });
                   }}
