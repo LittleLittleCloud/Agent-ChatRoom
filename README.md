@@ -1,9 +1,9 @@
 ## Agent Chatroom
-#### An extensible multi-agent platform built on top of AutoGen.Net and Orleans.
+#### An extensible multi-agent platform built on top of AutoGen.Net, shadcn and Orleans.
 
 [![NuGet version](https://badge.fury.io/nu/ChatRoom.SDK.svg)](https://badge.fury.io/nu/ChatRoom.Client) | [website](https://littlelittlecloud.github.io/Agent-ChatRoom/) | Join our [Discord](https://discord.gg/UYwcVfGaeq)
 
-![Agent Chatroom](assets/chatroom-webui.png)
+![Agent Chatroom](assets/agent-chatroom-switch-theme.gif)
 
 ## 🌟 Highlights
 - **Multi-Agent WebUI**: Chat with multiple agents simultaneously in a web browser.

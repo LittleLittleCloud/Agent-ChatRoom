@@ -4,7 +4,7 @@
       href: agent_chatroom_overview.md
     - name: Installation
       href: installation.md
-    - name: Samples
+    - name: Configuration Examples
       items:
         - name: Chat with OpenAI
           href: chat_with_openai.md
@@ -14,7 +14,7 @@
 - name: Guide
   items:
     - name: Develop an agent
-      href: develop_an_agent.md
+      href: coming_soon.md
     - name: Develop an orchestrator
-      href: develop_an_orchestrator.md
+      href: coming_soon.md
     
