@@ -7,7 +7,6 @@
             "openai_model_id": "gpt-3.5-turbo"
         }
     },
-    "enable_console_app": true,
     "server_config": {
         "urls": "http://localhost:51234;https://localhost:51235"
     },

@@ -1,20 +1,20 @@
-- name: Install client
-  href: install_client.md
-
-- name: Configure client
-  href: configure_client.md
-
-- name: Use client
-  href: use_client.md
-
-- name: Install agents
-  href: install_agents.md
-
-- name: Agents
+- name: Getting started
   items:
-    - name: OpenAI agent
-      href: install_openai_agent.md
-    - name: Bing Search agent
-      href: bing_search_agent.md
-    - name: Powershell agent
-      href: powershell_agent.md
+    - name: Overview
+      href: agent_chatroom_overview.md
+    - name: Installation
+      href: installation.md
+    - name: Samples
+      items:
+        - name: Chat with OpenAI
+          href: chat_with_openai.md
+        - name: Chat with Powershell helpers
+          href: chat_with_powershell_helpers.md
+
+- name: Guide
+  items:
+    - name: Develop an agent
+      href: develop_an_agent.md
+    - name: Develop an orchestrator
+      href: develop_an_orchestrator.md
+    
