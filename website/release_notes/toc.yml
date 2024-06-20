@@ -7,5 +7,5 @@
 - name: 0.2.5
   href: 0_2_5.md
 
-- name: 0.3.0-0.3.2
-  href: 0_3_0-0_3_2.md
+- name: 0.3.*
+  href: 0_3.md
