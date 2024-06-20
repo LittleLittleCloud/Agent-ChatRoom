@@ -70,6 +70,7 @@ Navigate to the web UI in your browser and start chatting with the agents.
 
 ## 📦 Pre-configured Chatrooms
 We provide the following configuration to help you get started quickly. More configurations will be added in the future.
+- [OpenAI-Chatroom](https://github.com/LittleLittleCloud/OpenAI-Chatroom): chat with OpenAI gpt.
 - [Powershell-Chatroom](https://github.com/LittleLittleCloud/Powershell-ChatRoom): chat with `ps-gpt` and `ps-runner` to help you write and run PowerShell scripts.
 
 ## 🌐 Server mode
