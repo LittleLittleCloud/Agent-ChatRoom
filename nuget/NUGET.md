@@ -1,7 +1,7 @@
 ### Agent ChatRoom
 An extensible multi-agent platform built on top of AutoGen.Net and Orleans.
 
-![webui](https://github.com/LittleLittleCloud/Agent-ChatRoom/blob/main/assets/agent-chatroom-switch-theme.gif?raw=true)
+![webui](https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/assets/agent-chatroom-switch-theme.gif)
 
 ---
 ### Getting Start
