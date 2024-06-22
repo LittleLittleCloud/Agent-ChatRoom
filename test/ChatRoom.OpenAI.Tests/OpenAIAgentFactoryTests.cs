@@ -25,7 +25,8 @@ public class OpenAIAgentFactoryTests
     public async Task ItReturnErrorMessageWhenMeetException()
     {
         var configuration = new OpenAIAgentConfiguration();
-        configuration.LLMConfiguration.AzureOpenAIKey = "invalid key";
+        configuration.LLMConfiguration.LLMType = LLMType.OpenAI;
+        configuration.LLMConfiguration.OpenAIApiKey = "invalid key";
         var agentFactory = new OpenAIAgentFactory(configuration);
         var agent = agentFactory.CreateAgent();
 
