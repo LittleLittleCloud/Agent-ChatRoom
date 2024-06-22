@@ -15,14 +15,3 @@ public class ChannelConfiguration
     [JsonPropertyName("openai_config")]
     public OpenAIClientConfiguration OpenAIConfiguration { get; set; } = new OpenAIClientConfiguration();
 }
-
-public class RoomConfiguration
-{
-    [Description("The name of the room. Default is 'room'")]
-    [JsonPropertyName("room")]
-    public string Room { get; set; } = "room";
-
-    [Description("The port number where the room is hosted. Default is 30000")]
-    [JsonPropertyName("port")]
-    public int Port { get; set; } = 30000;
-}

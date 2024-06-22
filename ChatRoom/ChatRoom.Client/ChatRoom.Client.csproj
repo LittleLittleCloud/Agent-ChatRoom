@@ -44,4 +44,10 @@
     </Content>
   </ItemGroup>
 
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChatRoom.OpenAI.Tests"/>
+    <InternalsVisibleTo Include="ChatRoom.Client.Tests"/>
+  </ItemGroup>
+
 </Project>

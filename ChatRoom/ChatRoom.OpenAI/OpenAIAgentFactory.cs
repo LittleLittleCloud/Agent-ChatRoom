@@ -5,7 +5,7 @@ using Azure.AI.OpenAI;
 
 namespace ChatRoom.OpenAI;
 
-public class OpenAIAgentFactory
+internal class OpenAIAgentFactory
 {
     private readonly OpenAIAgentConfiguration _config;
     public OpenAIAgentFactory(OpenAIAgentConfiguration config)

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using ChatRoom.Room;
+using ChatRoom.SDK;
 using Json.Schema.Generation;
 
 namespace ChatRoom.Client;
