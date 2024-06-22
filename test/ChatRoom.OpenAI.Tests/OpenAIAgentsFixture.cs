@@ -18,14 +18,28 @@ public class OpenAIAgentsFixture : IDisposable
         this.Command = new OpenAICommand();
 
         this._start = this.Command.ExecuteAsync(configuration);
-        this.Command.DeployAsync().Wait();
+        var deploy = this.Command.DeployAsync();
+        var timeout = Task.Delay(10000);
+
+        Task.WhenAny(deploy, timeout).Wait();
+
+        if (timeout.IsCompleted)
+        {
+            throw new TimeoutException("Failed to deploy the client in time.");
+        }
     }
 
     public OpenAICommand Command { get; private set; }
 
     public void Dispose()
     {
+        var timeOut = Task.Delay(10000);
         _ = Command.StopAsync();
-        this._start.Wait();
+        Task.WhenAny(this._start, timeOut).Wait();
+
+        if (timeOut.IsCompleted)
+        {
+            throw new TimeoutException("Failed to stop the client in time.");
+        }
     }
 }

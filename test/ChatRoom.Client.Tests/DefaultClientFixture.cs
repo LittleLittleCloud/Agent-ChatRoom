@@ -19,7 +19,15 @@ public class DefaultClientFixture : IDisposable
         var configuration = JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new ChatRoomClientCommand();
         this._start = this.Command.ExecuteAsync(configuration);
-        this.Command.DeployAsync().Wait();
+
+        var timeout = Task.Delay(10000);
+        var deployTask = this.Command.DeployAsync();
+
+        Task.WhenAny(deployTask, timeout).Wait();
+        if (timeout.IsCompleted)
+        {
+            throw new TimeoutException("Failed to deploy the client in time.");
+        }
     }
 
     public ChatRoomClientCommand Command { get; private set; }
@@ -27,6 +35,11 @@ public class DefaultClientFixture : IDisposable
     public void Dispose()
     {
         _ = Command.StopAsync();
-        this._start.Wait();
+        var timeout = Task.Delay(10000);
+        Task.WhenAny(_start, timeout).Wait();
+        if (timeout.IsCompleted)
+        {
+            throw new TimeoutException("Failed to stop the client in time.");
+        }
     }
 }
