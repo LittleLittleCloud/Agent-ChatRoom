@@ -1,0 +1,9 @@
+{
+    "$schema": "../../schema/client_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    }
+}

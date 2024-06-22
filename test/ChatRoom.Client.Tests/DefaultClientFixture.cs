@@ -15,7 +15,7 @@ public class DefaultClientFixture : IDisposable
     public DefaultClientFixture()
     {
         // called once before every test
-        var configurationPath = Path.Combine("configuration", "chatroom-client.json");
+        var configurationPath = Path.Combine("test-configuration", "chatroom-client.json");
         var configuration = JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new ChatRoomClientCommand();
         this._start = this.Command.ExecuteAsync(configuration);
