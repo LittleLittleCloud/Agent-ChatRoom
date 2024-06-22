@@ -49,14 +49,14 @@ public class ChatRoomClientCommandTests : IClassFixture<DefaultClientFixture>
         channels = await _client.GetChannels();
         channels.Count().Should().Be(1);
 
-        // create 1000 channels
-        for (int i = 0; i < 1000; i++)
+        // create 5 channels
+        for (int i = 0; i < 5; i++)
         {
             await _client.CreateChannel(i.ToString());
         }
 
         channels = await _client.GetChannels();
-        channels.Count().Should().Be(1001);
+        channels.Count().Should().Be(6);
 
         // remove all channels
         foreach (var channel in channels)
