@@ -28,7 +28,7 @@ public class ClientConfigurationTests
     public void VerifyConfigurationSchema()
     {
         var schema = new JsonSchemaBuilder()
-            .FromType<OpenAIAgentConfiguration>()
+            .FromType<Configuration>()
             .Build();
 
         var schemaFileName = "chatroom_openai_configuration_schema.json";

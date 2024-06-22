@@ -33,9 +33,9 @@ jobs:
     - name: Build
       run: |
         echo "Build ChatRoom"
-        dotnet build --no-restore --configuration Release -bl /p:SignAssembly=true
+        dotnet build --no-restore --configuration Debug -bl /p:SignAssembly=true
     - name: Unit Test
-      run: dotnet test --no-build -bl --configuration Release
+      run: dotnet test --no-build -bl --configuration Debug -m:1
     - name: Setup Node.js
       uses: actions/setup-node@v2
       with:

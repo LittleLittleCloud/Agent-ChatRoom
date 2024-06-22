@@ -16,6 +16,7 @@ using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Swashbuckle.AspNetCore;
+using static Google.Api.Gax.Grpc.Gcp.AffinityConfig.Types;
 
 namespace ChatRoom.Client;
 
@@ -28,6 +29,8 @@ public class ChatRoomClientCommandSettings : CommandSettings
 
 public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 {
+    private IHost? _host = null;
+    private bool _deployed = false;
     public static string Description { get; } = """
         A Chatroom cli client.
         
@@ -37,12 +40,48 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         A configuration file is a json file with the following schema:
         - https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json
         """;
-    public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomClientCommandSettings command)
+
+    internal IServiceProvider? ServiceProvider { get => _host?.Services; }
+
+    internal async Task StopAsync()
     {
+        if (_host is not null)
+        {
+            await _host.StopAsync();
+        }
+    }
+
+    internal async Task DeployAsync()
+    {
+        while (true)
+        {
+            if (_host is null)
+            {
+                await Task.Delay(1000);
+                continue;
+            }
+
+            if (_deployed)
+            {
+                break;
+            }
+
+            await Task.Delay(1000);
+        }
+    }
+
+    public override Task<int> ExecuteAsync(CommandContext _, ChatRoomClientCommandSettings command)
+    {
+        _deployed = false;
         var config = command.ConfigFile is not null
             ? JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(command.ConfigFile))!
             : new ChatRoomClientConfiguration();
 
+        return ExecuteAsync(config);
+    }
+
+    internal async Task<int> ExecuteAsync(ChatRoomClientConfiguration config)
+    {
         var workspace = config.Workspace;
         if (!Directory.Exists(workspace))
         {
@@ -86,7 +125,6 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddSingleton(config);
                 serviceCollection.AddSingleton(config.RoomConfig);
                 serviceCollection.AddSingleton(config.ChannelConfig);
-                serviceCollection.AddSingleton(command);
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
 
                 serviceCollection.AddSingleton(clientContext);
@@ -125,25 +163,25 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         if (config.ServerConfig is ServerConfiguration serverConfig)
         {
             hostBuilder.ConfigureWebHostDefaults(builder =>
-             {
-                 var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-                 var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? Environment.CurrentDirectory;
-                 var webRoot = Path.Combine(assemblyDirectory, "wwwroot");
-                 Console.WriteLine($"web root: {webRoot}");
-                 builder
-                 .UseWebRoot(webRoot)
-                 .UseContentRoot(workspace)
-                 .UseEnvironment(serverConfig.Environment)
-                 .UseUrls(serverConfig.Urls)
-                 .UseStartup<Startup>();
-             });
+            {
+                var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? Environment.CurrentDirectory;
+                var webRoot = Path.Combine(assemblyDirectory, "wwwroot");
+                Console.WriteLine($"web root: {webRoot}");
+                builder
+                .UseWebRoot(webRoot)
+                .UseContentRoot(workspace)
+                .UseEnvironment(serverConfig.Environment)
+                .UseUrls(serverConfig.Urls)
+                .UseStartup<Startup>();
+            });
         }
 
-        var host = hostBuilder.Build();
+        _host = hostBuilder.Build();
 
-        var sp = host.Services;
+        var sp = _host.Services;
         var lifetimeManager = sp.GetRequiredService<IHostApplicationLifetime>();
-        await host.StartAsync();
+        await _host.StartAsync();
         await AnsiConsole.Status()
             .StartAsync("initializing...", async ctx =>
             {
@@ -161,7 +199,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
         // configure chatroom client
         var chatPlatformClient = sp.GetRequiredService<ChatPlatformClient>();
-        var observerRef = sp.GetRequiredService<IRoomObserver>();
+        var observer = sp.GetRequiredService<ConsoleRoomObserver>();
         var roudRobinOrchestrator = sp.GetRequiredService<RoundRobinOrchestrator>();
         var humanToAgent = sp.GetRequiredService<HumanToAgent>();
         var dynamicGroupChat = sp.GetRequiredService<DynamicGroupChat>();
@@ -169,7 +207,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         await chatPlatformClient.RegisterOrchestratorAsync("RoundRobin", roudRobinOrchestrator);
         await chatPlatformClient.RegisterOrchestratorAsync("HumanToAgent", humanToAgent);
         await chatPlatformClient.RegisterOrchestratorAsync("DynamicGroupChat", dynamicGroupChat);
-        await chatPlatformClient.RegisterAgentAsync(config.YourName, clientContext.Description, true, observerRef);
+        await chatPlatformClient.RegisterAgentAsync(config.YourName, clientContext.Description, true, observer);
         logger.LogInformation("Client started.");
         logger.LogInformation($"Workspace: {workspace}");
         logger.LogInformation($"client log is saved to: {Path.Combine(workspace, "logs", clientLogPath)}");
@@ -178,6 +216,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             logger.LogInformation($"web ui is available at: {config.ServerConfig.Urls}");
         }
 
+        _deployed = true;
         if (config.EnableConsoleApp)
         {
             var consoleApp = sp.GetRequiredService<ChatRoomConsoleApp>();
@@ -185,15 +224,15 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         }
         else
         {
-            await host.WaitForShutdownAsync();
+            await _host.WaitForShutdownAsync();
         }
 
         await AnsiConsole.Status()
             .StartAsync("shutting down...", async ctx =>
             {
                 ctx.Spinner(Spinner.Known.Dots);
-                await host.StopAsync();
-                await host.WaitForShutdownAsync();
+                await _host.StopAsync();
+                await _host.WaitForShutdownAsync();
             });
 
         return 0;

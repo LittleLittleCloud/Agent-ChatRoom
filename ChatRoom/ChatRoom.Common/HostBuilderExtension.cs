@@ -8,6 +8,7 @@ using ChatRoom.SDK;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace ChatRoom.SDK;
 
@@ -31,14 +32,20 @@ public static class HostBuilderExtension
         int port = 30000)
     {
         collection.AddOrleansClient(clientBuilder =>
-        {
-            clientBuilder
-                .UseLocalhostClustering(gatewayPort: port);
-        })
-            .AddSingleton<ChatPlatformClient>(sp =>
+            {
+                clientBuilder
+                    .UseLocalhostClustering(gatewayPort: port);
+            })
+            .AddSingleton(sp =>
             {
                 var client = sp.GetRequiredService<IClusterClient>();
-                return new ChatPlatformClient(client, roomName);
+                var lifecycle = sp.GetService<IHostApplicationLifetime>();
+                var logger = sp.GetService<ILogger<ChatPlatformClient>>();
+                return new ChatPlatformClient(
+                    client: client,
+                    room: roomName,
+                    lifecycleService: lifecycle,
+                    logger: logger);
             });
 
         return collection;
@@ -110,11 +117,11 @@ public static class HostBuilderExtension
     {
         var chatPlatformClient = host.Services.GetRequiredService<ChatPlatformClient>();
         var lifecycle = host.Services.GetRequiredService<IHostApplicationLifetime>();
-        await chatPlatformClient.RegisterAgentAsync(agent, description);
+        await chatPlatformClient.RegisterAutoGenAgentAsync(agent, description);
 
         lifecycle.ApplicationStopping.Register(async () =>
         {
-            await chatPlatformClient.UnregisterAgentAsync(agent);
+            await chatPlatformClient.UnregisterAgentAsync(agent.Name);
         });
     }
 }

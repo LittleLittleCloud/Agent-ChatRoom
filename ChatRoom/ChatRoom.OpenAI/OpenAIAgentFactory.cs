@@ -2,12 +2,13 @@
 using AutoGen.OpenAI;
 using AutoGen.OpenAI.Extension;
 using Azure.AI.OpenAI;
-
+using ChatRoom.SDK.Extension;
 namespace ChatRoom.OpenAI;
 
-public class OpenAIAgentFactory
+internal class OpenAIAgentFactory
 {
     private readonly OpenAIAgentConfiguration _config;
+    
     public OpenAIAgentFactory(OpenAIAgentConfiguration config)
     {
         _config = config;
@@ -22,11 +23,12 @@ public class OpenAIAgentFactory
         if (openaiClient is not null && deployModelName is not null)
         {
             agent = new OpenAIChatAgent(
-            openAIClient: openaiClient,
-            name: _config.Name,
-            modelName: deployModelName,
-            systemMessage: _config.SystemMessage)
-            .RegisterMessageConnector();
+                openAIClient: openaiClient,
+                name: _config.Name,
+                modelName: deployModelName,
+                systemMessage: _config.SystemMessage)
+                .RegisterMessageConnector()
+                .ReturnErrorMessageWhenExceptionThrown();
         }
         else
         {

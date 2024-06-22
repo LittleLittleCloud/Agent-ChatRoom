@@ -1,6 +1,8 @@
 ﻿using AutoGen.Core;
 using Orleans.Runtime;
 using Orleans;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace ChatRoom.SDK;
 
@@ -8,35 +10,49 @@ public class ChatPlatformClient
 {
     private readonly IClusterClient _client;
     private readonly string _room;
+    private readonly IHostApplicationLifetime? _lifetime;
     private readonly IDictionary<string, IRoomObserver> _observers = new Dictionary<string, IRoomObserver>();
     private readonly IDictionary<string, IOrchestratorObserver> _orchestrators = new Dictionary<string, IOrchestratorObserver>();
-
-    public ChatPlatformClient(IClusterClient client, string room = "room")
+    private readonly ILogger<ChatPlatformClient>? _logger;
+    
+    public ChatPlatformClient(
+        IClusterClient client,
+        string room = "room",
+        IHostApplicationLifetime? lifecycleService = null,
+        ILogger<ChatPlatformClient>? logger = null)
     {
         _client = client;
         _room = room;
+        _lifetime = lifecycleService;
+        _logger = logger;
     }
 
-    public async Task RegisterAgentAsync(IAgent agent, string? description = null)
+    public async Task RegisterAutoGenAgentAsync(IAgent agent, string? description = null)
     {
         var observer = new AutoGenAgentObserver(_client, agent);
-        var room = _client.GetGrain<IRoomGrain>(_room);
-        var reference = _client.CreateObjectReference<IRoomObserver>(observer);
-        await room.AddAgentToRoom(agent.Name, description ?? string.Empty, false, reference);
-        _observers[agent.Name] = observer;
+        await this.RegisterAgentAsync(agent.Name, description ?? string.Empty, false, observer);
     }
 
-    public async Task UnregisterAgentAsync(IAgent agent)
+    public async Task UnregisterAgentAsync(string name)
     {
+        _logger?.LogInformation($"Unregistering agent {name}");
         var room = _client.GetGrain<IRoomGrain>(_room);
-        await room.RemoveAgentFromRoom(agent.Name);
-        _observers.Remove(agent.Name);
+        await room.RemoveAgentFromRoom(name);
+        _observers.Remove(name);
     }
 
     public async Task RegisterAgentAsync(string name, string description, bool isHuman, IRoomObserver observer)
     {
+        _logger?.LogInformation($"Registering agent {name}");
         var room = _client.GetGrain<IRoomGrain>(_room);
-        await room.AddAgentToRoom(name, description, isHuman, observer);
+        var reference = _client.CreateObjectReference<IRoomObserver>(observer);
+        await room.AddAgentToRoom(name, description, isHuman, reference);
+        _observers[name] = observer;
+        
+        if (_lifetime is not null)
+        {
+            _lifetime.ApplicationStopping.Register(async() => await this.UnregisterAgentAsync(name));
+        }
     }
 
     public async Task RegisterOrchestratorAsync(string name, IOrchestrator orchestrator)
