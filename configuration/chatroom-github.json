@@ -1,5 +1,5 @@
 {
-    "$schema": "../schema/chatroom_github_configuration_schema.json",
+    "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_github_configuration_schema.json",
     "issue_helper": {
         "openai_config": {
             "llm_type": "OpenAI",
