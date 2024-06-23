@@ -1,7 +1,9 @@
 - name: Getting started
   items:
     - name: Overview
-      href: agent_chatroom_overview.md
+      href: ../index.md
+    - name: Key Concepts
+      href: key_concepts.md
     - name: Installation
       href: installation.md
     - name: Configuration Examples
