@@ -21,6 +21,9 @@
     <InternalsVisibleTo Include="ChatRoom.Client" />
     <InternalsVisibleTo Include="ChatRoom.Tests" />
     <InternalsVisibleTo Include="ChatRoom.OpenAI" />
+    <InternalsVisibleTo Include="ChatRoom.Powershell" />
+    <InternalsVisibleTo Include="ChatRoom.Github" />
+    <InternalsVisibleTo Include="ChatRoom.BingSearch" />
   </ItemGroup>
 
 </Project>

@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ChatRoom\ChatRoom.Github\ChatRoom.Github.csproj" />
+    <ProjectReference Include="..\ChatRoom.Client.Tests\ChatRoom.Client.Tests.csproj" />
     <ProjectReference Include="..\ChatRoom.Tests\ChatRoom.Tests.csproj" />
   </ItemGroup>
 

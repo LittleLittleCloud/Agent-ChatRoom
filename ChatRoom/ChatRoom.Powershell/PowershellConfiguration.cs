@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ChatRoom.OpenAI;
+using ChatRoom.SDK;
 using Json.Schema.Generation;
 
 namespace ChatRoom.Powershell;
@@ -70,4 +71,8 @@ public class PowershellConfiguration
     [JsonPropertyName("gpt")]
     [Description("Powershell GPT configuration")]
     public PowershellGPTConfiguration GPT { get; set; } = new PowershellGPTConfiguration();
+
+    [JsonPropertyName("room_config")]
+    [Description("The configuration for the chat room")]
+    public RoomConfiguration RoomConfig { get; set; } = new RoomConfiguration();
 }

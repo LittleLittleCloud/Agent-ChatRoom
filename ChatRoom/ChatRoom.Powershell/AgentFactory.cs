@@ -2,6 +2,7 @@
 using AutoGen.OpenAI;
 using AutoGen.OpenAI.Extension;
 using Azure.AI.OpenAI;
+using ChatRoom.SDK.Extension;
 
 namespace ChatRoom.Powershell;
 
@@ -26,7 +27,8 @@ internal static class AgentFactory
             name: config.Name,
             systemMessage: config.SystemMessage)
             .RegisterMessageConnector()
-            .RegisterPrintMessage();
+            .RegisterPrintMessage()
+            .ReturnErrorMessageWhenExceptionThrown();
 
         return agent;
     }

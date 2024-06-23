@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Spectre.Console;
 using Spectre.Console.Cli;
 namespace ChatRoom.OpenAI;
-public class OpenAICommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
+internal class OpenAICommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
 {
     private IHost? _host = null;
     private bool _deployed = false;
@@ -20,17 +20,12 @@ public class OpenAICommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
         A configuration file is a json file with the following schema:
         - https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_openai_configuration_schema.json
         """;
+
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings setting)
     {
         var config = setting.ConfigFile is not null
             ? JsonSerializer.Deserialize<Configuration>(File.ReadAllText(setting.ConfigFile))!
             : new Configuration();
-
-        config.RoomConfig = new RoomConfiguration
-        {
-            Room = setting.Room ?? "room",
-            Port = setting.Port ?? 30000
-        };
 
         return await ExecuteAsync(config);
     }
