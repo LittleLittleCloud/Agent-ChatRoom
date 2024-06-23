@@ -34,5 +34,5 @@ public class BingSearchConfiguration
 
     [Description("OpenAI configuration")]
     [JsonPropertyName("openai_config")]
-    public OpenAIClientConfiguration? OpenAIConfiguration { get; set; } = new OpenAIClientConfiguration();
+    public OpenAIClientConfiguration? OpenAIConfiguration { get; set; } = null;
 }

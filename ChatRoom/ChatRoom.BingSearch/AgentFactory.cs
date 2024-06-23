@@ -8,6 +8,7 @@ using AutoGen.OpenAI;
 using AutoGen.OpenAI.Extension;
 using AutoGen.SemanticKernel;
 using Azure.AI.OpenAI;
+using ChatRoom.SDK.Extension;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Plugins.Web;
 using Microsoft.SemanticKernel.Plugins.Web.Bing;
@@ -43,7 +44,7 @@ internal static class AgentFactory
 
         var agent = new OpenAIChatAgent(
             openAIClient: openaiClient,
-            name: "bing-search",
+            name: config.Name,
             modelName: deployModelName,
             systemMessage: config.SystemMessage)
             .RegisterMessageConnector()
@@ -65,7 +66,8 @@ internal static class AgentFactory
                     return new TextMessage(Role.Assistant, ex.Message);
                 }
             })
-            .RegisterPrintMessage();
+            .RegisterPrintMessage()
+            .ReturnErrorMessageWhenExceptionThrown();
             
         return agent;
     }
