@@ -1,8 +1,3 @@
-Agent Chatroom is a multi-agent platform built on top of AutoGen.Net, shadcn and Orleans. It comes with a webui that allows you to chat with multiple agents simultaneously in a web browser. You can also run `ChatRoom.Client` as a restful server. Agent Chatroom is extensible, allowing you to create your own agents and orchestrators and integrate them into the chatroom.
-
-![switch-theme](../assets/agent-chatroom-switch-theme.gif)
-
-## Key Concept
 ### Agent
 In Agent Chatroom, an agent is a conversational agent that can send and receive messages. An agent can be a human (e.g. You) or an LLM chatbot. You can add agents to the room by installing agent packages (e.g `ChatRoom.OpenAI`) or by developing your own agents using `ChatRoom.SDK`.
 
