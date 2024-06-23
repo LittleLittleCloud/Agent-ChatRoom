@@ -36,6 +36,18 @@
         }
       },
       "description": "Powershell GPT configuration"
+    },
+    "room_config": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "$ref": "#/$defs/string14"
+        },
+        "port": {
+          "$ref": "#/$defs/integer1"
+        }
+      },
+      "description": "The configuration for the chat room"
     }
   },
   "$defs": {
@@ -139,6 +151,14 @@
     "string13": {
       "type": "string",
       "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
+    },
+    "string14": {
+      "type": "string",
+      "description": "The name of the room. Default is \u0027room\u0027"
+    },
+    "integer1": {
+      "type": "integer",
+      "description": "The port number where the room is hosted. Default is 30000"
     }
   }
 }

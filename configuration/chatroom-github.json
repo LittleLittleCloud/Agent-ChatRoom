@@ -1,0 +1,9 @@
+{
+    "$schema": "../schema/chatroom_github_configuration_schema.json",
+    "issue_helper": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    }
+}

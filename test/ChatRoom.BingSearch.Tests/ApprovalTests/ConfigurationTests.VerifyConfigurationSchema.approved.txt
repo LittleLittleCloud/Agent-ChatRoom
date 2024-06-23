@@ -1,6 +1,18 @@
 ﻿{
   "type": "object",
   "properties": {
+    "room_config": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "$ref": "#/$defs/string"
+        },
+        "port": {
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "description": "The configuration for the chat room"
+    },
     "name": {
       "type": "string",
       "description": "Name of the bing search agent, default is \u0027bing-search\u0027"
@@ -24,34 +36,42 @@
           "$ref": "#/$defs/lLMType"
         },
         "openai_api_key": {
-          "$ref": "#/$defs/string"
-        },
-        "openai_model_id": {
           "$ref": "#/$defs/string1"
         },
-        "azure_openai_endpoint": {
+        "openai_model_id": {
           "$ref": "#/$defs/string2"
         },
-        "azure_openai_key": {
+        "azure_openai_endpoint": {
           "$ref": "#/$defs/string3"
         },
-        "azure_openai_deploy_name": {
+        "azure_openai_key": {
           "$ref": "#/$defs/string4"
         },
-        "third_party_llm_endpoint": {
+        "azure_openai_deploy_name": {
           "$ref": "#/$defs/string5"
         },
-        "third_party_llm_key": {
+        "third_party_llm_endpoint": {
           "$ref": "#/$defs/string6"
         },
-        "third_party_llm_model_id": {
+        "third_party_llm_key": {
           "$ref": "#/$defs/string7"
+        },
+        "third_party_llm_model_id": {
+          "$ref": "#/$defs/string8"
         }
       },
       "description": "OpenAI configuration"
     }
   },
   "$defs": {
+    "string": {
+      "type": "string",
+      "description": "The name of the room. Default is \u0027room\u0027"
+    },
+    "integer": {
+      "type": "integer",
+      "description": "The port number where the room is hosted. Default is 30000"
+    },
     "lLMType": {
       "enum": [
         "AOAI",
@@ -60,35 +80,35 @@
       ],
       "description": "LLM provider, default is Azure OpenAI"
     },
-    "string": {
+    "string1": {
       "type": "string",
       "description": "OpenAI API key, default is $env:OPENAI_API_KEY"
     },
-    "string1": {
+    "string2": {
       "type": "string",
       "description": "OpenAI model ID, default is gpt-3.5-turbo"
     },
-    "string2": {
+    "string3": {
       "type": "string",
       "description": "Azure OpenAI endpoint, default is $env:AZURE_OPENAI_ENDPOINT"
     },
-    "string3": {
+    "string4": {
       "type": "string",
       "description": "Azure OpenAI key, default is $env:AZURE_OPENAI_API_KEY"
     },
-    "string4": {
+    "string5": {
       "type": "string",
       "description": "Azure OpenAI deploy name, default is $env:AZURE_OPENAI_DEPLOY_NAME"
     },
-    "string5": {
+    "string6": {
       "type": "string",
       "description": "Third-party LLM provider endpoint, default is $env:THIRD_PARTY_LLM_ENDPOINT"
     },
-    "string6": {
+    "string7": {
       "type": "string",
       "description": "Third-party LLM provider key, default is $env:THIRD_PARTY_LLM_KEY"
     },
-    "string7": {
+    "string8": {
       "type": "string",
       "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
     }

@@ -13,7 +13,7 @@ public class OpenAIAgentsFixture : IDisposable
 
     public OpenAIAgentsFixture()
     {
-        var configurationPath = Path.Combine("test-configuration", "openai-agents.json");
+        var configurationPath = Path.Combine("configuration", "chatroom-openai.json");
         var configuration = JsonSerializer.Deserialize<Configuration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new OpenAICommand();
 
@@ -29,7 +29,7 @@ public class OpenAIAgentsFixture : IDisposable
         }
     }
 
-    public OpenAICommand Command { get; private set; }
+    internal OpenAICommand Command { get; private set; }
 
     public void Dispose()
     {

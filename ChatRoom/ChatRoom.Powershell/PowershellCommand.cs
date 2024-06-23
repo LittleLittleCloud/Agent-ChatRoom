@@ -6,13 +6,17 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ChatRoom.SDK;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 
 namespace ChatRoom.Powershell;
 
-public class PowershellCommand : ChatRoomAgentCommand
+internal class PowershellCommand : ChatRoomAgentCommand
 {
+    private IHost? _host = null;
+    private bool _deployed = false;
+
     public static string Description => """
         Powershell agents for chat room.
 
@@ -30,15 +34,68 @@ public class PowershellCommand : ChatRoomAgentCommand
             ? JsonSerializer.Deserialize<PowershellConfiguration>(File.ReadAllText(settings.ConfigFile))!
             : new PowershellConfiguration();
 
-        var host = Host.CreateDefaultBuilder()
-            .AddAgentAsync(AgentFactory.CreatePwshDeveloperAgent(config.GPT), config.GPT.Description)
-            .AddAgentAsync(new PowershellRunnerAgent(config.Runner.Name, config.Runner.LastNMessage), config.Runner.Description)
-            .UseChatRoom(roomName: settings.Room ?? "room", port: settings.Port ?? 30000)
+        return await ExecuteAsync(config);
+    }
+
+    internal IServiceProvider? ServiceProvider => _host?.Services;
+
+    internal async Task StopAsync(int maxWaitingTimeInSeconds =10)
+    {
+        if (_host is not null)
+        {
+            var timeout = Task.Delay(TimeSpan.FromSeconds(maxWaitingTimeInSeconds));
+            var stopHostTask = _host.StopAsync();
+
+            await Task.WhenAny(timeout, stopHostTask);
+
+            if (timeout.IsCompleted)
+            {
+                throw new TimeoutException("Stop host timeout");
+            }
+        }
+    }
+
+    internal async Task DeployAsync(int maxWaitingTimeInSeconds = 20)
+    {
+        var timeOut = Task.Delay(TimeSpan.FromSeconds(maxWaitingTimeInSeconds));
+        while (true)
+        {
+            if (_host is null)
+            {
+                await Task.Delay(1000);
+                continue;
+            }
+
+            if (_deployed)
+            {
+                break;
+            }
+
+            if (timeOut.IsCompleted)
+            {
+                throw new TimeoutException("Deploy timeout");
+            }
+
+            await Task.Delay(1000);
+        }
+    }
+
+    internal async Task<int> ExecuteAsync(PowershellConfiguration config)
+    {
+        _deployed = false;
+        _host = Host.CreateDefaultBuilder()
+            .UseChatRoom(roomName: config.RoomConfig.Room ?? "room", port: config.RoomConfig.Port)
             .Build();
 
-        await host.StartAsync();
-        await host.WaitForAgentsJoinRoomAsync();
-        await host.WaitForShutdownAsync();
+        await _host.StartAsync();
+        var chatroomClient = _host.Services.GetRequiredService<ChatPlatformClient>();
+        var psGPTAgent = AgentFactory.CreatePwshDeveloperAgent(config.GPT);
+        var psRunnerAgent = new PowershellRunnerAgent(config.Runner.Name, config.Runner.LastNMessage);
+        await chatroomClient.RegisterAutoGenAgentAsync(psGPTAgent, config.GPT.Description);
+        await chatroomClient.RegisterAutoGenAgentAsync(psRunnerAgent, config.Runner.Description);
+
+        _deployed = true;
+        await _host.WaitForShutdownAsync();
 
         return 0;
     }

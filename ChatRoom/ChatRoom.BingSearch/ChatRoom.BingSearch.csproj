@@ -24,5 +24,9 @@
     <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
     <ProjectReference Include="..\ChatRoom.OpenAI\ChatRoom.OpenAI.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChatRoom.BingSearch.Tests"/>
+  </ItemGroup>
 
 </Project>

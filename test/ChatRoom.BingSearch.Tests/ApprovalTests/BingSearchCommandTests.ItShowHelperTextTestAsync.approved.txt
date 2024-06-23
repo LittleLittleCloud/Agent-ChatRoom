@@ -12,6 +12,4 @@ USAGE:
 OPTIONS:
     -h, --help               Prints help information
     -v, --version            Prints version information
-    -r, --room <ROOM>        The room name to create
-    -p, --port <PORT>        The port to listen
     -c, --config <CONFIG>    Configuration file

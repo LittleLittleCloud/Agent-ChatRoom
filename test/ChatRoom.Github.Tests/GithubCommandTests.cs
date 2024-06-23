@@ -8,11 +8,36 @@ using ApprovalTests.Reporters;
 using ApprovalTests;
 using Spectre.Console.Testing;
 using Xunit;
+using ChatRoom.Client.Tests;
+using ChatRoom.SDK;
+using Microsoft.Extensions.DependencyInjection;
+using FluentAssertions;
 
 namespace ChatRoom.Github.Tests;
 
-public class GithubCommandTests
+public class GithubCommandTests : IClassFixture<DefaultClientFixture>, IClassFixture<GithubAgentsFixture>
 {
+    private readonly DefaultClientFixture _fixture;
+    private readonly GithubAgentsFixture _githubFixture;
+    private readonly ChatPlatformClient _client;
+
+    public GithubCommandTests(DefaultClientFixture fixture, GithubAgentsFixture githubFixture)
+    {
+        _fixture = fixture;
+        _githubFixture = githubFixture;
+        _client = githubFixture.Command.ServiceProvider?.GetRequiredService<ChatPlatformClient>() ?? throw new InvalidOperationException("Failed to get ChatPlatformClient.");
+    }
+
+    [Fact]
+    public async Task ItRegisterAndUnregisterAgentsToRoomAsync()
+    {
+        var agents = await _client.GetRoomMembers();
+        agents.Count().Should().Be(2);
+
+        var names = agents.Select(a => a.Name).ToList();
+        names.Should().Contain("issue-helper");
+    }
+
     [Fact]
     [UseReporter(typeof(DiffReporter))]
     [UseApprovalSubdirectory("ApprovalTests")]

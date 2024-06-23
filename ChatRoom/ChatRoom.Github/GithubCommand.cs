@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoGen.Core;
 using Azure.AI.OpenAI;
 using ChatRoom.SDK;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.SemanticKernel.Agents;
 using Octokit;
@@ -16,6 +17,9 @@ namespace ChatRoom.Github;
 
 internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
 {
+    private IHost? _host = null;
+    private bool _deployed = false;
+
     public static string Description { get; } = """
         Github agents for ChatRoom
 
@@ -29,8 +33,14 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
             ? JsonSerializer.Deserialize<GithubConfiguration>(File.ReadAllText(settings.ConfigFile))!
             : new GithubConfiguration();
 
-        OpenAIClient? openaiClient = config.OpenAIConfiguration?.ToOpenAIClient();
-        string? deployModelName = config.OpenAIConfiguration?.ModelId;
+        return await ExecuteAsync(config);
+    }
+
+    internal async Task<int> ExecuteAsync(GithubConfiguration config)
+    {
+        // create issue helper
+        OpenAIClient? openaiClient = config.IssueHelper.OpenAIConfiguration?.ToOpenAIClient();
+        string? deployModelName = config.IssueHelper.OpenAIConfiguration?.ModelId;
 
         IAgent? issueHelper = null;
 
@@ -51,16 +61,64 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
             issueHelper = AgentFactory.CreateIssueHelperAgent(openaiClient!, deployModelName!, ghClient, config.IssueHelper.Name, config.IssueHelper.SystemMessage);
         };
 
-        var host = Host.CreateDefaultBuilder()
-            .UseChatRoom(roomName: settings.Room ?? "room", port: settings.Port ?? 30000)
+        _host = Host.CreateDefaultBuilder()
+            .UseChatRoom(roomName: config.RoomConfig.Room ?? "room", port: config.RoomConfig.Port)
             .Build();
-        
-        var sp = host.Services;
+        await _host.StartAsync();
 
-        await host.StartAsync();
-        await host.JoinRoomAsync(issueHelper, config.IssueHelper.Description);
-        await host.WaitForShutdownAsync();
+        var sp = _host.Services;
+        var chatPlatformClient = sp.GetRequiredService<ChatPlatformClient>() ?? throw new InvalidOperationException("ChatPlatformClient is not registered");
+
+        await chatPlatformClient.RegisterAutoGenAgentAsync(issueHelper, config.IssueHelper.Description);
+
+        _deployed = true;
+
+        await _host.WaitForShutdownAsync();
 
         return 0;
     }
+
+    internal IServiceProvider? ServiceProvider => _host?.Services;
+
+    internal async Task StopAsync(int maxWaitingTimeInSeconds = 10)
+    {
+        if (_host is not null)
+        {
+            var timeout = Task.Delay(TimeSpan.FromSeconds(maxWaitingTimeInSeconds));
+            var stopHostTask = _host.StopAsync();
+
+            await Task.WhenAny(timeout, stopHostTask);
+
+            if (timeout.IsCompleted)
+            {
+                throw new TimeoutException("Stop host timeout");
+            }
+        }
+    }
+
+    internal async Task DeployAsync(int maxWaitingTimeInSeconds = 20)
+    {
+        var timeOut = Task.Delay(TimeSpan.FromSeconds(maxWaitingTimeInSeconds));
+        while (true)
+        {
+            if (_host is null)
+            {
+                await Task.Delay(1000);
+                continue;
+            }
+
+            if (_deployed)
+            {
+                break;
+            }
+
+            if (timeOut.IsCompleted)
+            {
+                throw new TimeoutException("Deploy timeout");
+            }
+
+            await Task.Delay(1000);
+        }
+    }
+
 }
