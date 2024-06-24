@@ -62,7 +62,7 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
         };
 
         _host = Host.CreateDefaultBuilder()
-            .UseChatRoom(roomName: config.RoomConfig.Room ?? "room", port: config.RoomConfig.Port)
+            .UseChatRoomClient(roomName: config.RoomConfig.Room ?? "room", port: config.RoomConfig.Port)
             .Build();
         await _host.StartAsync();
 

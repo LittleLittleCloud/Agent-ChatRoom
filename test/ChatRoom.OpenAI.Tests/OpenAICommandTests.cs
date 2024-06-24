@@ -45,9 +45,9 @@ public class OpenAICommandTests : IClassFixture<DefaultClientFixture>, IClassFix
     public async Task ItRegisterAndUnregisterAgentsToRoomAsync()
     {
         var agents = await _client.GetRoomMembers();
-        agents.Count().Should().Be(3);
+        agents.Count().Should().Be(4);
 
         var names = agents.Select(a => a.Name).ToList();
-        names.Should().BeEquivalentTo(["User", "gpt35", "gpt4"]);
+        names.Should().BeEquivalentTo(["User", "gpt35", "gpt4", "llama3"]);
     }
 }

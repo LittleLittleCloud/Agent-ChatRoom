@@ -34,9 +34,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.BingSearch.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Powershell.Tests", "test\ChatRoom.Powershell.Tests\ChatRoom.Powershell.Tests.csproj", "{EE69B6B8-332F-48E6-AF7D-433489949ECD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.Github", "ChatRoom\ChatRoom.Github\ChatRoom.Github.csproj", "{DA54F7BA-1CA9-454A-B337-F231A68AB041}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Github", "ChatRoom\ChatRoom.Github\ChatRoom.Github.csproj", "{DA54F7BA-1CA9-454A-B337-F231A68AB041}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.Github.Tests", "test\ChatRoom.Github.Tests\ChatRoom.Github.Tests.csproj", "{0949EE2B-65CF-47C1-9A8C-80BD29B50588}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Github.Tests", "test\ChatRoom.Github.Tests\ChatRoom.Github.Tests.csproj", "{0949EE2B-65CF-47C1-9A8C-80BD29B50588}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{24BF590F-A466-4AB2-B750-A14C4CA2EFF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
