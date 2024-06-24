@@ -78,7 +78,7 @@ internal class BingSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSettin
         _deployed = false;
         _host = Host.CreateDefaultBuilder()
             //.AddAgentAsync(async (_) => AgentFactory.CreateBingSearchAgent(config), config.Description)
-            .UseChatRoom(roomName: config.RoomConfig.Room ?? "room", port: config.RoomConfig.Port)
+            .UseChatRoomClient(roomName: config.RoomConfig.Room ?? "room", port: config.RoomConfig.Port)
             .Build();
 
         await _host.StartAsync();

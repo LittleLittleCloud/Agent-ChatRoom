@@ -108,9 +108,8 @@ public class OpenAIClientConfiguration
             if (ThirdPartyLLMEndpoint is string
                 && ThirdPartyLLMModelId is string)
             {
-                var httpClient = new HttpClient()
+                var httpClient = new HttpClient(new CustomHttpClientHandler(ThirdPartyLLMEndpoint))
                 {
-                    BaseAddress = new Uri(ThirdPartyLLMEndpoint),
                     DefaultRequestHeaders =
                     {
                         { "x-api-key", ThirdPartyLLMKey },
@@ -124,12 +123,29 @@ public class OpenAIClientConfiguration
                     Transport = new HttpClientTransport(httpClient)
                 };
 
-                return new OpenAIClient(ThirdPartyLLMModelId, openaiClientOption);
+                return new OpenAIClient(ThirdPartyLLMKey, openaiClientOption);
             }
             else
             {
                 return null;
             }
         }
+    }
+}
+
+public sealed class CustomHttpClientHandler : HttpClientHandler
+{
+    private string _modelServiceUrl;
+
+    public CustomHttpClientHandler(string modelServiceUrl)
+    {
+        _modelServiceUrl = modelServiceUrl;
+    }
+
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        request.RequestUri = new Uri($"{_modelServiceUrl}{request.RequestUri?.PathAndQuery}");
+
+        return base.SendAsync(request, cancellationToken);
     }
 }

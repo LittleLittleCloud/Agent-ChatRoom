@@ -15,8 +15,6 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using Swashbuckle.AspNetCore;
-using static Google.Api.Gax.Grpc.Gcp.AffinityConfig.Types;
 
 namespace ChatRoom.Client;
 
@@ -114,12 +112,13 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
                 loggingBuilder.AddSerilog(serilogLogger);
             })
-            .UseOrleans(siloBuilder =>
-            {
-                siloBuilder
-                    .UseLocalhostClustering(gatewayPort: config.RoomConfig.Port)
-                    .AddMemoryGrainStorage("PubSubStore");
-            })
+            .UseChatRoomServer(config.RoomConfig)
+            //.UseOrleans(siloBuilder =>
+            //{
+            //    siloBuilder
+            //        .UseLocalhostClustering(gatewayPort: config.RoomConfig.Port)
+            //        .AddMemoryGrainStorage("PubSubStore");
+            //})
             .ConfigureServices(serviceCollection =>
             {
                 serviceCollection.AddSingleton(config);
@@ -141,13 +140,6 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                     var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
 
                     return new DynamicGroupChat(settings.ChannelConfig.OpenAIConfiguration);
-                });
-                serviceCollection.AddSingleton(sp =>
-                {
-                    var clusterClient = sp.GetRequiredService<IClusterClient>();
-                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
-                    var chatPlatformClient = new ChatPlatformClient(clusterClient, settings.RoomConfig.Room);
-                    return chatPlatformClient;
                 });
                 serviceCollection.AddSingleton(sp =>
                 {
