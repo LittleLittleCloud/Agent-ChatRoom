@@ -1,4 +1,5 @@
 ﻿using AutoGen.Core;
+using ChatRoom.SDK;
 
 namespace ChatRoom.Tests;
 

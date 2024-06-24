@@ -8,7 +8,7 @@ using Spectre.Console;
 
 namespace ChatRoom.Client;
 
-public class ConsoleRoomObserver : IRoomObserver
+public class ConsoleRoomAgent : IChatRoomAgent
 {
     public event EventHandler<ChatMsg>? OnMessageReceived;
     public event EventHandler<ChatMsg>? OnNotificationReceived;

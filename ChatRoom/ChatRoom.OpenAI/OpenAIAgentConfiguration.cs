@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 using ChatRoom.SDK;
 using Json.Schema.Generation;
-using Spectre.Console.Cli;
 
 namespace ChatRoom.OpenAI;
 
-internal class OpenAIAgentConfiguration
+public class OpenAIAgentConfiguration
 {
     [Description("llm configuration")]
     [JsonPropertyName("llm_config")]
@@ -27,15 +21,4 @@ internal class OpenAIAgentConfiguration
     [Description("Name of the agent, default is 'gpt'")]
     [JsonPropertyName("name")]
     public string Name { get; init; } = "gpt";
-}
-
-internal class Configuration
-{
-    [Description("The configuration for the chat room")]
-    [JsonPropertyName("room_config")]
-    public RoomConfiguration RoomConfig { get; set; } = new RoomConfiguration();
-
-    [Description("agents, the name of agents can't be duplicated")]
-    [JsonPropertyName("agents")]
-    public List<OpenAIAgentConfiguration> Agents { get; set; } = new List<OpenAIAgentConfiguration>();
 }

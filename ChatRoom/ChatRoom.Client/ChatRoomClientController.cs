@@ -24,16 +24,14 @@ public class ChatRoomClientController : Controller
     private readonly IClusterClient _clusterClient = null!;
     private readonly ClientContext _clientContext = null!;
     private readonly ILogger<ChatRoomClientController>? _logger = null!;
-    private readonly IRoomObserver _roomObserverRef = null!;
-    private readonly ConsoleRoomObserver _consoleRoomObserver = null!;
+    private readonly ConsoleRoomAgent _consoleRoomObserver = null!;
     private readonly ChatPlatformClient _chatPlatformClient = null!;
     private readonly ChatRoomClientConfiguration _config = null!;
 
     public ChatRoomClientController(
         IClusterClient clusterClient,
         ClientContext clientContext,
-        IRoomObserver roomObserverRef,
-        ConsoleRoomObserver consoleRoomObserver,
+        ConsoleRoomAgent consoleRoomObserver,
         ChatPlatformClient? chatPlatformClient = null!,
         ChatRoomClientConfiguration? config = null,
         ILogger<ChatRoomClientController>? logger = null)
@@ -41,7 +39,6 @@ public class ChatRoomClientController : Controller
         _clusterClient = clusterClient;
         _clientContext = clientContext;
         _logger = logger;
-        _roomObserverRef = roomObserverRef;
         _consoleRoomObserver = consoleRoomObserver;
         _config = config ?? new ChatRoomClientConfiguration();
         _chatPlatformClient = chatPlatformClient ?? new ChatPlatformClient(_clusterClient, _config.RoomConfig.Room);

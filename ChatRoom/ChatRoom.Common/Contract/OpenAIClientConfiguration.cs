@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 using Azure.AI.OpenAI;
 using Azure.Core.Pipeline;
 using Json.Schema.Generation;
 
-namespace ChatRoom.OpenAI;
+namespace ChatRoom.SDK;
 
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

@@ -40,6 +40,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.Github.Tests", "te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{24BF590F-A466-4AB2-B750-A14C4CA2EFF2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "weather-agent", "example\dotnet\weather-agent\weather-agent.csproj", "{5D49CB71-358A-4FC2-9957-C5F863126126}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -206,6 +208,18 @@ Global
 		{0949EE2B-65CF-47C1-9A8C-80BD29B50588}.Release|x64.Build.0 = Release|Any CPU
 		{0949EE2B-65CF-47C1-9A8C-80BD29B50588}.Release|x86.ActiveCfg = Release|Any CPU
 		{0949EE2B-65CF-47C1-9A8C-80BD29B50588}.Release|x86.Build.0 = Release|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Debug|x64.Build.0 = Debug|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Debug|x86.Build.0 = Debug|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Release|x64.ActiveCfg = Release|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Release|x64.Build.0 = Release|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Release|x86.ActiveCfg = Release|Any CPU
+		{5D49CB71-358A-4FC2-9957-C5F863126126}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -224,6 +238,7 @@ Global
 		{EE69B6B8-332F-48E6-AF7D-433489949ECD} = {4503B3D3-D2C7-4FE8-A450-5A051089635C}
 		{DA54F7BA-1CA9-454A-B337-F231A68AB041} = {C0FE0076-894A-4462-8B31-3099EDBCE0A7}
 		{0949EE2B-65CF-47C1-9A8C-80BD29B50588} = {4503B3D3-D2C7-4FE8-A450-5A051089635C}
+		{5D49CB71-358A-4FC2-9957-C5F863126126} = {24BF590F-A466-4AB2-B750-A14C4CA2EFF2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E2F0A4B1-A064-41DD-B0C3-A4FF892EF46A}

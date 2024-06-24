@@ -10,6 +10,7 @@ using ApprovalTests.Core;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
 using ChatRoom.OpenAI;
+using ChatRoom.SDK;
 using FluentAssertions;
 using Json.Schema;
 using Json.Schema.Generation;

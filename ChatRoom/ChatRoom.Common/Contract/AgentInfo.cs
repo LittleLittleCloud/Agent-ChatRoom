@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ChatRoom;
+namespace ChatRoom.SDK;
 
 [GenerateSerializer]
 public record class AgentInfo

@@ -112,13 +112,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
                 loggingBuilder.AddSerilog(serilogLogger);
             })
-            .UseChatRoomServer(config.RoomConfig)
-            //.UseOrleans(siloBuilder =>
-            //{
-            //    siloBuilder
-            //        .UseLocalhostClustering(gatewayPort: config.RoomConfig.Port)
-            //        .AddMemoryGrainStorage("PubSubStore");
-            //})
+            .UseChatRoomServer(config.RoomConfig, openAIConfig: config.ChannelConfig.OpenAIConfiguration)
             .ConfigureServices(serviceCollection =>
             {
                 serviceCollection.AddSingleton(config);
@@ -127,27 +121,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
 
                 serviceCollection.AddSingleton(clientContext);
-                serviceCollection.AddSingleton<ConsoleRoomObserver>();
-                serviceCollection.AddSingleton<RoundRobinOrchestrator>();
-                serviceCollection.AddSingleton(sp =>
-                {
-                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
-
-                    return new HumanToAgent(settings.ChannelConfig.OpenAIConfiguration);
-                });
-                serviceCollection.AddSingleton(sp =>
-                {
-                    var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
-
-                    return new DynamicGroupChat(settings.ChannelConfig.OpenAIConfiguration);
-                });
-                serviceCollection.AddSingleton(sp =>
-                {
-                    var roomObserver = sp.GetRequiredService<ConsoleRoomObserver>();
-                    var clusterClient = sp.GetRequiredService<IClusterClient>();
-                    var roomObserverRef = clusterClient.CreateObjectReference<IRoomObserver>(roomObserver);
-                    return roomObserverRef;
-                });
+                serviceCollection.AddSingleton<ConsoleRoomAgent>();
                 serviceCollection.AddSingleton<ChatRoomClientController>();
                 serviceCollection.AddSingleton<ChatRoomConsoleApp>();
             });
@@ -191,8 +165,8 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
         // configure chatroom client
         var chatPlatformClient = sp.GetRequiredService<ChatPlatformClient>();
-        var observer = sp.GetRequiredService<ConsoleRoomObserver>();
-        var roudRobinOrchestrator = sp.GetRequiredService<RoundRobinOrchestrator>();
+        var observer = sp.GetRequiredService<ConsoleRoomAgent>();
+        var roudRobinOrchestrator = sp.GetRequiredService<RoundRobin>();
         var humanToAgent = sp.GetRequiredService<HumanToAgent>();
         var dynamicGroupChat = sp.GetRequiredService<DynamicGroupChat>();
 

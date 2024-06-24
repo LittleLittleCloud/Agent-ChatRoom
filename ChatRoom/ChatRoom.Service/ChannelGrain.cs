@@ -15,7 +15,7 @@ internal class ChannelGrain : Grain, IChannelGrain
     private static readonly object _lock = new();
     private readonly List<ChatMsg> _messages = new(100);
     private readonly ILogger _logger;
-    private readonly Dictionary<AgentInfo, IChannelObserver> _agents = new();
+    private readonly Dictionary<AgentInfo, IChatRoomAgentObserver> _agents = new();
     private readonly Dictionary<string, IOrchestratorObserver> _orchestrators = new();
     private readonly ChannelConfiguration _config;
 
@@ -41,7 +41,7 @@ internal class ChannelGrain : Grain, IChannelGrain
         this.DeactivateOnIdle();
     }
 
-    public async Task AddAgentToChannel(string name, string description, bool isHuman, IChannelObserver callBack)
+    public async Task AddAgentToChannel(string name, string description, bool isHuman, IChatRoomAgentObserver callBack)
     {
         var agentInfo = new AgentInfo(name, description, isHuman);
         // check if agent is already in _agents

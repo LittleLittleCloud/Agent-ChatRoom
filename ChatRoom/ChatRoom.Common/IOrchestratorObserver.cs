@@ -4,11 +4,6 @@ public interface IOrchestratorObserver : IOrchestrator, IGrainObserver
 {
 }
 
-public interface IOrchestrator
-{
-    Task<string?> GetNextSpeaker(AgentInfo[] members, ChatMsg[] messages);
-}
-
 internal class OrchestratorObserver : IOrchestratorObserver
 {
     private readonly IOrchestrator _orchestrator;

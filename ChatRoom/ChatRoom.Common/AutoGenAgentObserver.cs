@@ -3,7 +3,7 @@ using ChatRoom.SDK;
 
 namespace ChatRoom.SDK;
 
-internal class AutoGenAgentObserver : IRoomObserver
+internal class AutoGenAgentObserver : IChatRoomAgentObserver
 {
     private readonly IAgent _agent;
     private readonly IClusterClient _client;

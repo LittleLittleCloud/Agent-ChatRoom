@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ChatRoom.SDK;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
-namespace ChatRoom.Client;
+namespace ChatRoom.SDK;
 
-internal class RoundRobinOrchestrator : IOrchestrator
+internal class RoundRobin : IOrchestrator
 {
-    public readonly ILogger<RoundRobinOrchestrator>? _logger;
+    public readonly ILogger<RoundRobin>? _logger;
 
-    public RoundRobinOrchestrator(
-        ILogger<RoundRobinOrchestrator>? logger = null)
+    public RoundRobin(
+        ILogger<RoundRobin>? logger = null)
     {
         _logger = logger;
     }

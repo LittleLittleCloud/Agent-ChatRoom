@@ -6,10 +6,10 @@ using Orleans.Utilities;
 
 namespace ChatRoom.Room;
 
-public class RoomGrain : Grain, IRoomGrain
+internal class RoomGrain : Grain, IRoomGrain
 {
     private readonly List<string> _channelNames = new(100);
-    private readonly Dictionary<AgentInfo, IRoomObserver> _agents = [];
+    private readonly Dictionary<AgentInfo, IChatRoomAgentObserver> _agents = [];
     private readonly Dictionary<string, IOrchestratorObserver> _orchestrators = [];
     private readonly ILogger<RoomGrain>? _logger;
 
@@ -25,7 +25,7 @@ public class RoomGrain : Grain, IRoomGrain
 
     public Task<AgentInfo[]> GetMembers() => Task.FromResult(_agents.Keys.ToArray());
 
-    public async Task AddAgentToRoom(string name, string description, bool isHuman, IRoomObserver observer)
+    public async Task AddAgentToRoom(string name, string description, bool isHuman, IChatRoomAgentObserver observer)
     {
         var agent = new AgentInfo(name, description, isHuman);
         if (_agents.ContainsKey(agent))

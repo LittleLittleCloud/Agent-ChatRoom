@@ -1,9 +1,9 @@
 ﻿using AutoGen.Core;
 using ChatRoom.SDK;
 
-namespace ChatRoom.OpenAI;
+namespace ChatRoom.SDK;
 
-public class DynamicGroupChat : IOrchestrator
+internal class DynamicGroupChat : IOrchestrator
 {
     private readonly OpenAIClientConfiguration _config;
     public DynamicGroupChat(OpenAIClientConfiguration llmConfig)
