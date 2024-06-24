@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ChatRoom.OpenAI;
+using ChatRoom.SDK;
 using Json.Schema.Generation;
 
 namespace ChatRoom.Room;

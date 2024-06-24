@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoGen.Core;
-using ChatRoom.SDK;
-using Orleans;
+﻿using AutoGen.Core;
 
-namespace ChatRoom.OpenAI;
+namespace ChatRoom.SDK;
 
-public class HumanToAgent : IOrchestrator
+internal class HumanToAgent : IOrchestrator
 {
     private readonly OpenAIClientConfiguration _config;
     public HumanToAgent(OpenAIClientConfiguration llmConfig)
@@ -23,7 +16,7 @@ public class HumanToAgent : IOrchestrator
         {
             return null;
         }
-        
+
         // dumb implementation by using AutoGen GroupChat
         var humanMembers = members.Where(x => x.IsHuman).ToArray();
         var notHumanMembers = members.Where(x => !x.IsHuman).ToArray();

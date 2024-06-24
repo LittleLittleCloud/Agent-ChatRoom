@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoGen.Core;
+using ChatRoom.SDK;
 using FluentAssertions;
 using Xunit;
 
