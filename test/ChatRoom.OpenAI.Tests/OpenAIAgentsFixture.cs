@@ -19,7 +19,7 @@ public class OpenAIAgentsFixture : IDisposable
 
         this._start = this.Command.ExecuteAsync(configuration);
         var deploy = this.Command.DeployAsync();
-        var timeout = Task.Delay(10000);
+        var timeout = Task.Delay(30000);
 
         Task.WhenAny(deploy, timeout).Wait();
 
@@ -33,7 +33,7 @@ public class OpenAIAgentsFixture : IDisposable
 
     public void Dispose()
     {
-        var timeOut = Task.Delay(10000);
+        var timeOut = Task.Delay(30000);
         _ = Command.StopAsync();
         Task.WhenAny(this._start, timeOut).Wait();
 
