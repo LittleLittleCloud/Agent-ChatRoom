@@ -127,7 +127,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                 serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
 
                 serviceCollection.AddSingleton(clientContext);
-                serviceCollection.AddSingleton<ConsoleRoomObserver>();
+                serviceCollection.AddSingleton<ConsoleRoomAgent>();
                 serviceCollection.AddSingleton<RoundRobinOrchestrator>();
                 serviceCollection.AddSingleton(sp =>
                 {
@@ -140,13 +140,6 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
                     var settings = sp.GetRequiredService<ChatRoomClientConfiguration>();
 
                     return new DynamicGroupChat(settings.ChannelConfig.OpenAIConfiguration);
-                });
-                serviceCollection.AddSingleton(sp =>
-                {
-                    var roomObserver = sp.GetRequiredService<ConsoleRoomObserver>();
-                    var clusterClient = sp.GetRequiredService<IClusterClient>();
-                    var roomObserverRef = clusterClient.CreateObjectReference<IRoomObserver>(roomObserver);
-                    return roomObserverRef;
                 });
                 serviceCollection.AddSingleton<ChatRoomClientController>();
                 serviceCollection.AddSingleton<ChatRoomConsoleApp>();
@@ -191,7 +184,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
         // configure chatroom client
         var chatPlatformClient = sp.GetRequiredService<ChatPlatformClient>();
-        var observer = sp.GetRequiredService<ConsoleRoomObserver>();
+        var observer = sp.GetRequiredService<ConsoleRoomAgent>();
         var roudRobinOrchestrator = sp.GetRequiredService<RoundRobinOrchestrator>();
         var humanToAgent = sp.GetRequiredService<HumanToAgent>();
         var dynamicGroupChat = sp.GetRequiredService<DynamicGroupChat>();

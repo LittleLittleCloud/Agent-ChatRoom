@@ -11,7 +11,7 @@ public class ChatPlatformClient
     private readonly IClusterClient _client;
     private readonly string _room;
     private readonly IHostApplicationLifetime? _lifetime;
-    private readonly IDictionary<string, IRoomObserver> _observers = new Dictionary<string, IRoomObserver>();
+    private readonly IDictionary<string, IChatRoomAgentObserver> _observers = new Dictionary<string, IChatRoomAgentObserver>();
     private readonly IDictionary<string, IOrchestratorObserver> _orchestrators = new Dictionary<string, IOrchestratorObserver>();
     private readonly ILogger<ChatPlatformClient>? _logger;
     
@@ -41,11 +41,12 @@ public class ChatPlatformClient
         _observers.Remove(name);
     }
 
-    public async Task RegisterAgentAsync(string name, string description, bool isHuman, IRoomObserver observer)
+    public async Task RegisterAgentAsync(string name, string description, bool isHuman, IChatRoomAgent agent)
     {
         _logger?.LogInformation($"Registering agent {name}");
         var room = _client.GetGrain<IRoomGrain>(_room);
-        var reference = _client.CreateObjectReference<IRoomObserver>(observer);
+        var observer = new ChatRoomAgentObserver(agent);
+        var reference = _client.CreateObjectReference<IChatRoomAgentObserver>(observer);
         await room.AddAgentToRoom(name, description, isHuman, reference);
         _observers[name] = observer;
         

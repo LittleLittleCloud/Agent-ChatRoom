@@ -1,6 +1,6 @@
 ﻿using AutoGen.Core;
 
-namespace ChatRoom;
+namespace ChatRoom.SDK;
 
 /// <summary>
 /// Must contain either TextPart or [ImageData, MimeType] or [ImageUrl, MimeType].

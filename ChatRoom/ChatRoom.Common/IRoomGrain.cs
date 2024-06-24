@@ -2,9 +2,9 @@
 
 namespace ChatRoom.SDK;
 
-public interface IRoomGrain : IGrainWithStringKey
+internal interface IRoomGrain : IGrainWithStringKey
 {
-    Task AddAgentToRoom(string name, string description, bool isHuman, IRoomObserver callBack);
+    Task AddAgentToRoom(string name, string description, bool isHuman, IChatRoomAgentObserver callBack);
 
     Task RemoveAgentFromRoom(string name);
 

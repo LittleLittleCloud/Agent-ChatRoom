@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ChatRoom.SDK;
+using ChatRoom.SDK.Contract;
 using Spectre.Console;
 
 namespace ChatRoom.Client;
 
-public class ConsoleRoomObserver : IRoomObserver
+public class ConsoleRoomAgent : IChatRoomAgent
 {
     public event EventHandler<ChatMsg>? OnMessageReceived;
     public event EventHandler<ChatMsg>? OnNotificationReceived;

@@ -62,8 +62,8 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     [Fact]
     public async Task ItCreateAndRemoveChannelTestAsync()
     {
-        var observerMock = Mock.Of<ConsoleRoomObserver>();
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock);
+        var observerMock = Mock.Of<ConsoleRoomAgent>();
+        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock);
 
         // create nameof(ChatRoomClientControllerTests) channel
         await controller.CreateChannel(new CreateChannelRequest(nameof(ChatRoomClientControllerTests)));
@@ -87,10 +87,11 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     [Fact]
     public async Task ItAddAndRemoveAgentToChannelTestAsync()
     {
-        var observerMock = Mock.Of<ConsoleRoomObserver>();
-        var observerRef = _cluster.Client.CreateObjectReference<IRoomObserver>(observerMock);
+        var agentMock = Mock.Of<ConsoleRoomAgent>();
+        var observerMock = new ChatRoomAgentObserver(agentMock);
+        var observerRef = _cluster.Client.CreateObjectReference<IChatRoomAgentObserver>(observerMock);
         var client = new ChatPlatformClient(_cluster.Client, nameof(ChatRoomClientControllerTests));
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock, observerMock, client);
+        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, agentMock, client);
         var roomGrain = _cluster.Client.GetGrain<IRoomGrain>(nameof(ChatRoomClientControllerTests));
         var testAgentName = "testAgent";
         await roomGrain.AddAgentToRoom(testAgentName, "test", true, observerRef);

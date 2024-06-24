@@ -1,4 +1,4 @@
-﻿namespace ChatRoom;
+﻿namespace ChatRoom.SDK;
 
 [GenerateSerializer]
 public record class ChannelInfo

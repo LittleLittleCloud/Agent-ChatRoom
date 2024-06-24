@@ -48,6 +48,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="ChatRoom.OpenAI.Tests"/>
     <InternalsVisibleTo Include="ChatRoom.Client.Tests"/>
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 
 </Project>

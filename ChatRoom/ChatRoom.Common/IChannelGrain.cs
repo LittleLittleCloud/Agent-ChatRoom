@@ -1,14 +1,12 @@
 ﻿using ChatRoom.SDK;
-using Orleans.Concurrency;
-using Orleans.Runtime;
 
-namespace ChatRoom;
+namespace ChatRoom.SDK;
 
 [Alias("IChannelGrain")]
-public interface IChannelGrain : IGrainWithStringKey
+internal interface IChannelGrain : IGrainWithStringKey
 {
-    Task AddAgentToChannel(string name, string description, bool isHuman, IChannelObserver callBack);
-    
+    Task AddAgentToChannel(string name, string description, bool isHuman, IChatRoomAgentObserver callBack);
+
     Task RemoveAgentFromChannel(string name);
 
     Task AddOrchestratorToChannel(string name, IOrchestratorObserver orchestrator);

@@ -13,17 +13,16 @@ internal class ChatRoomConsoleApp
 {
     private readonly IClusterClient _clusterClient;
     private ClientContext _clientContext;
-    private readonly IRoomObserver _roomObserverRef;
     private readonly ILogger _logger;
     private readonly string _workspacePath = null!;
     private readonly string _chatRoomContextSchemaPath = null!;
     private readonly ChatRoomClientController _controller;
     private readonly ChatPlatformClient _chatPlatformClient;
     private readonly ChatRoomClientConfiguration _chatRoomClientConfiguration;
+    
     public ChatRoomConsoleApp(
         ClientContext clientContext,
         ChatRoomClientConfiguration settings,
-        IRoomObserver roomObserver,
         IClusterClient clsterClient,
         ChatRoomClientController controller,
         ChatPlatformClient chatPlatformClient,
@@ -32,7 +31,6 @@ internal class ChatRoomConsoleApp
         _logger = logger;
         _workspacePath = settings.Workspace;
         _chatRoomContextSchemaPath = Path.Combine(_workspacePath, "chat-history.json");
-        _roomObserverRef = roomObserver;
         _clusterClient = clsterClient;
         _clientContext = clientContext;
         _controller = controller;
@@ -43,10 +41,6 @@ internal class ChatRoomConsoleApp
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         PrintUsage();
-        //await _chatPlatformClient.RegisterAgentAsync(_clientContext.UserName!, _clientContext.Description!, true, _roomObserverRef);
-        //await _chatPlatformClient.RegisterOrchestratorAsync(nameof(RoundRobinOrchestrator), _roundRobinOrchestrator);
-        //await _chatPlatformClient.RegisterOrchestratorAsync(nameof(DynamicGroupChat), dynamicGroupChat);
-        //await _chatPlatformClient.RegisterOrchestratorAsync(nameof(HumanToAgent), humanToAgent);
         await ProcessLoopAsync(_clientContext, cancellationToken);
     }
 

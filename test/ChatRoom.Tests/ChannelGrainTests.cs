@@ -43,15 +43,15 @@ public class ChannelGrainTests(ClusterFixture fixture)
             .ReturnsAsync("human");
         var orchestratorRef = _cluster.GrainFactory.CreateObjectReference<IOrchestratorObserver>(orchestrator);
 
-        var human = Mock.Of<IChannelObserver>();
+        var human = Mock.Of<IChatRoomAgentObserver>();
         Mock.Get(human).Setup(x => x.GenerateReplyAsync(It.IsAny<AgentInfo>(), It.IsAny<ChatMsg[]>(), It.IsAny<ChannelInfo>()))
             .ReturnsAsync(new ChatMsg("human", "I am human"));
-        var humanRef = _cluster.GrainFactory.CreateObjectReference<IChannelObserver>(human);
+        var humanRef = _cluster.GrainFactory.CreateObjectReference<IChatRoomAgentObserver>(human);
         
-        var bot = Mock.Of<IChannelObserver>();
+        var bot = Mock.Of<IChatRoomAgentObserver>();
         Mock.Get(bot).Setup(x => x.GenerateReplyAsync(It.IsAny<AgentInfo>(), It.IsAny<ChatMsg[]>(), It.IsAny<ChannelInfo>()))
             .ReturnsAsync(new ChatMsg("bot", "I am bot"));
-        var botRef = _cluster.GrainFactory.CreateObjectReference<IChannelObserver>(bot);
+        var botRef = _cluster.GrainFactory.CreateObjectReference<IChatRoomAgentObserver>(bot);
 
         await channel.AddAgentToChannel("human", "dummy", true, humanRef);
         await channel.AddAgentToChannel("bot", "bot", false, botRef);
