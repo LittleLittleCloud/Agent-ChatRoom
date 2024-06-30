@@ -66,6 +66,7 @@ public static class HostBuilderExtension
     /// <summary>
     /// Add Agent chatroom and <see cref="ChatPlatformClient"/> to host builder.
     /// This will start a in-process chatroom server and add the <see cref="ChatPlatformClient"/> to the host builder.
+    /// If ChatRoom.StaticWebUI is added to the project, it will also start a web ui.
     /// <para>
     /// This will also add the following orchestrators:
     /// </para>
