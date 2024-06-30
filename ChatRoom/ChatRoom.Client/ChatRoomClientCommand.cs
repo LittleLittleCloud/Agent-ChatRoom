@@ -86,12 +86,6 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             Directory.CreateDirectory(workspace);
         }
 
-        var clientContext = new ClientContext()
-        {
-            UserName = config.YourName,
-            CurrentRoom = config.RoomConfig.Room,
-        };
-
         var dateTimeNow = DateTime.Now;
         var clientLogPath = Path.Combine(workspace, "logs", $"clients-{dateTimeNow:yyyy-MM-dd_HH-mm-ss}.log");
         var debugLogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] ({SourceContext}) {Message:lj}{NewLine}{Exception}";

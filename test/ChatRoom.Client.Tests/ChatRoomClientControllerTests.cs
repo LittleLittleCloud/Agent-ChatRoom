@@ -20,7 +20,7 @@ namespace ChatRoom.Client.Tests;
 public class ChatRoomClientControllerTests(ClusterFixture fixture)
 {
     private readonly TestCluster _cluster = fixture.Cluster;
-    private readonly ClientContext _clientContext = new ClientContext()
+    private readonly ConsoleAppContext _clientContext = new ConsoleAppContext()
     {
         CurrentChannel = "test",
         CurrentRoom = nameof(ChatRoomClientControllerTests),

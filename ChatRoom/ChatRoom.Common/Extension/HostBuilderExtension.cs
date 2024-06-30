@@ -66,24 +66,23 @@ public static class HostBuilderExtension
     /// <summary>
     /// Add Agent chatroom and <see cref="ChatPlatformClient"/> to host builder.
     /// This will start a in-process chatroom server and add the <see cref="ChatPlatformClient"/> to the host builder.
-    /// 
     /// <para>
     /// This will also add the following orchestrators:
     /// </para>
     /// <item><see cref="HumanToAgent"/></item>
-    /// 
     /// <para>
     /// </para>
-    /// <list type="bullet">
+    /// 
+    /// <para>If the <see cref="ChannelConfiguration.OpenAIConfiguration"/> in <paramref name="serverConfig"/>
+    /// is not null, the following orchestrators will also be added:</para>
     /// <item><see cref="DynamicGroupChat"/></item>
     /// <item><see cref="RoundRobin"/></item>
-    /// </list>
     /// Use this when you want to host the chatroom server in the same process.
     /// </summary>
     /// <param name="hostBuilder"></param>
     /// <param name="serverConfig"></param>
     /// <returns></returns>
-    internal static IHostBuilder UseChatRoomServer(
+    public static IHostBuilder UseChatRoomServer(
         this IHostBuilder hostBuilder,
         ChatRoomServerConfiguration serverConfig)
     {
@@ -117,7 +116,7 @@ public static class HostBuilderExtension
 
                 if (serverConfig.EnableConsoleApp)
                 {
-                    serviceCollections.AddSingleton<ConsoleRoomAgent>();
+                    serviceCollections.AddSingleton<ChatRoomConsoleApp>();
                 }
 
                 serviceCollections.AddSingleton(sp =>

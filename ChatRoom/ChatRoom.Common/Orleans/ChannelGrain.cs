@@ -2,13 +2,12 @@
 using AutoGen.Core;
 using Azure.AI.OpenAI;
 using ChatRoom.SDK;
-using ChatRoom.OpenAI;
 using Microsoft.Extensions.Logging;
 using Orleans.Concurrency;
 using Orleans.Runtime;
 using OrleansCodeGen.Orleans;
 
-namespace ChatRoom.Room;
+namespace ChatRoom.SDK;
 
 internal class ChannelGrain : Grain, IChannelGrain
 {

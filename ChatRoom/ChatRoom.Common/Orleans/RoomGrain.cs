@@ -4,7 +4,7 @@ using Orleans.Runtime;
 using Orleans.Streams;
 using Orleans.Utilities;
 
-namespace ChatRoom.Room;
+namespace ChatRoom.SDK;
 
 internal class RoomGrain : Grain, IRoomGrain
 {

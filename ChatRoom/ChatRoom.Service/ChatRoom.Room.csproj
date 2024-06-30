@@ -12,7 +12,6 @@
   <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
 
   <ItemGroup>
-    <PackageReference Include="AutoGen.OpenAI" />
     <PackageReference Include="Microsoft.Orleans.Server" />
   </ItemGroup>
 
