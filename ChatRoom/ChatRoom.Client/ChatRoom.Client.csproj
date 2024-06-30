@@ -30,6 +30,7 @@
     <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
     <ProjectReference Include="..\ChatRoom.OpenAI\ChatRoom.OpenAI.csproj" />
     <ProjectReference Include="..\ChatRoom.Service\ChatRoom.Room.csproj" />
+    <ProjectReference Include="..\ChatRoom.StaticWebUI\ChatRoom.StaticWebUI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,17 +38,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
-
-    <Content Include="$(RepoRoot)\chatroom-ui\out\**\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Content>
   </ItemGroup>
 
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ChatRoom.OpenAI.Tests"/>
-    <InternalsVisibleTo Include="ChatRoom.Client.Tests"/>
+    <InternalsVisibleTo Include="ChatRoom.OpenAI.Tests" />
+    <InternalsVisibleTo Include="ChatRoom.Client.Tests" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 
