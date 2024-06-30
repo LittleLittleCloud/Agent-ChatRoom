@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ChatRoom\ChatRoom.Common\ChatRoom.SDK.csproj" />
-    <ProjectReference Include="..\..\ChatRoom\ChatRoom.Service\ChatRoom.Room.csproj" />
     <ProjectReference Include="..\ChatRoom.BingSearch.Tests\ChatRoom.BingSearch.Tests.csproj" />
     <ProjectReference Include="..\ChatRoom.Client.Tests\ChatRoom.Client.Tests.csproj" />
     <ProjectReference Include="..\ChatRoom.Github.Tests\ChatRoom.Github.Tests.csproj" />
