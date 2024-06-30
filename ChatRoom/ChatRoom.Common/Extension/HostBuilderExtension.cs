@@ -159,6 +159,14 @@ public static class HostBuilderExtension
                 var assemblyLocation = Assembly.GetExecutingAssembly().Location;
                 var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? Environment.CurrentDirectory;
                 var webRoot = Path.Combine(assemblyDirectory, "wwwroot");
+                
+                // check if index.html exists in the wwwroot folder
+                if (!File.Exists(Path.Combine(webRoot, "index.html")))
+                {
+                    Console.WriteLine("index.html not found in wwwroot folder.");
+                    Console.WriteLine("Please add ChatRoom.StaticWebUI package to your project if you want to use the default web UI.");
+                }
+                
                 builder
                 .UseWebRoot(webRoot)
                 .UseContentRoot(serverConfig.Workspace)

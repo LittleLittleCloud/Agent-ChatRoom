@@ -13,16 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\**\*"
-          Exclude="$(MSBuildProjectName)$(MSBuildProjectExtension)"
-          BuildAction="Content"
-          Pack="true"
-          PackageCopyToOutput="true"
-          PackagePath="contentFiles/any/any/"
-          PackageFlatten="false" />
     <Content Include="$(RepoRoot)\chatroom-ui\out\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <PackagePath>contentFiles/any/any/wwwroot</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+      <Pack>true</Pack>
+      <PackageFlattern>false</PackageFlattern>
     </Content>
   </ItemGroup>
 

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.Common\ChatRoom.SDK.csproj" />
+    <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.StaticWebUI\ChatRoom.StaticWebUI.csproj" />
   </ItemGroup>
 
 </Project>

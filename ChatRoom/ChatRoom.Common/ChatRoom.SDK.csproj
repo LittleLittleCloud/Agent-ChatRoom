@@ -32,5 +32,4 @@
     <InternalsVisibleTo Include="ChatRoom.BingSearch" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
-
 </Project>

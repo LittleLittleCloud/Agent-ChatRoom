@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.StaticWebUI\ChatRoom.StaticWebUI.csproj" />
     <ProjectReference Include="..\weather-agent\weather-agent.csproj" />
+    <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.StaticWebUI\ChatRoom.StaticWebUI.csproj" />
   </ItemGroup>
 
 </Project>
