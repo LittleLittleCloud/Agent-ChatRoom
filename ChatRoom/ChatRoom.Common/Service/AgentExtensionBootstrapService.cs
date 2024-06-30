@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace ChatRoom.Client;
+namespace ChatRoom.SDK;
 
-public class AgentExtensionBootstrapService : IHostedService
+internal class AgentExtensionBootstrapService : IHostedService
 {
-    private readonly ChatRoomClientConfiguration _config;
+    private readonly ChatRoomServerConfiguration _config;
     private readonly ILogger<AgentExtensionBootstrapService> _logger;
     private readonly List<Process> _processes = [];
-    public AgentExtensionBootstrapService(ChatRoomClientConfiguration config, ILogger<AgentExtensionBootstrapService> logger)
+    public AgentExtensionBootstrapService(ChatRoomServerConfiguration config, ILogger<AgentExtensionBootstrapService> logger)
     {
         _config = config;
         _logger = logger;
@@ -86,7 +81,7 @@ public class AgentExtensionBootstrapService : IHostedService
         {
             if (args.Data is not null)
             {
-                _logger.LogInformation("Extension {ExtensionName} (pid: {PID}) output: {Output}", configuration.Name, process.Id , args.Data);
+                _logger.LogInformation("Extension {ExtensionName} (pid: {PID}) output: {Output}", configuration.Name, process.Id, args.Data);
             }
         };
 

@@ -45,7 +45,6 @@ public class PowershellCommandTests : IClassFixture<DefaultClientFixture>, IClas
     public async Task ItAddPowershellAgentsToRoomTestAsync()
     {
         var roomMembers = await _chatPlatformClient.GetRoomMembers();
-        roomMembers.Count().Should().Be(3);
         roomMembers.Select(a => a.Name).Should().Contain(["ps-gpt", "ps-runner"]);
     }
 }

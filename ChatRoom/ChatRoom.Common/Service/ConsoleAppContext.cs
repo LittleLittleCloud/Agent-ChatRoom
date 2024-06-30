@@ -1,6 +1,7 @@
-﻿using ChatRoom;
+﻿
+namespace ChatRoom.SDK;
 
-public class ClientContext
+internal class ConsoleAppContext
 {
     public string? CurrentChannel { get; set; }
 

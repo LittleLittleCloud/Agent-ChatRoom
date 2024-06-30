@@ -72,25 +72,19 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
     {
         _deployed = false;
         var config = command.ConfigFile is not null
-            ? JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(command.ConfigFile))!
-            : new ChatRoomClientConfiguration();
+            ? JsonSerializer.Deserialize<ChatRoomServerConfiguration>(File.ReadAllText(command.ConfigFile))!
+            : new ChatRoomServerConfiguration();
 
         return ExecuteAsync(config);
     }
 
-    internal async Task<int> ExecuteAsync(ChatRoomClientConfiguration config)
+    internal async Task<int> ExecuteAsync(ChatRoomServerConfiguration config)
     {
         var workspace = config.Workspace;
         if (!Directory.Exists(workspace))
         {
             Directory.CreateDirectory(workspace);
         }
-
-        var clientContext = new ClientContext()
-        {
-            UserName = config.YourName,
-            CurrentRoom = config.RoomConfig.Room,
-        };
 
         var dateTimeNow = DateTime.Now;
         var clientLogPath = Path.Combine(workspace, "logs", $"clients-{dateTimeNow:yyyy-MM-dd_HH-mm-ss}.log");
@@ -112,36 +106,7 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
                 loggingBuilder.AddSerilog(serilogLogger);
             })
-            .UseChatRoomServer(config.RoomConfig, openAIConfig: config.ChannelConfig.OpenAIConfiguration)
-            .ConfigureServices(serviceCollection =>
-            {
-                serviceCollection.AddSingleton(config);
-                serviceCollection.AddSingleton(config.RoomConfig);
-                serviceCollection.AddSingleton(config.ChannelConfig);
-                serviceCollection.AddHostedService<AgentExtensionBootstrapService>();
-
-                serviceCollection.AddSingleton(clientContext);
-                serviceCollection.AddSingleton<ConsoleRoomAgent>();
-                serviceCollection.AddSingleton<ChatRoomClientController>();
-                serviceCollection.AddSingleton<ChatRoomConsoleApp>();
-            });
-
-        if (config.ServerConfig is ServerConfiguration serverConfig)
-        {
-            hostBuilder.ConfigureWebHostDefaults(builder =>
-            {
-                var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-                var assemblyDirectory = Path.GetDirectoryName(assemblyLocation) ?? Environment.CurrentDirectory;
-                var webRoot = Path.Combine(assemblyDirectory, "wwwroot");
-                Console.WriteLine($"web root: {webRoot}");
-                builder
-                .UseWebRoot(webRoot)
-                .UseContentRoot(workspace)
-                .UseEnvironment(serverConfig.Environment)
-                .UseUrls(serverConfig.Urls)
-                .UseStartup<Startup>();
-            });
-        }
+            .UseChatRoomServer(config);
 
         _host = hostBuilder.Build();
 
@@ -163,17 +128,6 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
 
         var logger = sp.GetRequiredService<ILogger<ChatRoomClientCommand>>();
 
-        // configure chatroom client
-        var chatPlatformClient = sp.GetRequiredService<ChatPlatformClient>();
-        var observer = sp.GetRequiredService<ConsoleRoomAgent>();
-        var roudRobinOrchestrator = sp.GetRequiredService<RoundRobin>();
-        var humanToAgent = sp.GetRequiredService<HumanToAgent>();
-        var dynamicGroupChat = sp.GetRequiredService<DynamicGroupChat>();
-
-        await chatPlatformClient.RegisterOrchestratorAsync("RoundRobin", roudRobinOrchestrator);
-        await chatPlatformClient.RegisterOrchestratorAsync("HumanToAgent", humanToAgent);
-        await chatPlatformClient.RegisterOrchestratorAsync("DynamicGroupChat", dynamicGroupChat);
-        await chatPlatformClient.RegisterAgentAsync(config.YourName, clientContext.Description, true, observer);
         logger.LogInformation("Client started.");
         logger.LogInformation($"Workspace: {workspace}");
         logger.LogInformation($"client log is saved to: {Path.Combine(workspace, "logs", clientLogPath)}");

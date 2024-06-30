@@ -1,8 +1,8 @@
 ﻿{
   "openapi": "3.0.1",
   "info": {
-    "title": "ChatRoom.Client",
-    "version": "1.0"
+    "title": "ChatRoom.Server",
+    "version": "v1"
   },
   "paths": {
     "/api/ChatRoomClient/Version": {

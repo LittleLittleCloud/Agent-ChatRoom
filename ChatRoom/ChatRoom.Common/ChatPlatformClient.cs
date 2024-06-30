@@ -59,11 +59,6 @@ public class ChatPlatformClient
     public async Task RegisterOrchestratorAsync(string name, IOrchestrator orchestrator)
     {
         var observer = new OrchestratorObserver(orchestrator);
-        await this.RegisterOrchestratorAsync(name, observer);
-    }
-
-    public async Task RegisterOrchestratorAsync(string name, IOrchestratorObserver observer)
-    {
         var room = _client.GetGrain<IRoomGrain>(_room);
         var reference = _client.CreateObjectReference<IOrchestratorObserver>(observer);
         await room.AddOrchestratorToRoom(name, reference);

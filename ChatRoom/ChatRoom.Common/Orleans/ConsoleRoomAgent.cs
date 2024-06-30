@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ChatRoom.SDK;
-using Spectre.Console;
+﻿using Spectre.Console;
 
-namespace ChatRoom.Client;
+namespace ChatRoom.SDK;
 
-public class ConsoleRoomAgent : IChatRoomAgent
+internal class ConsoleRoomAgent : IChatRoomAgent
 {
     public event EventHandler<ChatMsg>? OnMessageReceived;
     public event EventHandler<ChatMsg>? OnNotificationReceived;

@@ -1,28 +1,25 @@
-﻿using System.Text.Json;
-using ChatRoom.Client.DTO;
-using ChatRoom.OpenAI;
-using ChatRoom.SDK;
+﻿using ChatRoom.SDK;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
-namespace ChatRoom.Client;
+namespace ChatRoom.SDK;
 
 internal class ChatRoomConsoleApp
 {
     private readonly IClusterClient _clusterClient;
-    private ClientContext _clientContext;
+    private ConsoleAppContext _clientContext;
     private readonly ILogger _logger;
     private readonly string _workspacePath = null!;
     private readonly string _chatRoomContextSchemaPath = null!;
     private readonly ChatRoomClientController _controller;
     private readonly ChatPlatformClient _chatPlatformClient;
-    private readonly ChatRoomClientConfiguration _chatRoomClientConfiguration;
-    
+    private readonly ChatRoomServerConfiguration _chatRoomClientConfiguration;
+
     public ChatRoomConsoleApp(
-        ClientContext clientContext,
-        ChatRoomClientConfiguration settings,
+        ConsoleAppContext clientContext,
+        ChatRoomServerConfiguration settings,
         IClusterClient clsterClient,
         ChatRoomClientController controller,
         ChatPlatformClient chatPlatformClient,
@@ -50,7 +47,7 @@ internal class ChatRoomConsoleApp
         AnsiConsole.MarkupLine("[bold red]Exiting...[/]");
     }
 
-    async Task ProcessLoopAsync(ClientContext context, CancellationToken ct)
+    async Task ProcessLoopAsync(ConsoleAppContext context, CancellationToken ct)
     {
         string? input = null;
         do
@@ -112,7 +109,7 @@ internal class ChatRoomConsoleApp
             {
                 "/j" => JoinChannel(input.Replace("/j", "").Trim()),
                 _ => null
-            } is Task<ClientContext> cxtTask)
+            } is Task<ConsoleAppContext> cxtTask)
             {
                 context = await cxtTask;
                 continue;
@@ -242,7 +239,7 @@ internal class ChatRoomConsoleApp
         }
     }
 
-    public async Task SaveContextToWorkspace(ClientContext context)
+    public async Task SaveContextToWorkspace(ConsoleAppContext context)
     {
         await this._controller.SaveCheckpoint();
     }
@@ -306,11 +303,11 @@ internal class ChatRoomConsoleApp
         });
     }
 
-    public async Task ShowCurrentRoomChannels(ClientContext context)
+    public async Task ShowCurrentRoomChannels(ConsoleAppContext context)
     {
         var channelsResponse = await _controller.GetChannels();
         var channels = (channelsResponse.Result as OkObjectResult)?.Value as IEnumerable<ChannelInfo>;
-        
+
         if (channels is null)
         {
             AnsiConsole.MarkupLine("[bold red]No channels found[/]");
@@ -335,11 +332,11 @@ internal class ChatRoomConsoleApp
         });
     }
 
-    public async Task ShowCurrentChannelHistory(ClientContext context)
+    public async Task ShowCurrentChannelHistory(ConsoleAppContext context)
     {
         var historyResponse = await _controller.GetChannelChatHistory(new GetChannelChatHistoryRequest(context.CurrentChannel!, 1_000));
         var history = (historyResponse.Result as OkObjectResult)?.Value as IEnumerable<ChatMsg>;
-        
+
         if (history is null)
         {
             AnsiConsole.MarkupLine("[bold red]No history found[/]");
@@ -369,7 +366,7 @@ internal class ChatRoomConsoleApp
     }
 
     public async Task SendMessage(
-        ClientContext context,
+        ConsoleAppContext context,
         string messageText)
     {
         var message = new ChatMsg(context.UserName!, messageText);

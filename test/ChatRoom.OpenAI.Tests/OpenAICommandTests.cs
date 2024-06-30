@@ -26,7 +26,7 @@ public class OpenAICommandTests : IClassFixture<DefaultClientFixture>, IClassFix
     {
         _fixture = fixture;
         _openAIAgentsFixture = openAIAgentsFixture;
-        _client = fixture.Command.ServiceProvider?.GetRequiredService<ChatPlatformClient>() ?? throw new InvalidOperationException("Failed to get ChatPlatformClient.");
+        _client = openAIAgentsFixture.Command.ServiceProvider?.GetRequiredService<ChatPlatformClient>() ?? throw new InvalidOperationException("Failed to get ChatPlatformClient.");
     }
 
     [Fact]
@@ -45,9 +45,7 @@ public class OpenAICommandTests : IClassFixture<DefaultClientFixture>, IClassFix
     public async Task ItRegisterAndUnregisterAgentsToRoomAsync()
     {
         var agents = await _client.GetRoomMembers();
-        agents.Count().Should().Be(4);
-
         var names = agents.Select(a => a.Name).ToList();
-        names.Should().BeEquivalentTo(["User", "gpt35", "gpt4", "llama3"]);
+        names.Should().BeEquivalentTo(["gpt35", "gpt4", "llama3"]);
     }
 }

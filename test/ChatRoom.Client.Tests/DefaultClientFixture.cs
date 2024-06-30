@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ChatRoom.SDK;
 using Spectre.Console.Testing;
 using Xunit.Abstractions;
 
@@ -16,7 +17,7 @@ public class DefaultClientFixture : IDisposable
     {
         // called once before every test
         var configurationPath = Path.Combine("test-configuration", "chatroom-client.json");
-        var configuration = JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
+        var configuration = JsonSerializer.Deserialize<ChatRoomServerConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new ChatRoomClientCommand();
         this._start = this.Command.ExecuteAsync(configuration);
 

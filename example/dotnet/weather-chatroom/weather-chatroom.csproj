@@ -3,18 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>weather_agent</RootNamespace>
+    <RootNamespace>weather_chatroom</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoGen.OpenAI" />
-    <PackageReference Include="AutoGen.SourceGenerator" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.Common\ChatRoom.SDK.csproj" />
+    <ProjectReference Include="..\weather-agent\weather-agent.csproj" />
     <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.StaticWebUI\ChatRoom.StaticWebUI.csproj" />
   </ItemGroup>
 
