@@ -46,6 +46,6 @@ public class OpenAICommandTests : IClassFixture<DefaultClientFixture>, IClassFix
     {
         var agents = await _client.GetRoomMembers();
         var names = agents.Select(a => a.Name).ToList();
-        names.Should().BeEquivalentTo(["User", "gpt35", "gpt4", "llama3"]);
+        names.Should().BeEquivalentTo(["gpt35", "gpt4", "llama3"]);
     }
 }
