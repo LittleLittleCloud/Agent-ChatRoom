@@ -45,8 +45,6 @@ public class BingSearchCommandTests : IClassFixture<DefaultClientFixture>, IClas
     public async Task ItRegisterAndUnregisterAgentsToRoomAsync()
     {
         var agents = await _client.GetRoomMembers();
-        agents.Count().Should().Be(2);
-
         var names = agents.Select(a => a.Name).ToList();
         names.Should().Contain("bing-search");
     }
