@@ -48,7 +48,7 @@ jobs:
         echo "Build PowershellGPT"
         dotnet build --no-restore --configuration Release -bl /p:SignAssembly=true
     - name: Unit Test
-      run: dotnet test --no-build -bl --configuration Release
+      run: dotnet test --no-build -bl --configuration Release -m:1
     - name: Pack
       run: |
         echo "Create release build package"
