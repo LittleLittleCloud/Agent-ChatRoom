@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using ChatRoom.SDK;
+﻿using System.Text.Json.Serialization;
 
-namespace ChatRoom.Client;
+namespace ChatRoom.SDK;
 
-public abstract class Schema
+internal abstract class Schema
 {
     [JsonPropertyName("type")]
     public abstract string SchemaType { get; }
 }
 
-public class ChatRoomContextSchemaV0 : Schema
+internal class ChatRoomContextSchemaV0 : Schema
 {
     [JsonPropertyName("type")]
     public override string SchemaType => nameof(ChatRoomContextSchemaV0);
@@ -29,7 +23,7 @@ public class ChatRoomContextSchemaV0 : Schema
     public string CurrentChannel { get; set; } = "General";
 }
 
-public class ChatRoomContext
+internal class ChatRoomContext
 {
     public ChatRoomContext(ChatRoomContextSchemaV0 workspaceSchemaV0)
     {
@@ -48,7 +42,7 @@ public class ChatRoomContext
     public Dictionary<string, ChannelInfo> Channels { get; set; }
 
     public Dictionary<string, ChatMsg[]> ChatHistory { get; set; }
-    
+
     public string CurrentChannel { get; set; } = "General";
 
     public ChatRoomContextSchemaV0 ToSchema()

@@ -1,47 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using ChatRoom.Client.DTO;
-using ChatRoom.SDK;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
-using System.IO;
-using System.Reflection;
 
-namespace ChatRoom.Client;
+namespace ChatRoom.SDK;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-public class ChatRoomClientController : Controller
+internal class ChatRoomClientController : Controller
 {
     private readonly IClusterClient _clusterClient = null!;
-    private readonly ClientContext _clientContext = null!;
     private readonly ILogger<ChatRoomClientController>? _logger = null!;
     private readonly ConsoleRoomAgent _consoleRoomObserver = null!;
     private readonly ChatPlatformClient _chatPlatformClient = null!;
-    private readonly ChatRoomClientConfiguration _config = null!;
+    private readonly ChatRoomServerConfiguration _config = null!;
+    private readonly RoomConfiguration _roomConfiguration = null!;
 
     public ChatRoomClientController(
         IClusterClient clusterClient,
-        ClientContext clientContext,
         ConsoleRoomAgent consoleRoomObserver,
         ChatPlatformClient? chatPlatformClient = null!,
-        ChatRoomClientConfiguration? config = null,
+        ChatRoomServerConfiguration? config = null,
         ILogger<ChatRoomClientController>? logger = null)
     {
         _clusterClient = clusterClient;
-        _clientContext = clientContext;
         _logger = logger;
         _consoleRoomObserver = consoleRoomObserver;
-        _config = config ?? new ChatRoomClientConfiguration();
+        _roomConfiguration = config?.RoomConfig ?? new RoomConfiguration();
+        _config = config ?? new ChatRoomServerConfiguration();
         _chatPlatformClient = chatPlatformClient ?? new ChatPlatformClient(_clusterClient, _config.RoomConfig.Room);
+
+        _logger?.LogInformation("ChatRoomClientController created");
+        _logger?.LogInformation("Room: {Room}", _roomConfiguration.Room);
+        _logger?.LogInformation("Workspace: {Workspace}", _config.Workspace);
+        _logger?.LogInformation("YourName: {YourName}", _config.YourName);
     }
 
     [HttpGet]
@@ -73,7 +70,7 @@ public class ChatRoomClientController : Controller
             return new BadRequestResult();
         }
 
-        if (message.From != _clientContext.UserName)
+        if (message.From != _config.YourName)
         {
             return new BadRequestObjectResult("You are not authorized to send message to this channel");
         }
@@ -99,8 +96,8 @@ public class ChatRoomClientController : Controller
     public async Task<ActionResult> UnloadCheckpoint()
     {
 
-       _logger?.LogInformation("Unloading checkpoint");
-        var room = _clientContext.CurrentRoom;
+        _logger?.LogInformation("Unloading checkpoint");
+        var room = _roomConfiguration.Room;
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(room);
         // remove all channels
         var channels = await roomGrain.GetChannels();
@@ -123,7 +120,7 @@ public class ChatRoomClientController : Controller
         {
             return new BadRequestObjectResult("Checkpoint does not exist");
         }
-        var room = _clientContext.CurrentRoom;
+        var room = _roomConfiguration.Room;
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(room);
         // remove all channels
         var channels = await roomGrain.GetChannels();
@@ -150,7 +147,7 @@ public class ChatRoomClientController : Controller
     public async Task<ActionResult> SaveCheckpoint()
     {
         _logger?.LogInformation("Saving checkpoint");
-        var room = _clientContext.CurrentRoom;
+        var room = _roomConfiguration.Room;
         var roomGrain = _clusterClient.GetGrain<IRoomGrain>(room);
         var channels = await roomGrain.GetChannels();
         Dictionary<string, ChatMsg[]> chatHistory = new();
@@ -209,7 +206,7 @@ public class ChatRoomClientController : Controller
     public async Task<ActionResult<IEnumerable<ChannelInfo>>> GetChannels()
     {
         _logger?.LogInformation("Getting channels");
-        if (_clientContext.CurrentRoom == null)
+        if (_roomConfiguration.Room == null)
         {
             return new BadRequestObjectResult("You are not in a room");
         }
@@ -223,7 +220,7 @@ public class ChatRoomClientController : Controller
     public async Task<ActionResult<AgentInfo>> GetUserInfo()
     {
         _logger?.LogInformation("Getting user info");
-        return new OkObjectResult(new AgentInfo(_clientContext.UserName!, _clientContext.Description!));
+        return new OkObjectResult(new AgentInfo(_config.YourName!, "Human user"));
     }
 
     [HttpGet]
@@ -264,7 +261,7 @@ public class ChatRoomClientController : Controller
         };
 
         _consoleRoomObserver.OnMessageReceived += handler;
-        
+
         while (!HttpContext.RequestAborted.IsCancellationRequested)
         {
             await Task.Delay(1000);
@@ -291,7 +288,7 @@ public class ChatRoomClientController : Controller
     public async Task<ActionResult<IEnumerable<AgentInfo>>> GetRoomMembers()
     {
         _logger?.LogInformation("Getting members");
-        if (_clientContext.CurrentRoom == null)
+        if (_roomConfiguration.Room == null)
         {
             return new BadRequestObjectResult("You are not in a room");
         }
@@ -347,7 +344,7 @@ public class ChatRoomClientController : Controller
     {
         var channelName = request.ChannelName;
         _logger?.LogInformation("Getting members of channel {channelName}", channelName);
-        
+
         var members = await _chatPlatformClient.GetChannelMembers(channelName);
         return new OkObjectResult(members);
     }
@@ -380,46 +377,6 @@ public class ChatRoomClientController : Controller
 
         return new OkResult();
     }
-
-    //[HttpPost]
-    //public async Task<ActionResult> JoinChannel(
-    //    [FromBody] JoinChannelRequest request)
-    //{
-    //    var channelName = request.ChannelName;
-    //    _logger?.LogInformation("Joining channel {channelName}", channelName);
-    //    var channelResponse = await GetChannels();
-    //    var channels = await _chatPlatformClient.GetChannels();
-    //    if (channels?.All(x => x.Name != channelName) is true)
-    //    {
-    //        if (request.CreateIfNotExists)
-    //        {
-    //            _logger?.LogInformation("Channel {channelName} does not exist, creating it", channelName);
-    //            await CreateChannel(new CreateChannelRequest(channelName));
-    //        }
-    //        else
-    //        {
-    //            _logger?.LogWarning("Channel {channelName} does not exist", channelName);
-    //            return new BadRequestObjectResult("Channel does not exist");
-    //        }
-    //    }
-
-    //    await _chatPlatformClient.AddAgentToChannel(channelName, request.);
-
-    //    return new OkResult();
-    //}
-
-    //[HttpPost]
-    //public async Task<ActionResult> LeaveChannel(
-    //    [FromBody] LeaveChannelRequest request)
-    //{
-    //    var channelName = request.ChannelName;
-    //    _logger?.LogInformation("Leaving channel {channelName}", channelName);
-
-    //    var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channelName);
-    //    await channelGrain.RemoveAgentFromChannel(_clientContext.UserName!);
-
-    //    return new OkResult();
-    //}
 
     [HttpPost]
     public async Task<ActionResult> DeleteChannel(
@@ -485,7 +442,7 @@ public class ChatRoomClientController : Controller
         var channelName = request.ChannelName;
         var orchestratorName = request.OrchestratorName;
         _logger?.LogInformation("Adding orchestrator {orchestratorName} to channel {channelName}", orchestratorName, channelName);
-        
+
         await _chatPlatformClient.AddOrchestratorToChannel(channelName, orchestratorName);
 
         return new OkResult();
@@ -560,5 +517,14 @@ public struct SSEEvent
     public override string ToString()
     {
         return $"id: {Id}\nretry: {Retry}\nevent: {Event}\ndata: {Data}\n\n";
+    }
+}
+
+class ChatRoomClientControllerProvider : ControllerFeatureProvider
+{
+    protected override bool IsController(TypeInfo typeInfo)
+    {
+        var isCustomController = typeof(ChatRoomClientController).IsAssignableFrom(typeInfo);
+        return isCustomController;
     }
 }

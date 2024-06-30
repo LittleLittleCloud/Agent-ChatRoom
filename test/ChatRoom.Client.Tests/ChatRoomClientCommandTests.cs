@@ -12,6 +12,10 @@ using Xunit.Abstractions;
 using ChatRoom.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Linq;
 
 namespace ChatRoom.Client.Tests;
 

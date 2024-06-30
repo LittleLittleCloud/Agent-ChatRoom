@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ApprovalTests;
+﻿using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
-using ChatRoom.Client.DTO;
 using ChatRoom.SDK;
-using ChatRoom.Room;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +33,7 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     {
         var webHostBuilder = new WebHostBuilder()
                          .UseEnvironment(Environments.Development) // You can set the environment you want (development, staging, production)
-                         .UseStartup<Startup>(); // Startup class of your web app project
+                         .UseStartup<WebHostStartup>(); // Startup class of your web app project
 
         using (var server = new TestServer(webHostBuilder))
         {
@@ -63,7 +56,7 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
     public async Task ItCreateAndRemoveChannelTestAsync()
     {
         var observerMock = Mock.Of<ConsoleRoomAgent>();
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, observerMock);
+        var controller = new ChatRoomClientController(_cluster.Client, observerMock);
 
         // create nameof(ChatRoomClientControllerTests) channel
         await controller.CreateChannel(new CreateChannelRequest(nameof(ChatRoomClientControllerTests)));
@@ -91,7 +84,7 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
         var observerMock = new ChatRoomAgentObserver(agentMock);
         var observerRef = _cluster.Client.CreateObjectReference<IChatRoomAgentObserver>(observerMock);
         var client = new ChatPlatformClient(_cluster.Client, nameof(ChatRoomClientControllerTests));
-        var controller = new ChatRoomClientController(_cluster.Client, _clientContext, agentMock, client);
+        var controller = new ChatRoomClientController(_cluster.Client, agentMock, client);
         var roomGrain = _cluster.Client.GetGrain<IRoomGrain>(nameof(ChatRoomClientControllerTests));
         var testAgentName = "testAgent";
         await roomGrain.AddAgentToRoom(testAgentName, "test", true, observerRef);

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ChatRoom.SDK;
 
-namespace ChatRoom.Client.DTO;
+namespace ChatRoom.SDK;
 
 public record class SendTextMessageToChannelRequest
 {

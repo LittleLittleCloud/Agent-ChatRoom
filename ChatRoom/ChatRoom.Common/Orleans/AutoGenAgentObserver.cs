@@ -1,5 +1,4 @@
 ﻿using AutoGen.Core;
-using ChatRoom.SDK;
 
 namespace ChatRoom.SDK;
 
@@ -44,7 +43,7 @@ internal class AutoGenAgentObserver : IChatRoomAgentObserver
         AgentInfo _,
         ChatMsg[] messages,
         ChannelInfo channelInfo)
-    { 
+    {
         // convert ChatMsg to TextMessage
         var autogenMessages = messages.Select(msg => msg.ToAutoGenMessage()).ToArray();
         var channel = _client.GetGrain<IChannelGrain>(channelInfo.Name);

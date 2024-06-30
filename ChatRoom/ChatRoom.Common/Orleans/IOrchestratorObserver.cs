@@ -1,6 +1,6 @@
 ﻿namespace ChatRoom.SDK;
 
-public interface IOrchestratorObserver : IOrchestrator, IGrainObserver
+internal interface IOrchestratorObserver : IOrchestrator, IGrainObserver
 {
 }
 

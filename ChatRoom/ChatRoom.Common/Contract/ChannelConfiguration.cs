@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using ChatRoom.OpenAI;
-using ChatRoom.SDK;
+﻿using System.Text.Json.Serialization;
 using Json.Schema.Generation;
 
-namespace ChatRoom.Room;
+namespace ChatRoom.SDK;
 
 public class ChannelConfiguration
 {

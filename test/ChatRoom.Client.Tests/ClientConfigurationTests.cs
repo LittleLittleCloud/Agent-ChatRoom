@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
+using ChatRoom.SDK;
 using FluentAssertions;
 using Json.Schema;
 using Json.Schema.Generation;
@@ -22,7 +23,7 @@ public class ClientConfigurationTests
     public void VerifyConfigurationSchema()
     {
         var schema = new JsonSchemaBuilder()
-            .FromType<ChatRoomClientConfiguration>()
+            .FromType<ChatRoomServerConfiguration>()
             .Build();
 
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });

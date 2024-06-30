@@ -1,11 +1,9 @@
 ﻿using System.Text.Json.Serialization;
-using ChatRoom.Room;
-using ChatRoom.SDK;
 using Json.Schema.Generation;
 
-namespace ChatRoom.Client;
+namespace ChatRoom.SDK;
 
-public class ChatRoomClientConfiguration
+public class ChatRoomServerConfiguration
 {
     [Description("The configuration for the chat room")]
     [JsonPropertyName("room_config")]

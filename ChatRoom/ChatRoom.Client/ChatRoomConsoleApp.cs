@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using ChatRoom.Client.DTO;
-using ChatRoom.OpenAI;
-using ChatRoom.SDK;
+﻿using ChatRoom.SDK;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
@@ -18,11 +15,11 @@ internal class ChatRoomConsoleApp
     private readonly string _chatRoomContextSchemaPath = null!;
     private readonly ChatRoomClientController _controller;
     private readonly ChatPlatformClient _chatPlatformClient;
-    private readonly ChatRoomClientConfiguration _chatRoomClientConfiguration;
-    
+    private readonly ChatRoomServerConfiguration _chatRoomClientConfiguration;
+
     public ChatRoomConsoleApp(
         ClientContext clientContext,
-        ChatRoomClientConfiguration settings,
+        ChatRoomServerConfiguration settings,
         IClusterClient clsterClient,
         ChatRoomClientController controller,
         ChatPlatformClient chatPlatformClient,
@@ -310,7 +307,7 @@ internal class ChatRoomConsoleApp
     {
         var channelsResponse = await _controller.GetChannels();
         var channels = (channelsResponse.Result as OkObjectResult)?.Value as IEnumerable<ChannelInfo>;
-        
+
         if (channels is null)
         {
             AnsiConsole.MarkupLine("[bold red]No channels found[/]");
@@ -339,7 +336,7 @@ internal class ChatRoomConsoleApp
     {
         var historyResponse = await _controller.GetChannelChatHistory(new GetChannelChatHistoryRequest(context.CurrentChannel!, 1_000));
         var history = (historyResponse.Result as OkObjectResult)?.Value as IEnumerable<ChatMsg>;
-        
+
         if (history is null)
         {
             AnsiConsole.MarkupLine("[bold red]No history found[/]");
