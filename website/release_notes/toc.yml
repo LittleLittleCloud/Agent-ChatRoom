@@ -1,11 +1,14 @@
-- name: 0.0.8-0.1.2
-  href: 0_0_8-0_1_2.md
+- namew: 0.4.*
+  href: 0_4.md
 
-- name: 0.2.3
-  href: 0_2_3.md
+- name: 0.3.*
+  href: 0_3.md
 
 - name: 0.2.5
   href: 0_2_5.md
 
-- name: 0.3.*
-  href: 0_3.md
+- name: 0.2.3
+  href: 0_2_3.md
+
+- name: 0.0.8-0.1.2
+  href: 0_0_8-0_1_2.md
