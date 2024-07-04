@@ -1,19 +1,21 @@
 ﻿using System.Text.Json;
-using ChatRoom.BingSearch;
+using ChatRoom.WebSearch;
 using ChatRoom.SDK;
 using Json.Schema.Generation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 
-internal class BingSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
+internal class WebSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
 {
     private IHost? _host = null;
     private bool _deployed = false;
 
     public static string Description { get; } = """
-        Bing search agent for chat room.
-        The agent will search the query from Bing search engine and return the result.
+        Web search agents for chat room.
+        This package provides the following web search agents:
+        - Bing search agent
+        - Google search agent
         
         To use the agent, you need to provide a configuration file.
         A configuration file is a json file with the following schema:
@@ -23,8 +25,8 @@ internal class BingSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSettin
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings settings)
     {
         var config = settings.ConfigFile is not null
-            ? JsonSerializer.Deserialize<BingSearchConfiguration>(File.ReadAllText(settings.ConfigFile))!
-            : new BingSearchConfiguration();
+            ? JsonSerializer.Deserialize<WebSearchConfiguration>(File.ReadAllText(settings.ConfigFile))!
+            : new WebSearchConfiguration();
 
         return await ExecuteAsync(config);
     }
@@ -73,7 +75,7 @@ internal class BingSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSettin
         }
     }
 
-    internal async Task<int> ExecuteAsync(BingSearchConfiguration config)
+    internal async Task<int> ExecuteAsync(WebSearchConfiguration config)
     {
         _deployed = false;
         _host = Host.CreateDefaultBuilder()
@@ -83,7 +85,15 @@ internal class BingSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSettin
         await _host.StartAsync();
         var chatroomClient = _host.Services.GetRequiredService<ChatPlatformClient>();
 
-        await chatroomClient.RegisterAutoGenAgentAsync(AgentFactory.CreateBingSearchAgent(config), config.Description);
+        if (config.BingSearchConfiguration is not null)
+        {
+            await chatroomClient.RegisterAutoGenAgentAsync(AgentFactory.CreateBingSearchAgent(config.BingSearchConfiguration), config.BingSearchConfiguration.Description);
+        }
+
+        if (config.GoogleSearchConfiguration is not null)
+        {
+            await chatroomClient.RegisterAutoGenAgentAsync(AgentFactory.CreateGoogleSearchAgent(config.GoogleSearchConfiguration), config.GoogleSearchConfiguration.Description);
+        }
 
         _deployed = true;
 

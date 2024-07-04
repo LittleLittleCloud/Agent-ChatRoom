@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ChatRoom\ChatRoom.BingSearch\ChatRoom.BingSearch.csproj" />
+    <ProjectReference Include="..\..\ChatRoom\ChatRoom.BingSearch\ChatRoom.WebSearch.csproj" />
     <ProjectReference Include="..\ChatRoom.Client.Tests\ChatRoom.Client.Tests.csproj" />
   </ItemGroup>
 

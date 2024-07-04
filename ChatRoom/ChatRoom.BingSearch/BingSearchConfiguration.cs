@@ -8,14 +8,10 @@ using ChatRoom.OpenAI;
 using ChatRoom.SDK;
 using Json.Schema.Generation;
 
-namespace ChatRoom.BingSearch;
+namespace ChatRoom.WebSearch;
 
 public class BingSearchConfiguration
 {
-    [JsonPropertyName("room_config")]
-    [Description("The configuration for the chat room")]
-    public RoomConfiguration RoomConfig { get; set; } = new RoomConfiguration();
-
     [Description("Name of the bing search agent, default is 'bing-search'")]
     [JsonPropertyName("name")]
     public string Name { get; set; } = "bing-search";
@@ -36,3 +32,4 @@ public class BingSearchConfiguration
     [JsonPropertyName("openai_config")]
     public OpenAIClientConfiguration? OpenAIConfiguration { get; set; } = null;
 }
+

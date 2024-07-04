@@ -13,15 +13,15 @@ using ChatRoom.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using FluentAssertions;
 
-namespace ChatRoom.BingSearch.Tests;
+namespace ChatRoom.WebSearch.Tests;
 
-public class BingSearchCommandTests : IClassFixture<DefaultClientFixture>, IClassFixture<BingSearchFixture>
+public class WebSearchCommandTests : IClassFixture<DefaultClientFixture>, IClassFixture<WebSearchFixture>
 {
     private readonly DefaultClientFixture _fixture;
-    private readonly BingSearchFixture _bingSearchFixture;
+    private readonly WebSearchFixture _bingSearchFixture;
     private readonly ChatPlatformClient _client;
 
-    public BingSearchCommandTests(DefaultClientFixture fixture, BingSearchFixture bingSearchFixture)
+    public WebSearchCommandTests(DefaultClientFixture fixture, WebSearchFixture bingSearchFixture)
     {
         _fixture = fixture;
         _bingSearchFixture = bingSearchFixture;
@@ -34,7 +34,7 @@ public class BingSearchCommandTests : IClassFixture<DefaultClientFixture>, IClas
     public async Task ItShowHelperTextTestAsync()
     {
         var app = new CommandAppTester();
-        app.SetDefaultCommand<BingSearchCommand>(BingSearchCommand.Description);
+        app.SetDefaultCommand<WebSearchCommand>(WebSearchCommand.Description);
 
         var result = await app.RunAsync("--help");
 
@@ -47,5 +47,6 @@ public class BingSearchCommandTests : IClassFixture<DefaultClientFixture>, IClas
         var agents = await _client.GetRoomMembers();
         var names = agents.Select(a => a.Name).ToList();
         names.Should().Contain("bing-search");
+        names.Should().Contain("google-search");
     }
 }

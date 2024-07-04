@@ -7,7 +7,7 @@ using Json.Schema;
 using Json.Schema.Generation;
 using Xunit;
 
-namespace ChatRoom.BingSearch.Tests
+namespace ChatRoom.WebSearch.Tests
 {
     public class ConfigurationTests
     {
@@ -17,10 +17,10 @@ namespace ChatRoom.BingSearch.Tests
         public void VerifyConfigurationSchema()
         {
             var schema = new JsonSchemaBuilder()
-                .FromType<BingSearchConfiguration>()
+                .FromType<WebSearchConfiguration>()
                 .Build();
 
-            var schemaFileName = "chatroom_bing_search_configuration_schema.json";
+            var schemaFileName = "chatroom_web_search_configuration_schema.json";
             var schemaFilePath = Path.Join("Schema", schemaFileName);
             var schemaFile = File.ReadAllText(schemaFilePath);
 
