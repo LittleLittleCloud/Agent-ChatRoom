@@ -1,0 +1,17 @@
+{
+    "$schema": "../schema/chatroom_web_search_configuration_schema.json",
+    "bing_search_config": {
+        "name": "bing-search",
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "google_search_config": {
+        "name": "google-search",
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    }
+}

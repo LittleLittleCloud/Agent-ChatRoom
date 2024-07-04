@@ -29,7 +29,7 @@
     <InternalsVisibleTo Include="ChatRoom.OpenAI" />
     <InternalsVisibleTo Include="ChatRoom.Powershell" />
     <InternalsVisibleTo Include="ChatRoom.Github" />
-    <InternalsVisibleTo Include="ChatRoom.BingSearch" />
+    <InternalsVisibleTo Include="ChatRoom.WebSearch" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 </Project>
