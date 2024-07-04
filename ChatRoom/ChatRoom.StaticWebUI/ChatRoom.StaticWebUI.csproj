@@ -31,8 +31,6 @@
       <WwwrootExists Condition="Exists('$(RepoRoot)\chatroom-ui\out\index.html')">true</WwwrootExists>
     </PropertyGroup>
 
-    <Message Text="shit" />
-
     <!-- Optionally, do something based on the existence of wwwroot -->
     <Message Text="wwwroot doesn't exist. Have you built the chatroom-ui project?" Condition="'$(WwwrootExists)' == 'false'" />
     <Error Text="The wwwroot directory does not exist. Please build chatroom-ui project by running `npm run build` under their root. For more information on how to build chatroom-ui, please refer to https://github.com/LittleLittleCloud/Agent-ChatRoom/tree/main/chatroom-ui" Condition="'$(WwwrootExists)' == 'false'" />
