@@ -10,6 +10,7 @@
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
     <Title>The static website for Agent chatroom</Title>
     <Description>This package the build artifact (wwwroot) of chatroom-ui for Agent chatroom</Description>
+    <WwwrootExists>False</WwwrootExists>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,5 +23,17 @@
       <PackageFlattern>false</PackageFlattern>
     </Content>
   </ItemGroup>
+
+  <!-- Custom target to check if wwwroot exists -->
+  <Target Name="CheckWwwrootExists" BeforeTargets="PrepareForRun">
+    <!-- Check if the wwwroot directory exists -->
+    <PropertyGroup>
+      <WwwrootExists Condition="Exists('$(RepoRoot)\chatroom-ui\out\index.html')">true</WwwrootExists>
+    </PropertyGroup>
+
+    <!-- Optionally, do something based on the existence of wwwroot -->
+    <Message Text="wwwroot doesn't exist. Have you built the chatroom-ui project?" Condition="'$(WwwrootExists)' == 'false'" />
+    <Error Text="The wwwroot directory does not exist. Please build chatroom-ui project by running `npm run build` under their root. For more information on how to build chatroom-ui, please refer to https://github.com/LittleLittleCloud/Agent-ChatRoom/tree/main/chatroom-ui" Condition="'$(WwwrootExists)' == 'false'" />
+  </Target>
 
 </Project>

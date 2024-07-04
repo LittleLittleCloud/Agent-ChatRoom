@@ -22,13 +22,33 @@ dotnet tool install -g ChatRoom.OpenAI
 ```json
 {
     "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_openai_configuration_schema.json",
-    "name": "openai",
-    "system_message": "You are a helpful AI assistant",
-    "openai_config": {
-        "llm_type": "OpenAI",
-        "openai_api_key": "xxx",
-        "openai_model_id": "gpt-3.5-turbo"
-    }
+    "agents": [
+        {
+            "name": "gpt35",
+            "system_message": "You are a helpful AI assistant",
+            "llm_config": {
+                "llm_type": "OpenAI",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        },
+        {
+            "name": "gpt4",
+            "system_message": "You are a helpful AI assistant",
+            "llm_config": {
+                "llm_type": "OpenAI",
+                "openai_model_id": "gpt-4-turbo"
+            }
+        },
+        {
+            "name": "llama3",
+            "system_message": "You are a helpful AI assistant",
+            "llm_config": {
+                "llm_type": "ThirdParty",
+                "third_party_llm_endpoint": "http://127.0.0.1:11434",
+                "third_party_llm_model_id": "llama3:latest"
+            }
+        }
+    ]
 }
 ```
 

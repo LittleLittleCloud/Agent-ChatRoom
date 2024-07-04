@@ -27,15 +27,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         global-json-file: global.json
-    - name: Restore dependencies
-      run: |
-        dotnet restore -bl
-    - name: Build
-      run: |
-        echo "Build ChatRoom"
-        dotnet build --no-restore --configuration Debug -bl /p:SignAssembly=true
-    - name: Unit Test
-      run: dotnet test --no-build -bl --configuration Debug -m:1
     - name: Setup Node.js
       uses: actions/setup-node@v2
       with:
@@ -45,3 +36,13 @@ jobs:
         cd chatroom-ui
         npm install
         npm run build
+    - name: Restore dependencies
+      run: |
+        dotnet restore -bl
+    - name: Build
+      run: |
+        echo "Build ChatRoom"
+        dotnet build --no-restore --configuration Debug -bl /p:SignAssembly=true
+    - name: Unit Test
+      run: dotnet test --no-build -bl --configuration Debug -m:1
+    

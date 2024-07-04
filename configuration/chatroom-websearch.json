@@ -1,5 +1,5 @@
 {
-    "$schema": "../schema/chatroom_web_search_configuration_schema.json",
+    "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_web_search_configuration_schema.json",
     "bing_search_config": {
         "name": "bing-search",
         "openai_config": {
