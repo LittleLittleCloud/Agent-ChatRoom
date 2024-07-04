@@ -22,6 +22,15 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '22.x'
+    - name: build webui
+      run: |
+        cd chatroom-ui
+        npm install
+        npm run build
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -36,12 +45,4 @@ jobs:
         dotnet build --no-restore --configuration Debug -bl /p:SignAssembly=true
     - name: Unit Test
       run: dotnet test --no-build -bl --configuration Debug -m:1
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '22.x'
-    - name: build webui
-      run: |
-        cd chatroom-ui
-        npm install
-        npm run build
+    
