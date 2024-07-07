@@ -23,10 +23,6 @@ internal class PowershellCommand : ChatRoomAgentCommand
         The following agents are available:
         - ps-gpt: an agent that generate powershell script.
         - ps-runner: an agent that run powershell script.
-
-        To use the agents, you need to provide a configuration file.
-        A configuration file is a json file with the following schema:
-        - https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_powershell_configuration_schema.json
         """;
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings settings)
     {

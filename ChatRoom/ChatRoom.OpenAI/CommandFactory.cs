@@ -16,17 +16,18 @@ internal class CommandFactory
         app.Configure(config =>
         {
             config.AddCommand<OpenAICommand>("run")
-                .WithDescription(OpenAICommand.Description);
+                .WithDescription(OpenAICommand.Description)
+                .WithExample(["run", "-c", "config.json"]);
 
             config.AddCommand<OpenAICreateConfigurationFromTemplateCommand>("create")
                 .WithDescription("""
                 Create and save a configuration file from given template.
                 The following templates are available:
                 - chatroom-openai: Create a configuration file for chat room with OpenAI agents.
-                """);
-            config.AddExample(["run", "-c", "config.json"]);
-            config.AddExample(["create", "--template", "chatroom-openai"]);
+                """)
+                .WithExample(["create", "--template", "chatroom-openai"]);
         });
+
         return app;
     }
 }

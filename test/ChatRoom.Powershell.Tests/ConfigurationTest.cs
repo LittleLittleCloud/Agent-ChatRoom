@@ -27,7 +27,7 @@ public class ConfigurationTest
 
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
         var schemaFileName = "chatroom_powershell_configuration_schema.json";
-        var schemaFilePath = Path.Join("Schema", schemaFileName);
+        var schemaFilePath = Path.Join("template", "chatroom.powershell", schemaFileName);
         var schemaFile = File.ReadAllText(schemaFilePath);
 
         Approvals.Verify(json);
