@@ -33,7 +33,7 @@ public class ClientConfigurationTests
             .Build();
 
         var schemaFileName = "chatroom_openai_configuration_schema.json";
-        var schemaFilePath = Path.Join("Schema", schemaFileName);
+        var schemaFilePath = Path.Join("template", "chatroom.openai", schemaFileName);
         var schemaFile = File.ReadAllText(schemaFilePath);
 
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
