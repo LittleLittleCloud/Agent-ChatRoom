@@ -29,4 +29,11 @@
     <InternalsVisibleTo Include="ChatRoom.WebSearch.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="$(RepoRoot)\template\chatroom.websearch\*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>template\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

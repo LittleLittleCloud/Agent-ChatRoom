@@ -21,7 +21,7 @@ namespace ChatRoom.WebSearch.Tests
                 .Build();
 
             var schemaFileName = "chatroom_web_search_configuration_schema.json";
-            var schemaFilePath = Path.Join("Schema", schemaFileName);
+            var schemaFilePath = Path.Join("template", "chatroom.websearch", schemaFileName);
             var schemaFile = File.ReadAllText(schemaFilePath);
 
             var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });

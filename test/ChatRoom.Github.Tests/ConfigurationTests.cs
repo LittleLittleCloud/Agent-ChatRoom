@@ -29,7 +29,7 @@ public class ConfigurationTests
         Approvals.Verify(json);
 
         var schemaFileName = "chatroom_github_configuration_schema.json";
-        var schemaFilePath = Path.Join("Schema", schemaFileName);
+        var schemaFilePath = Path.Join("template", "chatroom.github", schemaFileName);
         var schemaFile = File.ReadAllText(schemaFilePath);
         schemaFile.Should().BeEquivalentTo(json);
     }

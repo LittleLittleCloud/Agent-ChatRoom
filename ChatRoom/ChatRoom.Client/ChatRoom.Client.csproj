@@ -32,11 +32,12 @@
     <ProjectReference Include="..\ChatRoom.StaticWebUI\ChatRoom.StaticWebUI.csproj" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <Content Include="$(RepoRoot)\configuration\**\*.json">
+    <EmbeddedResource Include="$(RepoRoot)\template\chatroom\*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Content>
+      <Link>template\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </EmbeddedResource>
   </ItemGroup>
 
 
