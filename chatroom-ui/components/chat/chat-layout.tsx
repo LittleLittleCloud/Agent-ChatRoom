@@ -69,10 +69,11 @@ export function ChatLayout({
         });
       }
       else {
+        var orchestrators = _channelInfos[i].orchestrators ?? [undefined];
         _channels.push({
           ..._channelInfos[i],
           maxReply: 10,
-          orchestrator: undefined,
+          orchestrator: orchestrators[0],
         });
       }
     }
