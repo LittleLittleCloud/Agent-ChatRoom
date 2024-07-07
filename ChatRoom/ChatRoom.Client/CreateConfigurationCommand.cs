@@ -14,3 +14,14 @@ internal class CreateConfigurationCommand : CreateConfigurationFromTemplateComma
     {
     }
 }
+
+internal class ListTemplatesCommand : ListAvailableTemplatesCommand
+{
+    public ListTemplatesCommand()
+        : base(new Dictionary<string, string>
+        {
+            ["chatroom"] = "get-started chatroom template",
+        })
+    {
+    }
+}

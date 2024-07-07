@@ -45,8 +45,8 @@ internal abstract class CreateConfigurationFromTemplateCommand : AsyncCommand<Te
             return 1;
         }
 
-        var template = await GetEmbeddedResourceContentAsync($"{settings.Template}.json");
-        var schema = await GetEmbeddedResourceContentAsync(schemaPath);
+        var template = GetTemplateContent(settings.Template);
+        var schema = GetSchemaContent();
 
         // save the template to the output file
         await File.WriteAllTextAsync(settings.Output, template);
@@ -57,9 +57,21 @@ internal abstract class CreateConfigurationFromTemplateCommand : AsyncCommand<Te
         return 0;
     }
 
+    internal string GetSchemaContent()
+    {
+        return GetEmbeddedResourceContentAsync(schemaPath).Result;
+    }
+
+    internal string[] AvailableTemplates => availableTemplates;
+
+    internal string GetTemplateContent(string template)
+    {
+        return GetEmbeddedResourceContentAsync($"{template}.json").Result;
+    }
+
     internal async Task<string> GetEmbeddedResourceContentAsync(string resource)
     {
-        var assembly = Assembly.GetExecutingAssembly();
+        var assembly = this.GetType().Assembly;
         var resourceName = assembly.GetManifestResourceNames().FirstOrDefault(str => str.EndsWith(resource));
         if (resourceName is null)
         {

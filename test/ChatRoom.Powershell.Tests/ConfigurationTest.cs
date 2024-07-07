@@ -32,5 +32,32 @@ public class ConfigurationTest
 
         Approvals.Verify(json);
         schemaFile.Should().BeEquivalentTo(json);
+
+        var command = new CreateConfigurationCommand();
+        var schemaContent = command.GetSchemaContent();
+        schemaContent.Should().BeEquivalentTo(json);
+    }
+
+
+    [Fact]
+    [UseReporter(typeof(DiffReporter))]
+    [UseApprovalSubdirectory("ApprovalTests")]
+    public void VerifyAvailableTemplates()
+    {
+        var command = new CreateConfigurationCommand();
+        var availableTemplates = command.AvailableTemplates;
+        availableTemplates.Should().BeEquivalentTo(["chatroom-powershell"]);
+
+        var listTemplatesCommand = new ListTemplatesCommand();
+        listTemplatesCommand.AvailableTemplates.Keys.Should().BeEquivalentTo(availableTemplates);
+
+        var templates = new List<string>();
+        foreach (var template in availableTemplates)
+        {
+            var templateContent = command.GetTemplateContent(template);
+            templates.Add(templateContent);
+        }
+
+        Approvals.VerifyAll("templates", templates, "templates");
     }
 }
