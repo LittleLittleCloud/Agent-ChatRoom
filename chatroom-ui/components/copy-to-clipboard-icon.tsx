@@ -39,7 +39,7 @@ export const CopyToClipboardIcon: FC<CopyToClipboardIconProps> = ({ textValue, s
       ) : (
         <Clipboard size={size} className="mr-1.5" />
       )}
-      {isCopied ? 'Copied!' : 'Copy to clipboard'}
+      {isCopied ? 'Copied!' : 'Copy'}
     </button>
   );
 };
