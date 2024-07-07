@@ -32,17 +32,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Schema\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
-    <Content Include="$(RepoRoot)\configuration\**\*.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Content>
     <Content Include="$(RepoRoot)\template\**\*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>template\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Content>
-    <Content Include="$(RepoRoot)\test\test-configuration\**\*.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>test-configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
   </ItemGroup>
 </Project>
