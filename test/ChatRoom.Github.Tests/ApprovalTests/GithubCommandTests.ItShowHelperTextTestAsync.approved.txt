@@ -2,7 +2,7 @@
 Github agents for ChatRoom
 
 The following agents are available:
-- issue-helper: A github issue helper agent
+- issue-helper: A github issue helper agent.
 
 USAGE:
     testhost.dll [OPTIONS]

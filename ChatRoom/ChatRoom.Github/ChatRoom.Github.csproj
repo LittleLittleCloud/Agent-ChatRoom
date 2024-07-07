@@ -29,4 +29,12 @@
     <ProjectReference Include="..\ChatRoom.OpenAI\ChatRoom.OpenAI.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(RepoRoot)\template\chatroom.github\*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>template\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

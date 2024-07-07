@@ -5,8 +5,17 @@ using ChatRoom.Powershell;
 using ChatRoom.SDK;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
+var app = new CommandApp();
 
-var app = new CommandApp<PowershellCommand>()
-    .WithDescription(PowershellCommand.Description);
+app.Configure(app =>
+{
+    app.AddCommand<CreateConfigurationCommand>("create")
+        .WithDescription("Create and save a configuration file from given template.")
+        .WithExample(["create", "--template", "chatroom-powershell"]);
+
+    app.AddCommand<ChatRoomAgentCommand>("run")
+        .WithDescription("Run the chat room agent.")
+        .WithExample(["run", "-c", "config.json"]);
+});
 
 await app.RunAsync(args);

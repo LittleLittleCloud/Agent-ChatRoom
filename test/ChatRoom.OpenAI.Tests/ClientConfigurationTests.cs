@@ -9,6 +9,7 @@ using ApprovalTests.Approvers;
 using ApprovalTests.Core;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
+using ChatRoom.Client;
 using ChatRoom.OpenAI;
 using ChatRoom.SDK;
 using FluentAssertions;
@@ -33,12 +34,38 @@ public class ClientConfigurationTests
             .Build();
 
         var schemaFileName = "chatroom_openai_configuration_schema.json";
-        var schemaFilePath = Path.Join("Schema", schemaFileName);
+        var schemaFilePath = Path.Join("template", "chatroom.openai", schemaFileName);
         var schemaFile = File.ReadAllText(schemaFilePath);
 
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
         Approvals.Verify(json);
         schemaFile.Should().BeEquivalentTo(json);
+
+        var command = new CreateConfigurationCommand();
+        var schemaContent = command.GetSchemaContent();
+        schemaContent.Should().BeEquivalentTo(json);
+    }
+
+    [Fact]
+    [UseReporter(typeof(DiffReporter))]
+    [UseApprovalSubdirectory("ApprovalTests")]
+    public void VerifyAvailableTemplates()
+    {
+        var command = new CreateConfigurationCommand();
+        var availableTemplates = command.AvailableTemplates;
+        availableTemplates.Should().BeEquivalentTo(["chatroom-openai"]);
+
+        var listTemplatesCommand = new ListTemplatesCommand();
+        listTemplatesCommand.AvailableTemplates.Keys.Should().BeEquivalentTo(availableTemplates);
+
+        var templates = new List<string>();
+        foreach (var template in availableTemplates)
+        {
+            var templateContent = command.GetTemplateContent(template);
+            templates.Add(templateContent);
+        }
+
+        Approvals.VerifyAll("templates", templates, "templates");
     }
 
     [Fact]

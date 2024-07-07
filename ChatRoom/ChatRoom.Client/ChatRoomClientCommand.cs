@@ -20,7 +20,7 @@ namespace ChatRoom.Client;
 
 public class ChatRoomClientCommandSettings : CommandSettings
 {
-    [Description("Configuration file, schema: https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json")]
+    [Description("Configuration file")]
     [CommandOption("-c|--config <CONFIG>")]
     public string? ConfigFile { get; init; } = null;
 }
@@ -30,13 +30,9 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
     private IHost? _host = null;
     private bool _deployed = false;
     public static string Description { get; } = """
-        A Chatroom cli client.
+        A Chatroom client.
         
-        The client will start a chat room service and attach a console client to it.
-        
-        To use the client, you need to provide a configuration file.
-        A configuration file is a json file with the following schema:
-        - https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json
+        The client will start a chat room service and attach web ui to it.
         """;
 
     internal IServiceProvider? ServiceProvider { get => _host?.Services; }

@@ -10,78 +10,33 @@
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 - **Extensible**: Create your own agents and integrate them into the chatroom.
 
-## 🚀 Quick Start
+## 🚀 Quick Start with OpenAI
 1. Install the `ChatRoom.Client` and `ChatRoom.OpenAI` tools from NuGet.
 ```bash
 dotnet tool install -g ChatRoom.Client
 dotnet tool install -g ChatRoom.OpenAI
 ```
 
-2. Create configuration file for `ChatRoom.OpenAI` and save it to `chatroom-openai.json`
-
-```json
-{
-    "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/chatroom_openai_configuration_schema.json",
-    "agents": [
-        {
-            "name": "gpt35",
-            "system_message": "You are a helpful AI assistant",
-            "llm_config": {
-                "llm_type": "OpenAI",
-                "openai_model_id": "gpt-3.5-turbo"
-            }
-        },
-        {
-            "name": "gpt4",
-            "system_message": "You are a helpful AI assistant",
-            "llm_config": {
-                "llm_type": "OpenAI",
-                "openai_model_id": "gpt-4-turbo"
-            }
-        },
-        {
-            "name": "llama3",
-            "system_message": "You are a helpful AI assistant",
-            "llm_config": {
-                "llm_type": "ThirdParty",
-                "third_party_llm_endpoint": "http://127.0.0.1:11434",
-                "third_party_llm_model_id": "llama3:latest"
-            }
-        }
-    ]
-}
-```
-
-3. Create configuration file for `ChatRoom.Client` and save it to `chatroom-client.json`
-```json
-{
-    "$schema": "https://raw.githubusercontent.com/LittleLittleCloud/Agent-ChatRoom/main/schema/client_configuration_schema.json",
-    "channel_config": {
-        "openai_config": {
-            "llm_type": "OpenAI",
-            "openai_api_key": "xxx",
-            "openai_model_id": "gpt-3.5-turbo"
-        }
-    },
-    "enable_console_app": true,
-    "server_config": {
-        "urls": "http://localhost:51234;https://localhost:51235"
-    },
-    "agent_extensions": [
-        {
-            "name": "OpenAI",
-            "command": "chatroom-openai -c chatroom-openai.json"
-        }
-    ]
-}
-```
-
-4. Start the `ChatRoom.Client` with the following command:
+2. Create configuration files from one of the templates
 ```bash
-chatroom -c chatroom-client.json
+# Create configuration file for ChatRoom.Client
+chatroom create -t chatroom -o chatroom-client.json
+
+# Create configuration file for ChatRoom.OpenAI
+chatroom-openai create -t openai -o chatroom-openai.json
 ```
 
-You will see the following output similar to the following:
+3. Fill in the configuration files with your OpenAI API key and other information.
+4. Start the chatroom client with the OpenAI agent.
+```bash
+# start chatroom server
+chatroom run -c chatroom-client.json
+
+# in another terminal, add the OpenAI agent to the chatroom server
+chatroom-openai run -c chatroom-openai.json
+```
+
+You will see the following output from chatroom client which indicates the web UI is available at `http://localhost:51237` and `https://localhost:51238`.
 ```bash
 web ui is available at: http://localhost:51237;https://localhost:51238
 ```

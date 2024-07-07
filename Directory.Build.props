@@ -27,19 +27,14 @@
     <PackageReference Include="Spectre.Console.Testing" />
   </ItemGroup>
 
-  
   <ItemGroup  Condition="'$(IsTestProject)' == 'true'">
     <Content Include="$(RepoRoot)\schema\**\*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Schema\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
-    <Content Include="$(RepoRoot)\configuration\**\*.json">
+    <Content Include="$(RepoRoot)\template\**\*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Content>
-    <Content Include="$(RepoRoot)\test\test-configuration\**\*.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>test-configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>template\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
   </ItemGroup>
 </Project>

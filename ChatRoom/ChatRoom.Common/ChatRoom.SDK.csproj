@@ -27,9 +27,13 @@
     <InternalsVisibleTo Include="ChatRoom.Client.Tests" />
     <InternalsVisibleTo Include="ChatRoom.Tests" />
     <InternalsVisibleTo Include="ChatRoom.OpenAI" />
+    <InternalsVisibleTo Include="ChatRoom.OpenAI.Tests" />
     <InternalsVisibleTo Include="ChatRoom.Powershell" />
+    <InternalsVisibleTo Include="ChatRoom.Powershell.Tests" />
     <InternalsVisibleTo Include="ChatRoom.Github" />
+    <InternalsVisibleTo Include="ChatRoom.Github.Tests" />
     <InternalsVisibleTo Include="ChatRoom.WebSearch" />
+    <InternalsVisibleTo Include="ChatRoom.WebSearch.Tests" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 </Project>

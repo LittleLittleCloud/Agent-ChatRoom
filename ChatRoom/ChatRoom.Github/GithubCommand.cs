@@ -24,7 +24,7 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
         Github agents for ChatRoom
 
         The following agents are available:
-        - issue-helper: A github issue helper agent
+        - issue-helper: A github issue helper agent.
         """;
 
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings settings)
