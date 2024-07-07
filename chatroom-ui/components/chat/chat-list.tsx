@@ -92,6 +92,54 @@ export function ChatList({
     await onReloadMessages(messages);
   }
 
+  const deleteMessageAboveHandler = async (message: ChatMsg) => {
+    if (confirm(`Are you sure you want to delete all messages above this message?`) === false) {
+      return;
+    }
+    if (channel.name === undefined || channel.name === null || message.id === undefined || message.id === null) {
+      return;
+    }
+
+    var index = messages.indexOf(message);
+    var messagesToDelete = messages.slice(0, index);
+    for (var i = 0; i < messagesToDelete.length; i++) {
+      var message = messagesToDelete[i];
+      if (message.id === undefined || message.id === null) {
+        continue;
+      }
+      await getApiChatRoomClientDeleteMessageByChannelNameByMessageId({
+        channelName: channel.name,
+        messageId: message.id
+      });
+    }
+
+    await onReloadMessages(messages);
+  }
+
+  const deleteMessageBelowHandler = async (message: ChatMsg) => {
+    if (confirm(`Are you sure you want to delete all messages below this message?`) === false) {
+      return;
+    }
+    if (channel.name === undefined || channel.name === null || message.id === undefined || message.id === null) {
+      return;
+    }
+
+    var index = messages.indexOf(message);
+    var messagesToDelete = messages.slice(index + 1);
+    for (var i = 0; i < messagesToDelete.length; i++) {
+      var message = messagesToDelete[i];
+      if (message.id === undefined || message.id === null) {
+        continue;
+      }
+      await getApiChatRoomClientDeleteMessageByChannelNameByMessageId({
+        channelName: channel.name,
+        messageId: message.id
+      });
+    }
+
+    await onReloadMessages(messages);
+  }
+
   const editMessageHandler = async (message: ChatMsg) => {
     if (channel.name === undefined || channel.name === null || message.id === undefined || message.id === null) {
       return;
@@ -261,6 +309,8 @@ export function ChatList({
                 message={message}
                 selectedUser={selectedUser}
                 onEdit={editMessageHandler}
+                onDeletedMessageAbove={deleteMessageAboveHandler}
+                onDeletedMessageBelow={deleteMessageBelowHandler}
                 onDeleted={deleteMessageHandler} />
             </motion.div>
           ))}

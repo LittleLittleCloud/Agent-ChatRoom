@@ -5,7 +5,7 @@ import { Markdown } from "../markdown";
 import { Badge } from "../ui/badge";
 import { AgentInfo, ChatMsg, getApiChatRoomClientDeleteMessageByChannelNameByMessageId } from "@/chatroom-client";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { Columns, Columns2, Copy, Edit, RotateCcw, Trash, Type } from "lucide-react";
+import { Columns, Columns2, Copy, Edit, EllipsisVertical, RotateCcw, Trash, Type } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 import { Button } from "../ui/button";
 import { CopyToClipboardIcon } from "../copy-to-clipboard-icon";
@@ -13,16 +13,27 @@ import { channel } from "diagnostics_channel";
 import { on } from "events";
 import EmojiPicker from "@emoji-mart/react";
 import { GetTextContent } from "@/chatroom-client/types.extension";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Label } from "../ui/label";
 
 export interface ChatMessageProps {
   message: ChatMsg;
   selectedUser: AgentInfo;
   onDeleted?: (msg: ChatMsg) => void;
   onResend?: (msg: ChatMsg) => void;
+  onDeletedMessageAbove?: (msg: ChatMsg) => void;
+  onDeletedMessageBelow?: (msg: ChatMsg) => void;
   onEdit?: (msg: ChatMsg) => void;
 }
 
-export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit, }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  selectedUser,
+  onDeleted,
+  onDeletedMessageAbove,
+  onDeletedMessageBelow,
+  onResend,
+  onEdit, }: ChatMessageProps) {
   const isFromSelectedUser = message.from === selectedUser.name;
   const [markdown, setMarkdown] = React.useState<string>('');
   const [showResend, setShowResend] = React.useState<boolean>(message.from == selectedUser.name);
@@ -35,13 +46,21 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
     if (textContent === undefined) {
       return;
     }
-    else{
+    else {
       setMarkdown(textContent);
     }
   }, [message]);
 
   const handleDelete = async (msg: ChatMsg) => {
     onDeleted?.(msg);
+  }
+
+  const handleDeleteMessageAbove = async (msg: ChatMsg) => {
+    onDeletedMessageAbove?.(msg);
+  }
+
+  const handleDeleteMessageBelow = async (msg: ChatMsg) => {
+    onDeletedMessageBelow?.(msg);
   }
 
   const handleEditing = async (msg: ChatMsg) => {
@@ -106,33 +125,48 @@ export function ChatMessage({ message, selectedUser, onDeleted, onResend, onEdit
             <Button variant={"ghost"} size={"tiny"} onClick={() => handleDelete(message)}>
               <Trash size={14} />
             </Button>
+            
+
           </div>
+          <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"} size={"tiny"}>
+                  <EllipsisVertical size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40">
+                <DropdownMenuLabel className="text-xs">Delete</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-xs" onSelect={() => handleDeleteMessageAbove(message)}>Delete all messages above</DropdownMenuItem>
+                <DropdownMenuItem className="text-xs" onSelect={() => handleDeleteMessageBelow(message)}>Delete all messages below</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
         </div>
         <div className="p-3 overflow-y-auto">
-          { isEditing ?
+          {isEditing ?
             <div className="flex flex-col border-2 border-solid border-accent rounded-md">
-            <textarea
-              value={editingText}
-              onChange={(e) => setEditingText(e.target.value)}
-              className="w-full p-2 h-auto bg-transparent border-0 focus:outline-none"
-            />
-            <div className="flex gap-2 p-2 whitespace-pre-wrap justify-end">
-              <Button
-                variant={"ghost"}
-                size={"tiny"}
-                onClick={() => handleEditing({ ...message, parts: [{ textPart: editingText }]})}
+              <textarea
+                value={editingText}
+                onChange={(e) => setEditingText(e.target.value)}
+                className="w-full p-2 h-auto bg-transparent border-0 focus:outline-none"
+              />
+              <div className="flex gap-2 p-2 whitespace-pre-wrap justify-end">
+                <Button
+                  variant={"ghost"}
+                  size={"tiny"}
+                  onClick={() => handleEditing({ ...message, parts: [{ textPart: editingText }] })}
                 >
-                Save
-              </Button>
-              <Button
-                variant={"warning"}
-                size={"tiny"}
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </Button>
+                  Save
+                </Button>
+                <Button
+                  variant={"warning"}
+                  size={"tiny"}
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </Button>
               </div>
-              </div>
+            </div>
             :
             showMarkdown ? <Markdown>{markdown}</Markdown> : <span>{markdown}</span>
           }
