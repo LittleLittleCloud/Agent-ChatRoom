@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.SemanticKernel.Agents;
 using Octokit;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace ChatRoom.Github;
@@ -38,6 +39,12 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
 
     internal async Task<int> ExecuteAsync(GithubConfiguration config)
     {
+        if (config.GithubRepoOwner is null || config.GithubRepoName is null)
+        {
+            AnsiConsole.MarkupLine("[red]Github repo owner and name are required.[/]");
+            return 1;
+        }
+
         // create issue helper
         OpenAIClient? openaiClient = config.IssueHelper.OpenAIConfiguration?.ToOpenAIClient();
         string? deployModelName = config.IssueHelper.OpenAIConfiguration?.ModelId;
@@ -58,7 +65,14 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
 
         if (issueHelper is null)
         {
-            issueHelper = AgentFactory.CreateIssueHelperAgent(openaiClient!, deployModelName!, ghClient, config.IssueHelper.Name, config.IssueHelper.SystemMessage);
+            issueHelper = AgentFactory.CreateIssueHelperAgent(
+                openaiClient!,
+                deployModelName!,
+                ghClient,
+                config.GithubRepoOwner!,
+                config.GithubRepoName!,
+                config.IssueHelper.Name,
+                config.IssueHelper.SystemMessage);
         };
 
         _host = Host.CreateDefaultBuilder()

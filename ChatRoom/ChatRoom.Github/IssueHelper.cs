@@ -13,18 +13,19 @@ namespace ChatRoom.Github;
 
 public partial class IssueHelper : INotifyAgent
 {
+    private readonly string repoOwner;
+    private readonly string repoName;
+
     /// <summary>
     /// Get an issue from a GitHub repository
     /// </summary>
-    /// <param name="owner">The owner of the repository</param>
     /// <param name="issueNumber">The issue number</param>
-    /// <param name="name">The name of the repository</param>
     /// <returns></returns>
     [Function]
-    public async Task<string> GetIssueAsync(string owner, string name, int issueNumber)
+    public async Task<string> GetIssueAsync(int issueNumber)
     {
-        Console.WriteLine($"Getting issue {issueNumber} from {owner}/{name}");
-        var issue = await _gitHubClient.Issue.Get(owner, name, issueNumber);
+        Console.WriteLine($"Getting issue {issueNumber} from {this.repoName}/{this.repoName}");
+        var issue = await _gitHubClient.Issue.Get(this.repoOwner, this.repoName, issueNumber);
         var dto = new IssueDTO(issue);
         var json = JsonSerializer.Serialize(dto, _jsonSerializerOptions);
 
@@ -34,14 +35,12 @@ public partial class IssueHelper : INotifyAgent
     /// <summary>
     /// Get the comments for an issue from a GitHub repository
     /// </summary>
-    /// <param name="owner">The owner of the repository</param>
-    /// <param name="name">The name of the repository</param>
     /// <param name="issueNumber">The issue number</param>
     [Function]
-    public async Task<string> GetIssueCommentsAsync(string owner, string name, int issueNumber)
+    public async Task<string> GetIssueCommentsAsync(int issueNumber)
     {
-        WriteLine($"Getting comments for issue {issueNumber} from {owner}/{name}");
-        var comments = await _gitHubClient.Issue.Comment.GetAllForIssue(owner, name, issueNumber);
+        WriteLine($"Getting comments for issue {issueNumber} from {this.repoOwner}/{this.repoName}");
+        var comments = await _gitHubClient.Issue.Comment.GetAllForIssue(this.repoOwner, this.repoName, issueNumber);
         var json = JsonSerializer.Serialize(comments, _jsonSerializerOptions);
 
         return json;
@@ -50,35 +49,33 @@ public partial class IssueHelper : INotifyAgent
     /// <summary>
     /// Search issues in a GitHub repository
     /// </summary>
-    /// <param name="owner">the repo owner</param>
-    /// <param name="repoName">the repo name</param>
     /// <param name="query">the search query</param>
     /// <param name="limit">the number of issues to return</param>
     /// <param name="author">the author of the issue</param>
     /// <param name="assignee">the assignee of the issue</param>
     /// <param name="mentioned">the mentioned user</param>
     /// <param name="labels">the labels of the issue</param>
+    /// <param name="milestone">the milestone of the issue</param>
     /// <param name="state">the state of the issue. legal values are 'open' and 'closed'</param>
     [Function]
     public async Task<string> SearchIssuesAsync(
-        string owner,
-        string repoName,
         string query,
         string author,
         string assignee,
         string mentioned,
         string[] labels,
-        int limit = 5,
-        string state = "open")
+        string milestone,
+        int? limit,
+        string state)
     {
-        WriteLine($"Searching issues in {owner}/{repoName} with query: {query}");
+        WriteLine($"Searching issues in {this.repoOwner}/{this.repoName} with query: {query}");
         var request = new SearchIssuesRequest(query);
         request.In = [
             IssueInQualifier.Title,
             IssueInQualifier.Body,
             IssueInQualifier.Comment,
             ];
-        request.Repos.Add(owner, repoName);
+        request.Repos.Add(this.repoOwner, this.repoName);
         if (assignee is not null)
         {
             Console.WriteLine($"Assignee: {assignee}");
@@ -117,7 +114,17 @@ public partial class IssueHelper : INotifyAgent
             _ => null,
         };
 
-        request.PerPage = 5;
+        if (limit is not null)
+        {
+            Console.WriteLine($"Limit: {limit}");
+            request.PerPage = limit.Value;
+        }
+
+        if (milestone is not null)
+        {
+            Console.WriteLine($"Milestone: {milestone}");
+            request.Milestone = milestone;
+        }
 
 
         var issues = await _gitHubClient.Search.SearchIssues(request);
@@ -133,8 +140,10 @@ public partial class IssueHelper : INotifyAgent
 
     public event EventHandler<ChatMsg>? Notify;
 
-    public IssueHelper(IAgent agent, GitHubClient gitHubClient)
+    public IssueHelper(IAgent agent, GitHubClient gitHubClient, string repoOwner, string repoName)
     {
+        this.repoOwner = repoOwner;
+        this.repoName = repoName;
         _agent = agent;
         _gitHubClient = gitHubClient;
         _jsonSerializerOptions = new JsonSerializerOptions

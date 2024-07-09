@@ -6,5 +6,8 @@
             "openai_model_id": "gpt-3.5-turbo",
             "openai_api_key": "<your-api-key>"
         }
-    }
+    },
+    "github_repo_name": "<repo-name>",
+    "github_repo_owner": "<repo-owner>",
+    "github_token": "<gh-token>"
 }
