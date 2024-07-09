@@ -43,4 +43,12 @@ public class GithubConfiguration
     [JsonPropertyName("github_token")]
     [Description("GitHub token, will use $env:GITHUB_TOKEN if not provided")]
     public string? GithubToken { get; set; } = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+
+    [JsonPropertyName("github_repo_owner")]
+    [Description("GitHub repository owner, will use $env:GITHUB_REPO_OWNER if not provided")]
+    public string? GithubRepoOwner { get; set; } = Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER");
+
+    [JsonPropertyName("github_repo_name")]
+    [Description("GitHub repository name, will use $env:GITHUB_REPO_NAME if not provided")]
+    public string? GithubRepoName { get; set; } = Environment.GetEnvironmentVariable("GITHUB_REPO_NAME");
 }

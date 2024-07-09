@@ -34,6 +34,14 @@
     "github_token": {
       "type": "string",
       "description": "GitHub token, will use $env:GITHUB_TOKEN if not provided"
+    },
+    "github_repo_owner": {
+      "type": "string",
+      "description": "GitHub repository owner, will use $env:GITHUB_REPO_OWNER if not provided"
+    },
+    "github_repo_name": {
+      "type": "string",
+      "description": "GitHub repository name, will use $env:GITHUB_REPO_NAME if not provided"
     }
   },
   "$defs": {

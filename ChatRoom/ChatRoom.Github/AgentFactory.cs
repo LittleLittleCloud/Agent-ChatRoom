@@ -16,6 +16,8 @@ internal static class AgentFactory
         OpenAIClient openaiClient,
         string deployModelName,
         GitHubClient gitHubClient,
+        string repoOwner,
+        string repoName,
         string name = "issue-helper",
         string systemMessage = "You are a github issue helper")
     {
@@ -26,6 +28,6 @@ internal static class AgentFactory
             systemMessage: systemMessage)
             .RegisterMessageConnector();
 
-        return new IssueHelper(openaiChatAgent, gitHubClient);
+        return new IssueHelper(openaiChatAgent, gitHubClient, repoOwner, repoName);
     }
 }
