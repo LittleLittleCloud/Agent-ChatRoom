@@ -31,9 +31,9 @@
             "$ref": "#/$defs/string11"
           }
         },
-        "description": "agents, the name of agents can\u0027t be duplicated"
+        "description": "openai agents, the name of agents can\u0027t be duplicated"
       },
-      "description": "agents, the name of agents can\u0027t be duplicated"
+      "description": "openai agents, the name of agents can\u0027t be duplicated"
     }
   },
   "$defs": {
