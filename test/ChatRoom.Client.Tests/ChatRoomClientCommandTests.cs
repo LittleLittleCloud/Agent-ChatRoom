@@ -19,12 +19,12 @@ using Newtonsoft.Json.Linq;
 
 namespace ChatRoom.Client.Tests;
 
-public class ChatRoomClientCommandTests : IClassFixture<DefaultClientFixture>
+public class ChatRoomClientCommandTests : IClassFixture<AllInOneChatRoomClientFixture>
 {
-    private readonly DefaultClientFixture _fixture;
+    private readonly AllInOneChatRoomClientFixture _fixture;
     private readonly ChatPlatformClient _client;
 
-    public ChatRoomClientCommandTests(DefaultClientFixture fixture, ITestOutputHelper output)
+    public ChatRoomClientCommandTests(AllInOneChatRoomClientFixture fixture, ITestOutputHelper output)
     {
         _fixture = fixture;
         _client = fixture.Command.ServiceProvider?.GetRequiredService<ChatPlatformClient>() ?? throw new InvalidOperationException("Failed to get ChatPlatformClient.");
@@ -41,6 +41,32 @@ public class ChatRoomClientCommandTests : IClassFixture<DefaultClientFixture>
         var result = await app.RunAsync("--help");
 
         Approvals.Verify(result.Output);
+    }
+
+    [Fact]
+    public async Task ItRegisterAllAgentsToTheRoom()
+    {
+        var agents = await _client.GetRoomMembers();
+        var names = agents.Select(a => a.Name).ToList();
+
+
+        //names.Should().BeEquivalentTo("User", "gpt3.5", "gpt4", "llama3", "bing-search", "google-search", "ps-gpt", "ps-runner", "issue-helper");
+        names.Should().Contain("User");
+        names.Should().Contain("gpt3.5");
+        names.Should().Contain("gpt4");
+        names.Should().Contain("llama3");
+        names.Should().Contain("bing-search");
+        names.Should().Contain("google-search");
+        names.Should().Contain("ps-gpt");
+        names.Should().Contain("ps-runner");
+        names.Should().Contain("issue-helper");
+
+        var orchestrators = await _client.GetOrchestrators();
+        //orchestrators.Should().BeEquivalentTo("RoundRobin", "HumanToAgent", "DynamicGroupChat");
+
+        orchestrators.Should().Contain("RoundRobin");
+        orchestrators.Should().Contain("HumanToAgent");
+        orchestrators.Should().Contain("DynamicGroupChat");
     }
 
     [Fact]

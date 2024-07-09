@@ -14,7 +14,7 @@ public class PowershellAgentsFixture : IDisposable
     public PowershellAgentsFixture()
     {
         var configurationPath = Path.Combine("template", "chatroom.powershell", "chatroom-powershell.json");
-        var configuration = JsonSerializer.Deserialize<PowershellConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
+        var configuration = JsonSerializer.Deserialize<ChatRoomPowershellConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new PowershellCommand();
 
         this._start = this.Command.ExecuteAsync(configuration);

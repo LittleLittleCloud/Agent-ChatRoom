@@ -15,13 +15,13 @@ using FluentAssertions;
 
 namespace ChatRoom.Powershell.Tests;
 
-public class PowershellCommandTests : IClassFixture<DefaultClientFixture>, IClassFixture<PowershellAgentsFixture>
+public class PowershellCommandTests : IClassFixture<EmptyChatRoomClientFixture>, IClassFixture<PowershellAgentsFixture>
 {
     private readonly PowershellAgentsFixture _fixture;
-    private readonly DefaultClientFixture _client;
+    private readonly EmptyChatRoomClientFixture _client;
     private readonly ChatPlatformClient _chatPlatformClient;
 
-    public PowershellCommandTests(DefaultClientFixture fixture, PowershellAgentsFixture powershellAgentsFixture)
+    public PowershellCommandTests(EmptyChatRoomClientFixture fixture, PowershellAgentsFixture powershellAgentsFixture)
     {
         _client = fixture;
         _fixture = powershellAgentsFixture;

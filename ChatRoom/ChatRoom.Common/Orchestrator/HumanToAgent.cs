@@ -56,7 +56,7 @@ internal class HumanToAgent : IOrchestrator
         }
         else if (nextAvailableAgents.Count() > 1)
         {
-            IAgent admin = OpenAIAgentFactory.CreateGroupChatAdmin(openaiClient, modelName: deployModelName);
+            IAgent admin = GroupChatAdminFactory.CreateGroupChatAdmin(openaiClient, modelName: deployModelName);
             var groupChat = new GroupChat(
                 workflow: graph,
                 members: humanAgents.Concat(notHumanAgents),

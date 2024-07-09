@@ -14,7 +14,7 @@ public class GithubAgentsFixture : IDisposable
     public GithubAgentsFixture()
     {
         var configurationPath = Path.Combine("template", "chatroom.github", "chatroom-github.json");
-        var configuration = JsonSerializer.Deserialize<GithubConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
+        var configuration = JsonSerializer.Deserialize<ChatRoomGithubConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new GithubCommand();
 
         this._start = this.Command.ExecuteAsync(configuration);

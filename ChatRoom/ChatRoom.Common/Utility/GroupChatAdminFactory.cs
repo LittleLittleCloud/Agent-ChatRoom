@@ -5,7 +5,7 @@ using Azure.AI.OpenAI;
 using ChatRoom.SDK.Extension;
 namespace ChatRoom.SDK;
 
-internal class OpenAIAgentFactory
+internal class GroupChatAdminFactory
 {
     public static IAgent CreateGroupChatAdmin(OpenAIClient client, string name = "admin", string modelName = "gpt-35-turbo-0125")
     {

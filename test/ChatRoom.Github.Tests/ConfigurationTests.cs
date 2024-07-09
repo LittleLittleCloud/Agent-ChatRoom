@@ -23,7 +23,7 @@ public class ConfigurationTests
     public void VerifyConfigurationSchema()
     {
         var schema = new JsonSchemaBuilder()
-            .FromType<GithubConfiguration>()
+            .FromType<ChatRoomGithubConfiguration>()
             .Build();
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
         Approvals.Verify(json);

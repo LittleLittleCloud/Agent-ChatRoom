@@ -14,3 +14,221 @@ templates[0] = {
     }
 }
 
+templates[1] = {
+    "$schema": "chatroom_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "<your-api-key>",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
+    "chatroom_openai_configuration": {
+        "agents": [
+            {
+                "name": "gpt3.5",
+                "system_message": "You are a helpful AI assistant",
+                "llm_config": {
+                    "llm_type": "OpenAI",
+                    "openai_api_key": "<your-api-key>",
+                    "openai_model_id": "gpt-3.5-turbo"
+                }
+            },
+            {
+                "name": "gpt4",
+                "system_message": "You are a helpful AI assistant",
+                "llm_config": {
+                    "llm_type": "OpenAI",
+                    "openai_api_key": "<your-api-key>",
+                    "openai_model_id": "gpt-4-turbo"
+                }
+            },
+            {
+                "name": "llama3",
+                "llm_config": {
+                    "llm_type": "ThirdParty",
+                    "third_party_llm_endpoint": "http://localhost:51234",
+                    "third_party_llm_model_id": "llama3:latest"
+                }
+            }
+        ]
+    }
+}
+
+templates[2] = {
+    "$schema": "chatroom_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "<your-api-key>",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
+    "chatroom_powershell_configuration": {
+        "gpt": {
+            "CurrentWorkingDirectory": ".",
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        },
+        "runner": {
+            "last_n_message": 3
+        }
+    }
+}
+
+templates[3] = {
+    "$schema": "chatroom_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "<your-api-key>",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
+    "chatroom_github_configuration": {
+        "github_repo_name": "<your-repo-name>",
+        "github_repo_owner": "<your-repo-owner>",
+        "github_token": "<your-gh-token>",
+        "issue_helper": {
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        }
+    }
+}
+
+templates[4] = {
+    "$schema": "chatroom_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "<your-api-key>",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
+    "chatroom_websearch_configuration": {
+        "bing_search_config": {
+            "bing_api_key": "<your-api-key>",
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        },
+        "google_search_config": {
+            "google_api_key": "<your-api-key>",
+            "google_custom_search_engine_id": "<your-cse-id>",
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        }
+    }
+}
+
+templates[5] = {
+    "$schema": "chatroom_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "<your-api-key>",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
+    "chatroom_github_configuration": {
+        "github_repo_name": "<your-repo-name>",
+        "github_repo_owner": "<your-repo-owner>",
+        "github_token": "<your-gh-token>",
+        "issue_helper": {
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        }
+    },
+    "chatroom_openai_configuration": {
+        "agents": [
+            {
+                "name": "gpt3.5",
+                "system_message": "You are a helpful AI assistant",
+                "llm_config": {
+                    "llm_type": "OpenAI",
+                    "openai_api_key": "<your-api-key>",
+                    "openai_model_id": "gpt-3.5-turbo"
+                }
+            },
+            {
+                "name": "gpt4",
+                "system_message": "You are a helpful AI assistant",
+                "llm_config": {
+                    "llm_type": "OpenAI",
+                    "openai_api_key": "<your-api-key>",
+                    "openai_model_id": "gpt-4-turbo"
+                }
+            },
+            {
+                "name": "llama3",
+                "llm_config": {
+                    "llm_type": "ThirdParty",
+                    "third_party_llm_endpoint": "http://localhost:51234",
+                    "third_party_llm_model_id": "llama3:latest"
+                }
+            }
+        ]
+    },
+    "chatroom_powershell_configuration": {
+        "gpt": {
+            "CurrentWorkingDirectory": ".",
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        },
+        "runner": {
+            "last_n_message": 3
+        }
+    },
+    "chatroom_websearch_configuration": {
+        "bing_search_config": {
+            "bing_api_key": "<your-api-key>",
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        },
+        "google_search_config": {
+            "google_api_key": "<your-api-key>",
+            "google_custom_search_engine_id": "<your-cse-id>",
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        }
+    }
+}
+

@@ -24,6 +24,7 @@
   
   <ItemGroup>
     <InternalsVisibleTo Include="ChatRoom.Powershell.Tests"/>
+    <InternalsVisibleTo Include="ChatRoom.Client"/>
   </ItemGroup>
 
 

@@ -31,7 +31,7 @@ internal class DynamicGroupChat : IOrchestrator
 
         var chatHistory = messages.Select(x => x.ToAutoGenMessage()).ToArray();
 
-        IAgent admin = OpenAIAgentFactory.CreateGroupChatAdmin(openaiClient, modelName: deployModelName);
+        IAgent admin = GroupChatAdminFactory.CreateGroupChatAdmin(openaiClient, modelName: deployModelName);
         var groupChat = new GroupChat(
             members: agents,
             admin: admin);

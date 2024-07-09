@@ -16,7 +16,7 @@ using Microsoft.SemanticKernel.Plugins.Web.Google;
 
 namespace ChatRoom.WebSearch;
 
-internal static class AgentFactory
+internal static class WebSearchAgentFactory
 {
     public static IAgent CreateBingSearchAgent(BingSearchConfiguration config)
     {

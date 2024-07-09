@@ -6,8 +6,11 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ChatRoom.Github;
 using ChatRoom.OpenAI;
+using ChatRoom.Powershell;
 using ChatRoom.SDK;
+using ChatRoom.WebSearch;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -68,13 +71,13 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
     {
         _deployed = false;
         var config = command.ConfigFile is not null
-            ? JsonSerializer.Deserialize<ChatRoomServerConfiguration>(File.ReadAllText(command.ConfigFile))!
-            : new ChatRoomServerConfiguration();
+            ? JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(command.ConfigFile))!
+            : new ChatRoomClientConfiguration();
 
         return ExecuteAsync(config);
     }
 
-    internal async Task<int> ExecuteAsync(ChatRoomServerConfiguration config)
+    internal async Task<int> ExecuteAsync(ChatRoomClientConfiguration config)
     {
         var workspace = config.Workspace;
         if (!Directory.Exists(workspace))
@@ -130,6 +133,53 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
         if (config.ServerConfig is ServerConfiguration)
         {
             logger.LogInformation($"web ui is available at: {config.ServerConfig.Urls}");
+        }
+
+        var chatRoomClient = sp.GetRequiredService<ChatPlatformClient>();
+
+        if (config.ChatRoomOpenAIConfiguration is ChatRoomOpenAIConfiguration openAIConfig)
+        {
+            logger.LogInformation("Registering agents from OpenAI configuration.");
+            foreach (var agentConfig in openAIConfig.Agents)
+            {
+                var agentFactory = new OpenAIAgentFactory(agentConfig);
+                await chatRoomClient.RegisterAutoGenAgentAsync(agentFactory.CreateAgent(), agentConfig.Description);
+
+                logger.LogInformation($"Agent {agentConfig.Name} registered.");
+            }
+        }
+
+        if (config.ChatRoomWebSearchConfiguration is ChatRoomWebSearchConfiguration webConfig)
+        {
+            logger.LogInformation("Registering agents from WebSearch configuration.");
+            if (webConfig.BingSearchConfiguration is BingSearchConfiguration bingConfig)
+            {
+                await chatRoomClient.RegisterAutoGenAgentAsync(WebSearchAgentFactory.CreateBingSearchAgent(bingConfig), bingConfig.Description);
+                logger.LogInformation("BingSearch agent registered.");
+            }
+
+            if (webConfig.GoogleSearchConfiguration is GoogleSearchConfiguration googleConfig)
+            {
+                await chatRoomClient.RegisterAutoGenAgentAsync(WebSearchAgentFactory.CreateGoogleSearchAgent(googleConfig), googleConfig.Description);
+                logger.LogInformation("GoogleSearch agent registered.");
+            }
+        }
+
+        if (config.ChatRoomPowershellConfiguration is ChatRoomPowershellConfiguration powershellConfig)
+        {
+            logger.LogInformation("Registering agents from Powershell configuration.");
+            var psGPT = PowershellAgentFactory.CreatePwshDeveloperAgent(powershellConfig.GPT);
+            var psRunner = new PowershellRunnerAgent(powershellConfig.Runner.Name, powershellConfig.Runner.LastNMessage);
+
+            await chatRoomClient.RegisterAutoGenAgentAsync(psGPT, powershellConfig.GPT.Description);
+            await chatRoomClient.RegisterAutoGenAgentAsync(psRunner, powershellConfig.Runner.Description);
+        }
+
+        if (config.ChatRoomGithubConfiguration is ChatRoomGithubConfiguration githubConfig)
+        {
+            logger.LogInformation("Registering agents from Github configuration.");
+            var issueHelperAgent = GithubAgentFactory.CreateIssueHelper(githubConfig);
+            await chatRoomClient.RegisterAutoGenAgentAsync(issueHelperAgent, githubConfig.IssueHelper.Description);
         }
 
         _deployed = true;

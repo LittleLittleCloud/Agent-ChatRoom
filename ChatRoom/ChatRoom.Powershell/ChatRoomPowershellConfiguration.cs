@@ -62,7 +62,7 @@ public class PowershellRunnerConfiguration
     public int LastNMessage { get; set; } = 10;
 }
 
-public class PowershellConfiguration
+public class ChatRoomPowershellConfiguration
 {
     [JsonPropertyName("runner")]
     [Description("Powershell runner configuration")]

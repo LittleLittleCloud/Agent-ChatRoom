@@ -16,8 +16,8 @@ internal class OpenAICommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings setting)
     {
         var config = setting.ConfigFile is not null
-            ? JsonSerializer.Deserialize<Configuration>(File.ReadAllText(setting.ConfigFile))!
-            : new Configuration();
+            ? JsonSerializer.Deserialize<ChatRoomOpenAIConfiguration>(File.ReadAllText(setting.ConfigFile))!
+            : new ChatRoomOpenAIConfiguration();
 
         return await ExecuteAsync(config);
     }
@@ -52,7 +52,7 @@ internal class OpenAICommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
         }
     }
 
-    internal async Task<int> ExecuteAsync(Configuration config)
+    internal async Task<int> ExecuteAsync(ChatRoomOpenAIConfiguration config)
     {
         // verify if the name of agents is duplicated
         var agentNames = config.Agents.Select(agent => agent.Name);

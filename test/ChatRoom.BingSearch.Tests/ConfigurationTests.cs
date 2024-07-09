@@ -17,7 +17,7 @@ namespace ChatRoom.WebSearch.Tests
         public void VerifyConfigurationSchema()
         {
             var schema = new JsonSchemaBuilder()
-                .FromType<WebSearchConfiguration>()
+                .FromType<ChatRoomWebSearchConfiguration>()
                 .Build();
 
             var schemaFileName = "chatroom_web_search_configuration_schema.json";
