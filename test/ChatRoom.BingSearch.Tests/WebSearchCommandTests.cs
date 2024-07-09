@@ -15,13 +15,13 @@ using FluentAssertions;
 
 namespace ChatRoom.WebSearch.Tests;
 
-public class WebSearchCommandTests : IClassFixture<DefaultClientFixture>, IClassFixture<WebSearchFixture>
+public class WebSearchCommandTests : IClassFixture<EmptyChatRoomClientFixture>, IClassFixture<WebSearchFixture>
 {
-    private readonly DefaultClientFixture _fixture;
+    private readonly EmptyChatRoomClientFixture _fixture;
     private readonly WebSearchFixture _bingSearchFixture;
     private readonly ChatPlatformClient _client;
 
-    public WebSearchCommandTests(DefaultClientFixture fixture, WebSearchFixture bingSearchFixture)
+    public WebSearchCommandTests(EmptyChatRoomClientFixture fixture, WebSearchFixture bingSearchFixture)
     {
         _fixture = fixture;
         _bingSearchFixture = bingSearchFixture;

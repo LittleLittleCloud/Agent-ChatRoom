@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="ChatRoom.WebSearch.Tests" />
+    <InternalsVisibleTo Include="ChatRoom.Client" />
   </ItemGroup>
 
   <ItemGroup>

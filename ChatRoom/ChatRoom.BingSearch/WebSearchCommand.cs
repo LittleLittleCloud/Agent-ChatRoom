@@ -25,8 +25,8 @@ internal class WebSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSetting
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings settings)
     {
         var config = settings.ConfigFile is not null
-            ? JsonSerializer.Deserialize<WebSearchConfiguration>(File.ReadAllText(settings.ConfigFile))!
-            : new WebSearchConfiguration();
+            ? JsonSerializer.Deserialize<ChatRoomWebSearchConfiguration>(File.ReadAllText(settings.ConfigFile))!
+            : new ChatRoomWebSearchConfiguration();
 
         return await ExecuteAsync(config);
     }
@@ -75,7 +75,7 @@ internal class WebSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSetting
         }
     }
 
-    internal async Task<int> ExecuteAsync(WebSearchConfiguration config)
+    internal async Task<int> ExecuteAsync(ChatRoomWebSearchConfiguration config)
     {
         _deployed = false;
         _host = Host.CreateDefaultBuilder()
@@ -87,12 +87,12 @@ internal class WebSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSetting
 
         if (config.BingSearchConfiguration is not null)
         {
-            await chatroomClient.RegisterAutoGenAgentAsync(AgentFactory.CreateBingSearchAgent(config.BingSearchConfiguration), config.BingSearchConfiguration.Description);
+            await chatroomClient.RegisterAutoGenAgentAsync(WebSearchAgentFactory.CreateBingSearchAgent(config.BingSearchConfiguration), config.BingSearchConfiguration.Description);
         }
 
         if (config.GoogleSearchConfiguration is not null)
         {
-            await chatroomClient.RegisterAutoGenAgentAsync(AgentFactory.CreateGoogleSearchAgent(config.GoogleSearchConfiguration), config.GoogleSearchConfiguration.Description);
+            await chatroomClient.RegisterAutoGenAgentAsync(WebSearchAgentFactory.CreateGoogleSearchAgent(config.GoogleSearchConfiguration), config.GoogleSearchConfiguration.Description);
         }
 
         _deployed = true;

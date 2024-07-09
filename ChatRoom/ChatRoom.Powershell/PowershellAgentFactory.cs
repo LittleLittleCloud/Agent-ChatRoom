@@ -6,7 +6,7 @@ using ChatRoom.SDK.Extension;
 
 namespace ChatRoom.Powershell;
 
-internal static class AgentFactory
+internal static class PowershellAgentFactory
 {
     public static IAgent CreatePwshDeveloperAgent(
         PowershellGPTConfiguration config)

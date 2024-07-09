@@ -30,7 +30,7 @@ public class ClientConfigurationTests
     public void VerifyConfigurationSchema()
     {
         var schema = new JsonSchemaBuilder()
-            .FromType<Configuration>()
+            .FromType<ChatRoomOpenAIConfiguration>()
             .Build();
 
         var schemaFileName = "chatroom_openai_configuration_schema.json";

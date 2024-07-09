@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="ChatRoom.OpenAI.Tests"/>
+    <InternalsVisibleTo Include="ChatRoom.Client"/>
   </ItemGroup>
 
 

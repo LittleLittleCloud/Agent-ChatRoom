@@ -30,7 +30,7 @@ public class IssueHelperConfiguration
     public OpenAIClientConfiguration? OpenAIConfiguration { get; set; } = null;
 }
 
-public class GithubConfiguration
+public class ChatRoomGithubConfiguration
 {
     [JsonPropertyName("room_config")]
     [Description("The configuration for the chat room")]

@@ -14,7 +14,7 @@ public class WebSearchFixture : IDisposable
     public WebSearchFixture()
     {
         var configurationPath = Path.Combine("template", "chatroom.websearch", "chatroom-websearch.json");
-        var configuration = JsonSerializer.Deserialize<WebSearchConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
+        var configuration = JsonSerializer.Deserialize<ChatRoomWebSearchConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new WebSearchCommand();
 
         this._start = this.Command.ExecuteAsync(configuration);

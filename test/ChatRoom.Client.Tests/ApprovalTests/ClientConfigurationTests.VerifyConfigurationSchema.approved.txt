@@ -2,16 +2,7 @@
   "type": "object",
   "properties": {
     "room_config": {
-      "type": "object",
-      "properties": {
-        "room": {
-          "$ref": "#/$defs/string"
-        },
-        "port": {
-          "$ref": "#/$defs/integer"
-        }
-      },
-      "description": "The configuration for the chat room"
+      "$ref": "#/$defs/roomConfiguration"
     },
     "channel_config": {
       "type": "object",
@@ -67,9 +58,84 @@
       "type": "boolean",
       "description": "Enable the console app for the chat room",
       "default": false
+    },
+    "chatroom_openai_configuration": {
+      "type": "object",
+      "properties": {
+        "room_config": {
+          "$ref": "#/$defs/roomConfiguration"
+        },
+        "agents": {
+          "$ref": "#/$defs/listOfOpenAIAgentConfiguration"
+        }
+      },
+      "description": "ChatRoom OpenAI configuration, default is null"
+    },
+    "chatroom_github_configuration": {
+      "type": "object",
+      "properties": {
+        "room_config": {
+          "$ref": "#/$defs/roomConfiguration"
+        },
+        "issue_helper": {
+          "$ref": "#/$defs/issueHelperConfiguration"
+        },
+        "github_token": {
+          "$ref": "#/$defs/string15"
+        },
+        "github_repo_owner": {
+          "$ref": "#/$defs/string16"
+        },
+        "github_repo_name": {
+          "$ref": "#/$defs/string17"
+        }
+      },
+      "description": "ChatRoom Github configuration, default is null"
+    },
+    "chatroom_powershell_configuration": {
+      "type": "object",
+      "properties": {
+        "runner": {
+          "$ref": "#/$defs/powershellRunnerConfiguration"
+        },
+        "gpt": {
+          "$ref": "#/$defs/powershellGPTConfiguration"
+        },
+        "room_config": {
+          "$ref": "#/$defs/roomConfiguration"
+        }
+      },
+      "description": "ChatRoom PowerShell configuration, default is null"
+    },
+    "chatroom_websearch_configuration": {
+      "type": "object",
+      "properties": {
+        "bing_search_config": {
+          "$ref": "#/$defs/bingSearchConfiguration"
+        },
+        "google_search_config": {
+          "$ref": "#/$defs/googleSearchConfiguration"
+        },
+        "room_config": {
+          "$ref": "#/$defs/roomConfiguration"
+        }
+      },
+      "description": "ChatRoom WebSearch configuration, default is null"
     }
   },
   "$defs": {
+    "roomConfiguration": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "$ref": "#/$defs/string"
+        },
+        "port": {
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "description": "The configuration for the chat room"
+    },
     "string": {
       "type": "string",
       "description": "The name of the room. Default is \u0027room\u0027"
@@ -150,6 +216,293 @@
     "string8": {
       "type": "string",
       "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
+    },
+    "listOfOpenAIAgentConfiguration": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "llm_config": {
+            "$ref": "#/$defs/openAIClientConfiguration1"
+          },
+          "system_message": {
+            "$ref": "#/$defs/string9"
+          },
+          "agent_description": {
+            "$ref": "#/$defs/string10"
+          },
+          "name": {
+            "$ref": "#/$defs/string11"
+          }
+        },
+        "description": "openai agents, the name of agents can\u0027t be duplicated"
+      },
+      "description": "openai agents, the name of agents can\u0027t be duplicated"
+    },
+    "openAIClientConfiguration1": {
+      "type": "object",
+      "properties": {
+        "llm_type": {
+          "$ref": "#/$defs/lLMType"
+        },
+        "openai_api_key": {
+          "$ref": "#/$defs/string1"
+        },
+        "openai_model_id": {
+          "$ref": "#/$defs/string2"
+        },
+        "azure_openai_endpoint": {
+          "$ref": "#/$defs/string3"
+        },
+        "azure_openai_key": {
+          "$ref": "#/$defs/string4"
+        },
+        "azure_openai_deploy_name": {
+          "$ref": "#/$defs/string5"
+        },
+        "third_party_llm_endpoint": {
+          "$ref": "#/$defs/string6"
+        },
+        "third_party_llm_key": {
+          "$ref": "#/$defs/string7"
+        },
+        "third_party_llm_model_id": {
+          "$ref": "#/$defs/string8"
+        }
+      },
+      "description": "llm configuration"
+    },
+    "string9": {
+      "type": "string",
+      "description": "System message used in gpt agent, default is \u0027You are a helpful AI assistant\u0027"
+    },
+    "string10": {
+      "type": "string",
+      "description": "Agent description used in gpt agent, default is \u0027I am a helpful AI assistant\u0027"
+    },
+    "string11": {
+      "type": "string",
+      "description": "Name of the agent, default is \u0027gpt\u0027"
+    },
+    "issueHelperConfiguration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string12"
+        },
+        "system_message": {
+          "$ref": "#/$defs/string13"
+        },
+        "description": {
+          "$ref": "#/$defs/string14"
+        },
+        "openai_config": {
+          "$ref": "#/$defs/openAIClientConfiguration2"
+        }
+      },
+      "description": "Issue helper configuration"
+    },
+    "string12": {
+      "type": "string",
+      "description": "Name of the issue helper agent, default is \u0027issue-helper\u0027"
+    },
+    "string13": {
+      "type": "string",
+      "description": "System message, default is \u0027You are a github issue helper\u0027"
+    },
+    "string14": {
+      "type": "string",
+      "description": "Agent description, default is \u0027I am a github issue helper, I can help you with your github issues.\u0027"
+    },
+    "openAIClientConfiguration2": {
+      "type": "object",
+      "properties": {
+        "llm_type": {
+          "$ref": "#/$defs/lLMType"
+        },
+        "openai_api_key": {
+          "$ref": "#/$defs/string1"
+        },
+        "openai_model_id": {
+          "$ref": "#/$defs/string2"
+        },
+        "azure_openai_endpoint": {
+          "$ref": "#/$defs/string3"
+        },
+        "azure_openai_key": {
+          "$ref": "#/$defs/string4"
+        },
+        "azure_openai_deploy_name": {
+          "$ref": "#/$defs/string5"
+        },
+        "third_party_llm_endpoint": {
+          "$ref": "#/$defs/string6"
+        },
+        "third_party_llm_key": {
+          "$ref": "#/$defs/string7"
+        },
+        "third_party_llm_model_id": {
+          "$ref": "#/$defs/string8"
+        }
+      },
+      "description": "OpenAI configuration"
+    },
+    "string15": {
+      "type": "string",
+      "description": "GitHub token, will use $env:GITHUB_TOKEN if not provided"
+    },
+    "string16": {
+      "type": "string",
+      "description": "GitHub repository owner, will use $env:GITHUB_REPO_OWNER if not provided"
+    },
+    "string17": {
+      "type": "string",
+      "description": "GitHub repository name, will use $env:GITHUB_REPO_NAME if not provided"
+    },
+    "powershellRunnerConfiguration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string18"
+        },
+        "description": {
+          "$ref": "#/$defs/string19"
+        },
+        "last_n_message": {
+          "$ref": "#/$defs/integer1"
+        }
+      },
+      "description": "Powershell runner configuration"
+    },
+    "string18": {
+      "type": "string",
+      "description": "Name of the powershell runner agent, default is \u0027ps-runner\u0027"
+    },
+    "string19": {
+      "type": "string",
+      "description": "Agent description of the powershell runner agent, default is \u0027A powershell script runner\u0027"
+    },
+    "integer1": {
+      "type": "integer",
+      "description": "Number of last message to look for powershell script, default is 10"
+    },
+    "powershellGPTConfiguration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string20"
+        },
+        "CurrentWorkingDirectory": {
+          "$ref": "#/$defs/string21"
+        },
+        "system_message": {
+          "$ref": "#/$defs/string22"
+        },
+        "description": {
+          "$ref": "#/$defs/string23"
+        },
+        "openai_config": {
+          "$ref": "#/$defs/openAIClientConfiguration2"
+        }
+      },
+      "description": "Powershell GPT configuration"
+    },
+    "string20": {
+      "type": "string",
+      "description": "Name of the powershell gpt agent, default is \u0027ps-gpt\u0027"
+    },
+    "string21": {
+      "type": "string",
+      "description": "Current working directory, default is current directory of where the program is running"
+    },
+    "string22": {
+      "type": "string",
+      "description": "System message, default is \u0027$\u0022\u0022\u0022\r\n            You are a powershell developer. You need to convert the task assigned to you to a powershell script.\r\n            \r\n            If there is bug in the script, you need to fix it.\r\n\r\n            The current working directory is {cwd}\r\n\r\n            You need to write powershell script to resolve task. Put the script between \u0060\u0060\u0060pwsh and \u0060\u0060\u0060.\r\n            The script should always write the result to the output stream using Write-Host command.\r\n\r\n            e.g.\r\n            \u0060\u0060\u0060pwsh\r\n            # This is a powershell script\r\n            Write-Host \u0022Hello, World!\u0022\r\n            \u0060\u0060\u0060\r\n            \u0022\u0022\u0022\u0027"
+    },
+    "string23": {
+      "type": "string",
+      "description": "Agent description, default is \u0027I am PowerShell GPT, I am good at writing powershell scripts.\u0027"
+    },
+    "bingSearchConfiguration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string24"
+        },
+        "system_message": {
+          "$ref": "#/$defs/string25"
+        },
+        "description": {
+          "$ref": "#/$defs/string26"
+        },
+        "bing_api_key": {
+          "$ref": "#/$defs/string27"
+        },
+        "openai_config": {
+          "$ref": "#/$defs/openAIClientConfiguration2"
+        }
+      },
+      "description": "The configuration for Bing search agent"
+    },
+    "string24": {
+      "type": "string",
+      "description": "Name of the bing search agent, default is \u0027bing-search\u0027"
+    },
+    "string25": {
+      "type": "string",
+      "description": "System message, default is \u0027You are a Bing search agent. You can search the web using Bing search engine.\u0027"
+    },
+    "string26": {
+      "type": "string",
+      "description": "Agent description, default is \u0027I am a Bing search agent. I can search the web using Bing search engine.\u0027"
+    },
+    "string27": {
+      "type": "string",
+      "description": "Bing API key, will use $env:BING_API_KEY if not provided"
+    },
+    "googleSearchConfiguration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string28"
+        },
+        "system_message": {
+          "$ref": "#/$defs/string29"
+        },
+        "description": {
+          "$ref": "#/$defs/string30"
+        },
+        "google_api_key": {
+          "$ref": "#/$defs/string31"
+        },
+        "google_custom_search_engine_id": {
+          "$ref": "#/$defs/string32"
+        },
+        "openai_config": {
+          "$ref": "#/$defs/openAIClientConfiguration2"
+        }
+      },
+      "description": "The configuration for Google search agent"
+    },
+    "string28": {
+      "type": "string",
+      "description": "Name of the google search agent, default is \u0027google-search\u0027"
+    },
+    "string29": {
+      "type": "string",
+      "description": "System message, default is \u0027You are a Google search agent. You can search the web using Google search engine.\u0027"
+    },
+    "string30": {
+      "type": "string",
+      "description": "Agent description, default is \u0027I am a Google search agent. I can search the web using Google search engine.\u0027"
+    },
+    "string31": {
+      "type": "string",
+      "description": "Google search API key, will use $env:GOOGLE_API_KEY if not provided"
+    },
+    "string32": {
+      "type": "string",
+      "description": "Google custom search engine id, will use $env:GOOGLE_CUSTOM_SEARCH_ENGINE_ID if not provided"
     }
   }
 }

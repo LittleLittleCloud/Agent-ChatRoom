@@ -23,7 +23,7 @@ public class ClientConfigurationTests
     public void VerifyConfigurationSchema()
     {
         var schema = new JsonSchemaBuilder()
-            .FromType<ChatRoomServerConfiguration>()
+            .FromType<ChatRoomClientConfiguration>()
             .Build();
 
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
@@ -48,7 +48,7 @@ public class ClientConfigurationTests
     {
         var command = new CreateConfigurationCommand();
         var availableTemplates = command.AvailableTemplates;
-        availableTemplates.Should().BeEquivalentTo(["chatroom"]);
+        availableTemplates.Should().BeEquivalentTo(["chatroom_empty", "chatroom_openai", "chatroom_powershell", "chatroom_github", "chatroom_websearch", "chatroom_all_in_one"]);
 
         var listTemplatesCommand = new ListTemplatesCommand();
         listTemplatesCommand.AvailableTemplates.Keys.Should().BeEquivalentTo(availableTemplates);

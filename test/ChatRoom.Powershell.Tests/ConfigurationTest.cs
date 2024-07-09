@@ -22,7 +22,7 @@ public class ConfigurationTest
     public void VerifyConfigurationSchema()
     {
         var schema = new JsonSchemaBuilder()
-            .FromType<PowershellConfiguration>()
+            .FromType<ChatRoomPowershellConfiguration>()
             .Build();
 
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });

@@ -16,13 +16,13 @@ using Xunit;
 
 namespace ChatRoom.OpenAI.Tests;
 
-public class OpenAICommandTests : IClassFixture<DefaultClientFixture>, IClassFixture<OpenAIAgentsFixture>
+public class OpenAICommandTests : IClassFixture<EmptyChatRoomClientFixture>, IClassFixture<OpenAIAgentsFixture>
 {
-    private readonly DefaultClientFixture _fixture;
+    private readonly EmptyChatRoomClientFixture _fixture;
     private readonly OpenAIAgentsFixture _openAIAgentsFixture;
     private readonly ChatPlatformClient _client;
 
-    public OpenAICommandTests(DefaultClientFixture fixture, OpenAIAgentsFixture openAIAgentsFixture)
+    public OpenAICommandTests(EmptyChatRoomClientFixture fixture, OpenAIAgentsFixture openAIAgentsFixture)
     {
         _fixture = fixture;
         _openAIAgentsFixture = openAIAgentsFixture;

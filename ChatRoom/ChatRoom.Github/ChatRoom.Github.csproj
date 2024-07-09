@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="ChatRoom.Github.Tests" />
+    <InternalsVisibleTo Include="ChatRoom.Client" />
   </ItemGroup>
   
   <ItemGroup>

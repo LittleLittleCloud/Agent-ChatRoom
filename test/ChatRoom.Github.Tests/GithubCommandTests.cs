@@ -15,13 +15,13 @@ using FluentAssertions;
 
 namespace ChatRoom.Github.Tests;
 
-public class GithubCommandTests : IClassFixture<DefaultClientFixture>, IClassFixture<GithubAgentsFixture>
+public class GithubCommandTests : IClassFixture<EmptyChatRoomClientFixture>, IClassFixture<GithubAgentsFixture>
 {
-    private readonly DefaultClientFixture _fixture;
+    private readonly EmptyChatRoomClientFixture _fixture;
     private readonly GithubAgentsFixture _githubFixture;
     private readonly ChatPlatformClient _client;
 
-    public GithubCommandTests(DefaultClientFixture fixture, GithubAgentsFixture githubFixture)
+    public GithubCommandTests(EmptyChatRoomClientFixture fixture, GithubAgentsFixture githubFixture)
     {
         _fixture = fixture;
         _githubFixture = githubFixture;

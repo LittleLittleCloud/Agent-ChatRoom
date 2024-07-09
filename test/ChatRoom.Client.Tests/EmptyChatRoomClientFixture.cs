@@ -10,14 +10,14 @@ using Xunit.Abstractions;
 
 namespace ChatRoom.Client.Tests;
 
-public class DefaultClientFixture : IDisposable
+public abstract class ChatRoomClientFixture : IDisposable
 {
     private readonly Task _start;
-    public DefaultClientFixture()
+    public ChatRoomClientFixture(string templateName)
     {
         // called once before every test
-        var configurationPath = Path.Combine("template", "chatroom", "chatroom.json"); // "template/chatroom/chatroom.json
-        var configuration = JsonSerializer.Deserialize<ChatRoomServerConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
+        var configurationPath = Path.Combine("template", "chatroom", $"{templateName}.json"); // "template/chatroom/chatroom.json
+        var configuration = JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new ChatRoomClientCommand();
         this._start = this.Command.ExecuteAsync(configuration);
 
@@ -42,5 +42,21 @@ public class DefaultClientFixture : IDisposable
         {
             throw new TimeoutException("Failed to stop the client in time.");
         }
+    }
+}
+
+public class EmptyChatRoomClientFixture : ChatRoomClientFixture
+{
+    public EmptyChatRoomClientFixture() : base("chatroom_empty")
+    {
+        // called once before every test
+    }
+}
+
+public class AllInOneChatRoomClientFixture : ChatRoomClientFixture
+{
+    public AllInOneChatRoomClientFixture() : base("chatroom_all_in_one")
+    {
+        // called once before every test
     }
 }

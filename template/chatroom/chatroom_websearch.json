@@ -1,0 +1,32 @@
+{
+    "$schema": "chatroom_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "<your-api-key>",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
+    "chatroom_websearch_configuration": {
+        "bing_search_config": {
+            "bing_api_key": "<your-api-key>",
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        },
+        "google_search_config": {
+            "google_api_key": "<your-api-key>",
+            "google_custom_search_engine_id": "<your-cse-id>",
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        }
+    }
+}

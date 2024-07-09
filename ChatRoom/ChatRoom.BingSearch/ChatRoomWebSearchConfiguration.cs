@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace ChatRoom.WebSearch;
 
-public class WebSearchConfiguration
+internal class ChatRoomWebSearchConfiguration
 {
     [JsonPropertyName("bing_search_config")]
     [Description("The configuration for Bing search agent")]

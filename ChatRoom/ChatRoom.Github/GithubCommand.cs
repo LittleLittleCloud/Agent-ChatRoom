@@ -31,49 +31,19 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings settings)
     {
         var config = settings.ConfigFile is not null
-            ? JsonSerializer.Deserialize<GithubConfiguration>(File.ReadAllText(settings.ConfigFile))!
-            : new GithubConfiguration();
+            ? JsonSerializer.Deserialize<ChatRoomGithubConfiguration>(File.ReadAllText(settings.ConfigFile))!
+            : new ChatRoomGithubConfiguration();
 
         return await ExecuteAsync(config);
     }
 
-    internal async Task<int> ExecuteAsync(GithubConfiguration config)
+    internal async Task<int> ExecuteAsync(ChatRoomGithubConfiguration config)
     {
         if (config.GithubRepoOwner is null || config.GithubRepoName is null)
         {
             AnsiConsole.MarkupLine("[red]Github repo owner and name are required.[/]");
             return 1;
         }
-
-        // create issue helper
-        OpenAIClient? openaiClient = config.IssueHelper.OpenAIConfiguration?.ToOpenAIClient();
-        string? deployModelName = config.IssueHelper.OpenAIConfiguration?.ModelId;
-
-        IAgent? issueHelper = null;
-
-        if (openaiClient is null || deployModelName is null)
-        {
-            var defaultReply = $"{config.IssueHelper.Name} is not configured properly. Please check the configuration file.";
-            issueHelper = new DefaultReplyAgent(config.IssueHelper.Name, defaultReply);
-        }
-
-        var ghClient = new GitHubClient(new ProductHeaderValue("ChatRoom"));
-        if (config.GithubToken is string)
-        {
-            ghClient.Credentials = new Credentials(config.GithubToken);
-        }
-
-        if (issueHelper is null)
-        {
-            issueHelper = AgentFactory.CreateIssueHelperAgent(
-                openaiClient!,
-                deployModelName!,
-                ghClient,
-                config.GithubRepoOwner!,
-                config.GithubRepoName!,
-                config.IssueHelper.Name,
-                config.IssueHelper.SystemMessage);
-        };
 
         _host = Host.CreateDefaultBuilder()
             .UseChatRoomClient(roomName: config.RoomConfig.Room ?? "room", port: config.RoomConfig.Port)
@@ -83,6 +53,7 @@ internal class GithubCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
         var sp = _host.Services;
         var chatPlatformClient = sp.GetRequiredService<ChatPlatformClient>() ?? throw new InvalidOperationException("ChatPlatformClient is not registered");
 
+        var issueHelper = GithubAgentFactory.CreateIssueHelper(config);
         await chatPlatformClient.RegisterAutoGenAgentAsync(issueHelper, config.IssueHelper.Description);
 
         _deployed = true;

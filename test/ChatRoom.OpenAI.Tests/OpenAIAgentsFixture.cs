@@ -14,7 +14,7 @@ public class OpenAIAgentsFixture : IDisposable
     public OpenAIAgentsFixture()
     {
         var configurationPath = Path.Combine("template", "chatroom.openai", "chatroom-openai.json");
-        var configuration = JsonSerializer.Deserialize<Configuration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
+        var configuration = JsonSerializer.Deserialize<ChatRoomOpenAIConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new OpenAICommand();
 
         this._start = this.Command.ExecuteAsync(configuration);

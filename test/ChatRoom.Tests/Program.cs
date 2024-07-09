@@ -7,7 +7,7 @@ using ChatRoom.Powershell.Tests;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using var defaultClientFixture = new DefaultClientFixture();
+using var defaultClientFixture = new EmptyChatRoomClientFixture();
 using var openaiFixture = new OpenAIAgentsFixture();
 using var bing = new WebSearchFixture();
 using var githubFixture = new GithubAgentsFixture();

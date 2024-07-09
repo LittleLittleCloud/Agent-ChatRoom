@@ -27,8 +27,8 @@ internal class PowershellCommand : ChatRoomAgentCommand
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings settings)
     {
         var config = settings.ConfigFile is not null
-            ? JsonSerializer.Deserialize<PowershellConfiguration>(File.ReadAllText(settings.ConfigFile))!
-            : new PowershellConfiguration();
+            ? JsonSerializer.Deserialize<ChatRoomPowershellConfiguration>(File.ReadAllText(settings.ConfigFile))!
+            : new ChatRoomPowershellConfiguration();
 
         return await ExecuteAsync(config);
     }
@@ -76,7 +76,7 @@ internal class PowershellCommand : ChatRoomAgentCommand
         }
     }
 
-    internal async Task<int> ExecuteAsync(PowershellConfiguration config)
+    internal async Task<int> ExecuteAsync(ChatRoomPowershellConfiguration config)
     {
         _deployed = false;
         _host = Host.CreateDefaultBuilder()
@@ -85,7 +85,7 @@ internal class PowershellCommand : ChatRoomAgentCommand
 
         await _host.StartAsync();
         var chatroomClient = _host.Services.GetRequiredService<ChatPlatformClient>();
-        var psGPTAgent = AgentFactory.CreatePwshDeveloperAgent(config.GPT);
+        var psGPTAgent = PowershellAgentFactory.CreatePwshDeveloperAgent(config.GPT);
         var psRunnerAgent = new PowershellRunnerAgent(config.Runner.Name, config.Runner.LastNMessage);
         await chatroomClient.RegisterAutoGenAgentAsync(psGPTAgent, config.GPT.Description);
         await chatroomClient.RegisterAutoGenAgentAsync(psRunnerAgent, config.Runner.Description);
