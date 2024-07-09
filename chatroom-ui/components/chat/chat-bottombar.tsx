@@ -185,7 +185,7 @@ export default function ChatBottombar({
                 name="message"
                 placeholder="Aa"
                 className={
-                  cn("h-full border-none flex items-center overflow-hidden bg-background ring-0 focus:ring-0 focus:outline-none resize-none p-2",
+                  cn("h-auto max-h-60 border-none flex items-center bg-background ring-0 focus:ring-0 focus:outline-none resize-none p-2",
                   )} />
               
 
