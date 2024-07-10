@@ -6,11 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 
-internal class WebSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
+internal class WebSearchCommand : ChatRoomAgentCommand
 {
-    private IHost? _host = null;
-    private bool _deployed = false;
-
     public static string Description { get; } = """
         Web search agents for chat room.
         This package provides the following web search agents:
@@ -31,49 +28,6 @@ internal class WebSearchCommand : AsyncCommand<ChatRoomAgentClientCommandSetting
         return await ExecuteAsync(config);
     }
 
-
-    internal IServiceProvider? ServiceProvider => _host?.Services;
-
-    internal async Task StopAsync(int maxWaitingTimeInSeconds = 10)
-    {
-        if (_host is not null)
-        {
-            var timeout = Task.Delay(TimeSpan.FromSeconds(maxWaitingTimeInSeconds));
-            var stopHostTask = _host.StopAsync();
-
-            await Task.WhenAny(timeout, stopHostTask);
-
-            if (timeout.IsCompleted)
-            {
-                throw new TimeoutException("Stop host timeout");
-            }
-        }
-    }
-
-    internal async Task DeployAsync(int maxWaitingTimeInSeconds = 20)
-    {
-        var timeOut = Task.Delay(TimeSpan.FromSeconds(maxWaitingTimeInSeconds));
-        while (true)
-        {
-            if (_host is null)
-            {
-                await Task.Delay(1000);
-                continue;
-            }
-
-            if (_deployed)
-            {
-                break;
-            }
-
-            if (timeOut.IsCompleted)
-            {
-                throw new TimeoutException("Deploy timeout");
-            }
-
-            await Task.Delay(1000);
-        }
-    }
 
     internal async Task<int> ExecuteAsync(ChatRoomWebSearchConfiguration config)
     {

@@ -14,9 +14,6 @@ namespace ChatRoom.Powershell;
 
 internal class PowershellCommand : ChatRoomAgentCommand
 {
-    private IHost? _host = null;
-    private bool _deployed = false;
-
     public static string Description => """
         Powershell agents for chat room.
 
@@ -31,49 +28,6 @@ internal class PowershellCommand : ChatRoomAgentCommand
             : new ChatRoomPowershellConfiguration();
 
         return await ExecuteAsync(config);
-    }
-
-    internal IServiceProvider? ServiceProvider => _host?.Services;
-
-    internal async Task StopAsync(int maxWaitingTimeInSeconds =10)
-    {
-        if (_host is not null)
-        {
-            var timeout = Task.Delay(TimeSpan.FromSeconds(maxWaitingTimeInSeconds));
-            var stopHostTask = _host.StopAsync();
-
-            await Task.WhenAny(timeout, stopHostTask);
-
-            if (timeout.IsCompleted)
-            {
-                throw new TimeoutException("Stop host timeout");
-            }
-        }
-    }
-
-    internal async Task DeployAsync(int maxWaitingTimeInSeconds = 20)
-    {
-        var timeOut = Task.Delay(TimeSpan.FromSeconds(maxWaitingTimeInSeconds));
-        while (true)
-        {
-            if (_host is null)
-            {
-                await Task.Delay(1000);
-                continue;
-            }
-
-            if (_deployed)
-            {
-                break;
-            }
-
-            if (timeOut.IsCompleted)
-            {
-                throw new TimeoutException("Deploy timeout");
-            }
-
-            await Task.Delay(1000);
-        }
     }
 
     internal async Task<int> ExecuteAsync(ChatRoomPowershellConfiguration config)
