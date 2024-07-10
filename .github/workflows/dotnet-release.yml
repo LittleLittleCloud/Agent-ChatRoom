@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - release/**
+  release:
+    types: [created]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.head_ref }}
