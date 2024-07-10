@@ -76,6 +76,45 @@ export function ChatList({
     setRemainingTurns(-1);
   };
 
+  const onChooseNextSpeaker = async (agent: AgentInfo) => {
+    console.log("Choosing next speaker", agent);
+    if (channel.name === undefined || channel.name === null || channel.members === undefined || channel.members === null) {
+      return;
+    }
+
+    if (remainingTurns !== 0) {
+      toast(
+        {
+          title: "Orchestration in progress",
+          description: "Please wait for the current orchestration to complete",
+          variant: "default",
+        }
+      );
+      return;
+    }
+    var availableCandidate = channel.members.find((member) => member.name === agent.name);
+
+    if (availableCandidate?.name === undefined || availableCandidate?.name === null) {
+      toast(
+        {
+          title: "Candidate not found",
+          description: "The selected candidate is not a member of the channel",
+          variant: "default",
+        }
+      );
+      return;
+    }
+    setRemainingTurns(1);
+    await postApiChatRoomClientGenerateNextReply({
+      requestBody: {
+        channelName: channel.name,
+        chatMsgs: messages,
+        candidates: [availableCandidate.name],
+      },
+    });
+    setRemainingTurns(0);
+  };
+
   const deleteMessageHandler = async (message: ChatMsg) => {
     if (confirm(`Are you sure you want to delete this message?`) === false) {
       return;
@@ -272,6 +311,7 @@ export function ChatList({
             setRemainingTurns(remainingTurn);
             await onOrchestrationClickNext(remainingTurn, messages);
           }}
+          onChooseNextSpeaker={onChooseNextSpeaker}
           onChannelChange={onChannelChange}
           onRefresh={() => onReloadMessages(messages)}
           onDeleteChatHistory={onDeleteMessages} />

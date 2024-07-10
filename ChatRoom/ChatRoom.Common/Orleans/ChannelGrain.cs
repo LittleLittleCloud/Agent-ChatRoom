@@ -196,30 +196,48 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         candidates = candidates ??= _agents.Keys.Select(x => x.Name).ToArray();
         var agents = _agents.Where(x => candidates.Contains(x.Key.Name)).Select(x => x.Key).ToArray();
-        
-        if (orchestrator is null || !_orchestrators.ContainsKey(orchestrator))
+        var channelInfo = await GetChannelInfo();
+
+        AgentInfo? nextSpeaker;
+        IChatRoomAgentObserver nextSpeakerObserver;
+        msgs ??= _messages.ToArray();
+
+        // if there is only one available agents, invoke that agent directly
+        if (agents.Length == 1)
+        {
+            nextSpeaker = agents[0];
+            nextSpeakerObserver = _agents[nextSpeaker];
+        }
+        else if (orchestrator is null || !_orchestrators.ContainsKey(orchestrator))
         {
             _logger?.LogInformation($"Generate null reply because orchestrator {orchestrator} is not found");
             return null;
         }
-        
-        var orchestratorObserver = _orchestrators[orchestrator];
-        msgs ??= _messages.ToArray();
+        else
+        {
+            var orchestratorObserver = _orchestrators[orchestrator];
 
-        _logger.LogInformation("Getting next agent speaker");
-        var nextSpeakerName = agents.Length == 1 ? agents[0].Name : await orchestratorObserver.GetNextSpeaker(agents, msgs);
+            _logger.LogInformation("Getting next agent speaker");
+            var nextSpeakerName = await orchestratorObserver.GetNextSpeaker(agents, msgs);
+
+            nextSpeaker = agents.FirstOrDefault(x => x.Name == nextSpeakerName);
+            if (nextSpeaker is null)
+            {
+                _logger.LogInformation("No next speaker found");
+                return null;
+            }
+
+            _logger.LogInformation("Next Speaker: {NextSpeaker}", nextSpeaker.Name);
+
+            nextSpeakerObserver = _agents[nextSpeaker];
+        }
         
-        var nextSpeaker = agents.FirstOrDefault(x => x.Name == nextSpeakerName);
-        if (nextSpeaker is null)
+        if (nextSpeakerObserver is null)
         {
             _logger.LogInformation("No next speaker found");
             return null;
         }
 
-        _logger.LogInformation("Next Speaker: {NextSpeaker}", nextSpeaker.Name);
-    
-        var nextSpeakerObserver = _agents[nextSpeaker];
-        var channelInfo = await GetChannelInfo();
         var reply = await nextSpeakerObserver.GenerateReplyAsync(nextSpeaker, msgs, channelInfo);
 
         if (reply is not null)
@@ -228,6 +246,7 @@ internal class ChannelGrain : Grain, IChannelGrain
 
             await this.SendMessage(reply);
         }
+
         return reply;
     }
 
