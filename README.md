@@ -22,7 +22,7 @@ dotnet tool install --global ChatRoom.Client
 Writing configuration from scratch is painful, so `Agent Chatroom` provides a series of templates to help you get started quickly. Use the `list-templates` command to list all available templates and the `create` command to create a configuration from the selected template.
 
 > [!TIP]
-> `create` command also generates a json schema file for this configuration to provide intellisense in your editor. Use it wisely!
+> `create` command also generates a json schema file for this configuration to provide intellisense in your editor. Use it wisely can greatly save your effort on writing configuration.
 
 ### Step 1 - Choose from one of the available templates to get started.
 ```bash
