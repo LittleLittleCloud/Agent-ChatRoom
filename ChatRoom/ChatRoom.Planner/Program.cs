@@ -1,9 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Azure.AI.OpenAI;
 using ChatRoom;
-using ChatRoom.SDK.Extension;
-using ChatRoom.Powershell;
+using ChatRoom.Planner;
 using ChatRoom.SDK;
+using ChatRoom.SDK.Extension;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 var app = new CommandApp();

@@ -4,18 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
-using ChatRoom.SDK;
+using ApprovalTests;
+using ChatRoom.OpenAI;
 using FluentAssertions;
 using Json.Schema;
-using Json.Schema.Generation;
 using Xunit;
+using Json.Schema.Generation;
 
-namespace ChatRoom.Client.Tests;
+namespace ChatRoom.Planner.Tests;
 
-public class ClientConfigurationTests
+public class ConfigurationTests
 {
     [Fact]
     [UseReporter(typeof(DiffReporter))]
@@ -23,22 +23,23 @@ public class ClientConfigurationTests
     public void VerifyConfigurationSchema()
     {
         var schema = new JsonSchemaBuilder()
-            .FromType<ChatRoomClientConfiguration>()
+            .FromType<ChatRoomPlannerConfiguration>()
             .Build();
-
         var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions { WriteIndented = true });
-
-        var schemaFileName = "chatroom_configuration_schema.json";
-        var schemaFilePath = Path.Join("template", "chatroom", schemaFileName);
-        var schemaFile = File.ReadAllText(schemaFilePath);
-
         Approvals.Verify(json);
-        schemaFile.Should().BeEquivalentTo(json);
+
+        var schemaFileName = "chatroom_planner_configuration_schema.json";
+        var schemaFilePath = Path.Join("template", "chatroom.planner", schemaFileName);
+        var schemaFileContent = File.ReadAllText(schemaFilePath);
+        var schemaFile = JsonSerializer.Deserialize<JsonSchema>(schemaFileContent);
+        schemaFileContent = JsonSerializer.Serialize(schemaFile, new JsonSerializerOptions { WriteIndented = true });
+        schemaFileContent.Should().BeEquivalentTo(json);
 
         var command = new CreateConfigurationCommand();
-        var schemaContent = command.GetSchemaContent();
-
-        schemaContent.Should().BeEquivalentTo(json);
+        schemaFileContent = command.GetSchemaContent();
+        schemaFile = JsonSerializer.Deserialize<JsonSchema>(schemaFileContent);
+        schemaFileContent = JsonSerializer.Serialize(schemaFile, new JsonSerializerOptions { WriteIndented = true });
+        schemaFileContent.Should().BeEquivalentTo(json);
     }
 
     [Fact]
@@ -48,18 +49,10 @@ public class ClientConfigurationTests
     {
         var command = new CreateConfigurationCommand();
         var availableTemplates = command.AvailableTemplates;
-        availableTemplates.Should().BeEquivalentTo([
-            "chatroom_empty",
-            "chatroom_openai",
-            "chatroom_powershell",
-            "chatroom_github",
-            "chatroom_websearch",
-            "chatroom_planner",
-            "chatroom_all_in_one"]);
+        availableTemplates.Should().BeEquivalentTo(["chatroom-planner"]);
 
         var listTemplatesCommand = new ListTemplatesCommand();
         listTemplatesCommand.AvailableTemplates.Keys.Should().BeEquivalentTo(availableTemplates);
-
 
         var templates = new List<string>();
         foreach (var template in availableTemplates)
@@ -70,5 +63,4 @@ public class ClientConfigurationTests
 
         Approvals.VerifyAll("templates", templates, "templates");
     }
-
 }

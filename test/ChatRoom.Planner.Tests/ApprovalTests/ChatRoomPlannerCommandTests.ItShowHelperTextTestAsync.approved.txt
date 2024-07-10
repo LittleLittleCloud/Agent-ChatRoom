@@ -1,0 +1,13 @@
+﻿DESCRIPTION:
+This package contains planners and corresponding orchestrators for chatroom.
+
+The following planners are available:
+- react-planner: a ReAct agent for multi-agent planning.
+
+USAGE:
+    testhost.dll [OPTIONS]
+
+OPTIONS:
+    -h, --help               Prints help information
+    -v, --version            Prints version information
+    -c, --config <CONFIG>    Configuration file

@@ -50,7 +50,6 @@ public class ChatRoomClientCommandTests : IClassFixture<AllInOneChatRoomClientFi
         var names = agents.Select(a => a.Name).ToList();
 
 
-        //names.Should().BeEquivalentTo("User", "gpt3.5", "gpt4", "llama3", "bing-search", "google-search", "ps-gpt", "ps-runner", "issue-helper");
         names.Should().Contain("User");
         names.Should().Contain("gpt3.5");
         names.Should().Contain("gpt4");
@@ -60,13 +59,14 @@ public class ChatRoomClientCommandTests : IClassFixture<AllInOneChatRoomClientFi
         names.Should().Contain("ps-gpt");
         names.Should().Contain("ps-runner");
         names.Should().Contain("issue-helper");
+        names.Should().Contain("react-planner");
 
         var orchestrators = await _client.GetOrchestrators();
-        //orchestrators.Should().BeEquivalentTo("RoundRobin", "HumanToAgent", "DynamicGroupChat");
 
         orchestrators.Should().Contain("RoundRobin");
         orchestrators.Should().Contain("HumanToAgent");
         orchestrators.Should().Contain("DynamicGroupChat");
+        orchestrators.Should().Contain("ReactPlanningOrchestrator");
     }
 
     [Fact]

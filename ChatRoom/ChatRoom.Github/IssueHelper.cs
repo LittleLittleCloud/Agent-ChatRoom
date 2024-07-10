@@ -82,13 +82,6 @@ public partial class IssueHelper : INotifyAgent
             request.Assignee = assignee;
         }
 
-        //if (from is not null)
-        //{
-        //    to ??= DateTime.Now;
-        //    Console.WriteLine($"Since: {from}");
-        //    request.Created = new DateRange(new DateTimeOffset(from.Value), new DateTimeOffset(to.Value));
-        //}
-
         if (author is not null)
         {
             Console.WriteLine($"Author: {author}");
@@ -125,6 +118,8 @@ public partial class IssueHelper : INotifyAgent
             Console.WriteLine($"Milestone: {milestone}");
             request.Milestone = milestone;
         }
+
+        request.Is = [IssueIsQualifier.Issue];
 
 
         var issues = await _gitHubClient.Search.SearchIssues(request);

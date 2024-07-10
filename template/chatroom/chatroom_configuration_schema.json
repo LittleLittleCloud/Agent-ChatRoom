@@ -121,6 +121,18 @@
         }
       },
       "description": "ChatRoom WebSearch configuration, default is null"
+    },
+    "chatroom_planner_configuration": {
+      "type": "object",
+      "properties": {
+        "room_config": {
+          "$ref": "#/$defs/roomConfiguration1"
+        },
+        "react_planner_configuration": {
+          "$ref": "#/$defs/reActPlannerConfiguration"
+        }
+      },
+      "description": "ChatRoom Planner configuration, default is null"
     }
   },
   "$defs": {
@@ -503,6 +515,81 @@
     "string32": {
       "type": "string",
       "description": "Google custom search engine id, will use $env:GOOGLE_CUSTOM_SEARCH_ENGINE_ID if not provided"
+    },
+    "roomConfiguration1": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "$ref": "#/$defs/string"
+        },
+        "port": {
+          "$ref": "#/$defs/integer"
+        }
+      },
+      "description": "the configuration for chat room"
+    },
+    "reActPlannerConfiguration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/string33"
+        },
+        "system_message": {
+          "$ref": "#/$defs/string34"
+        },
+        "description": {
+          "$ref": "#/$defs/string35"
+        },
+        "openai_config": {
+          "$ref": "#/$defs/openAIClientConfiguration3"
+        }
+      },
+      "description": "the configuration for react planner"
+    },
+    "string33": {
+      "type": "string",
+      "description": "The name of the agent. Default is \u0027react-planner\u0027"
+    },
+    "string34": {
+      "type": "string",
+      "description": "System message"
+    },
+    "string35": {
+      "type": "string",
+      "description": "Description of the agent. Default is \u0027A react planner agent, which can help other agents to plan actions.\u0027"
+    },
+    "openAIClientConfiguration3": {
+      "type": "object",
+      "properties": {
+        "llm_type": {
+          "$ref": "#/$defs/lLMType"
+        },
+        "openai_api_key": {
+          "$ref": "#/$defs/string1"
+        },
+        "openai_model_id": {
+          "$ref": "#/$defs/string2"
+        },
+        "azure_openai_endpoint": {
+          "$ref": "#/$defs/string3"
+        },
+        "azure_openai_key": {
+          "$ref": "#/$defs/string4"
+        },
+        "azure_openai_deploy_name": {
+          "$ref": "#/$defs/string5"
+        },
+        "third_party_llm_endpoint": {
+          "$ref": "#/$defs/string6"
+        },
+        "third_party_llm_key": {
+          "$ref": "#/$defs/string7"
+        },
+        "third_party_llm_model_id": {
+          "$ref": "#/$defs/string8"
+        }
+      },
+      "description": "OpenAI configuration for the agent. To get ideal result, it\u0027s recommended to use gpt-4o or above for this agent."
     }
   }
 }

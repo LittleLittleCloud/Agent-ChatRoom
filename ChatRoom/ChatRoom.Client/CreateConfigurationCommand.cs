@@ -18,6 +18,7 @@ internal class CreateConfigurationCommand : CreateConfigurationFromTemplateComma
                 "chatroom_powershell",
                 "chatroom_github",
                 "chatroom_websearch",
+                "chatroom_planner",
                 "chatroom_all_in_one",
             ])
     {
@@ -34,6 +35,7 @@ internal class ListTemplatesCommand : ListAvailableTemplatesCommand
             ["chatroom_powershell"] = "get start with powershell gpt and runner",
             ["chatroom_github"] = "get start with github agents",
             ["chatroom_websearch"] = "get start with websearch agents",
+            ["chatroom_planner"] = "get start with planner agents",
             ["chatroom_all_in_one"] = "get start with all available agents",
         })
     {

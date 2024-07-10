@@ -1,4 +1,5 @@
-﻿using ChatRoom.WebSearch;
+﻿using ChatRoom.SDK.Extension;
+using ChatRoom.WebSearch;
 using Spectre.Console.Cli;
 var app = new CommandApp();
 app.Configure(config =>
@@ -10,6 +11,8 @@ app.Configure(config =>
     config.AddCommand<CreateConfigurationCommand>("create")
         .WithDescription("Create a configuration file for ChatRoom.WebSearch")
         .WithExample(["create", "--template", "chatroom-websearch"]);
+
+    config.AddListTemplateCommand<ListTemplatesCommand>();
 });
 await app.RunAsync(args);
 

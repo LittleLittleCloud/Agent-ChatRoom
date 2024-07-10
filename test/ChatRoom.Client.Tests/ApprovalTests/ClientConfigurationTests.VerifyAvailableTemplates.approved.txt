@@ -156,6 +156,29 @@ templates[5] = {
     "server_config": {
         "urls": "http://localhost:51234;https://localhost:51235"
     },
+    "chatroom_planner_configuration": {
+        "react_planner_configuration": {
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-4o"
+            }
+        }
+    }
+}
+
+templates[6] = {
+    "$schema": "chatroom_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "<your-api-key>",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
     "chatroom_github_configuration": {
         "github_repo_name": "<your-repo-name>",
         "github_repo_owner": "<your-repo-owner>",
@@ -165,6 +188,15 @@ templates[5] = {
                 "llm_type": "OpenAI",
                 "openai_api_key": "<your-api-key>",
                 "openai_model_id": "gpt-3.5-turbo"
+            }
+        }
+    },
+    "chatroom_planner_configuration": {
+        "react_planner_configuration": {
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-4o"
             }
         }
     },
