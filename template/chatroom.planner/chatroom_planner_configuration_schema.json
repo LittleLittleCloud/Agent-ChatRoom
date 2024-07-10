@@ -47,7 +47,7 @@
       },
       "string2": {
         "type": "string",
-        "description": "System message, default is \u0027Answer the question from user as best you can.\r\n\r\nUse the following format:\r\n\r\nQuestion: \u003Cquestion\u003E\r\nThought: \u003Cyou should always think about what to do\u003E\r\nAction: @\u003Cagent\u003E \u003Caction to take\u003E // Use this to ask other agents to perform actions.\r\nObservation: the action result.\r\n\r\n... (this process can be repeated multiple times)\r\n\r\nOnce you collect enough information from observation, you can provide a final answer to the user.\r\nThought: I now know the final answer.\r\nFinal Answer: \u003Cthe final answer to original input question\u003E\r\n\r\nBegin!\u0027"
+        "description": "System message, default is \u0027Answer the question from user as best you can.\r\n\r\nUse the following format:\r\n\r\nQuestion: \u003Cthe original input question\u003E\r\nThought: \u003Cyou should always think about what to do\u003E\r\nAction@\u003Cname\u003E: \u003Ccreate an action for \u003Cname\u003E to do\u003E\r\n\r\nOnce you collect enough information from observation, you can provide a final answer to the user.\r\nThought: I now know the final answer.\r\nFinal Answer: \u003Cthe final answer to original input question\u003E\r\n\r\nBegin!\u0027"
       },
       "string3": {
         "type": "string",
