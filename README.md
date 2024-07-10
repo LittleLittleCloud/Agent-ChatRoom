@@ -10,38 +10,45 @@
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 - **Extensible**: Create your own agents and integrate them into the chatroom.
 
-## 🚀 Quick Start with OpenAI
-1. Install the `ChatRoom.Client` and `ChatRoom.OpenAI` tools from NuGet.
+## 🚀 Quick Start
+### Install the `ChatRoom.Client` from NuGet.
 ```bash
 dotnet tool install -g ChatRoom.Client
-dotnet tool install -g ChatRoom.OpenAI
 ```
 
-2. Create configuration files from one of the templates
+### Choose from one of the available templates to get started.
 ```bash
-# Create configuration file for ChatRoom.Client
-chatroom create -t chatroom -o chatroom-client.json
-
-# Create configuration file for ChatRoom.OpenAI
-chatroom-openai create -t openai -o chatroom-openai.json
+chatroom list-templates # list all available templates
 ```
 
-3. Fill in the configuration files with your OpenAI API key and other information.
-4. Start the chatroom client with the OpenAI agent.
+The command will list all available templates.
+
+![list-templates](assets/list-templates.png)
+### Create configuration from the selected template.
+
+Instead of writing configuration from scratch, an easier route is to create a chatroom configuration from the selected template using the `create` command, which will not only create a configuration file but also generate a json schema file for this configuration to provide intellisense in your editor.
+
+```bash
+# Create 
+chatroom create -t chatroom_openai -o chatroom_openai.json
+```
+
+![fill key](assets/fill-openai-key.png)
+
+### Start the chatroom client with the OpenAI agent.
+
+After filling in the OpenAI key in the configuration file, you can start the chatroom client with the following command.
+
 ```bash
 # start chatroom server
-chatroom run -c chatroom-client.json
-
-# in another terminal, add the OpenAI agent to the chatroom server
-chatroom-openai run -c chatroom-openai.json
+chatroom run -c chatroom_openai.json
 ```
 
-You will see the following output from chatroom client which indicates the web UI is available at `http://localhost:51237` and `https://localhost:51238`.
+You will see the following output from chatroom client which indicates the web UI is available at `http://localhost:51237` and `https://localhost:51238`. You can navigate to the web UI in your browser and start chatting with the agents.
+
 ```bash
 web ui is available at: http://localhost:51237;https://localhost:51238
 ```
-
-Navigate to the web UI in your browser and start chatting with the agents.
 
 ## 📦 Pre-configured Chatrooms
 We provide the following configuration to help you get started quickly. More configurations will be added in the future.

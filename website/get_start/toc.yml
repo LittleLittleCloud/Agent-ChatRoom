@@ -6,7 +6,7 @@
       href: key_concepts.md
     - name: Installation
       href: installation.md
-    - name: Configuration Examples
+    - name: Showcases
       items:
         - name: Chat with OpenAI
           href: chat_with_openai.md
