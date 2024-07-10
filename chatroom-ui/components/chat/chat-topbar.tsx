@@ -45,6 +45,7 @@ export default function ChatTopbar({
 }: ChatTopbarProps) {
   const [members, setMembers] = React.useState<AgentInfo[]>(channel.members || []);
   const [currentChannel, setCurrentChannel] = React.useState<Channel>(channel);
+  const iconSize = 14;
   useEffect(() => {
     setMembers(channel.members || []);
     setCurrentChannel(channel);
@@ -52,7 +53,7 @@ export default function ChatTopbar({
     , [channel]);
 
   return (
-    <div className="w-full flex flex-wrap h-full p-4 pl-8 justify-start gap-10 items-center border-b">
+    <div className="w-full flex h-full p-3 pl-8 justify-start gap-3 items-center border-b">
       <div className="flex flex-col">
         <span className="font-medium text-nowrap">{channel.name}</span>
       </div>
@@ -62,10 +63,10 @@ export default function ChatTopbar({
           href="#"
           onClick={onRefresh}
           className={
-            cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
+            cn(buttonVariants({ variant: "ghost", size: "tiny" }))
           }>
           <IconTooltip content="Refresh">
-            <RotateCcw size={15} />
+            <RotateCcw size={iconSize} />
           </IconTooltip>
         </Link>
 
@@ -74,19 +75,19 @@ export default function ChatTopbar({
           href="#"
           onClick={onDeleteChatHistory}
           className={
-            cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
+            cn(buttonVariants({ variant: "ghost", size: "tiny" }))
           }>
           <IconTooltip content="Delete Chat History">
-            <Trash size={15} />
+            <Trash size={iconSize} />
           </IconTooltip>
         </Link>
       </div>
       {/* orchestration */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 grow">
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              size={"sm"}
+              size={"tiny"}
               variant={"outline"}
             >
               Orchestration
@@ -95,7 +96,7 @@ export default function ChatTopbar({
           <PopoverContent
             side="bottom"
             className="w-80">
-            <div className="grid grid-cols-3 items-center gap-4 rounded-md">
+            <div className="grid grid-cols-3 items-center gap-4 rounded-md text-sm p-2">
               <div>
                 <span>Orchestrator</span>
               </div>
@@ -155,7 +156,7 @@ export default function ChatTopbar({
           <Link
             href="#"
             className={
-              cn(buttonVariants({ variant: "grey", size: "icon" }), "h-9, w-9")
+              cn(buttonVariants({ variant: "grey", size: "tiny" }))
             }>
             <IconTooltip content="Cancelling">
               <StepForward size={15} />
@@ -168,7 +169,7 @@ export default function ChatTopbar({
             href="#"
             onClick={onContinue}
             className={
-              cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
+              cn(buttonVariants({ variant: "ghost", size: "tiny" }))
             }>
             <IconTooltip content="Continue">
               <StepForward size={15} />
@@ -190,7 +191,7 @@ export default function ChatTopbar({
         }
       </div>
 
-      <div className='flex gap-2 grow justify-end'>
+      <div className='flex gap-2 flex-wrap justify-end'>
         {members.map((agent, index) => (
           <Badge
             variant={"accent"}
