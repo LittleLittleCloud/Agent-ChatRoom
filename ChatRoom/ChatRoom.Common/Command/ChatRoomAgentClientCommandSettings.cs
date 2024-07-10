@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 
 namespace ChatRoom.SDK;
@@ -10,4 +11,5 @@ internal class ChatRoomAgentClientCommandSettings : CommandSettings
 }
 
 internal abstract class ChatRoomAgentCommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
-{}
+{
+}

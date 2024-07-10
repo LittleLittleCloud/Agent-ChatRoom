@@ -31,6 +31,7 @@
     <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
     <ProjectReference Include="..\ChatRoom.Github\ChatRoom.Github.csproj" />
     <ProjectReference Include="..\ChatRoom.OpenAI\ChatRoom.OpenAI.csproj" />
+    <ProjectReference Include="..\ChatRoom.Planner\ChatRoom.Planner.csproj" />
     <ProjectReference Include="..\ChatRoom.Powershell\ChatRoom.Powershell.csproj" />
     <ProjectReference Include="..\ChatRoom.StaticWebUI\ChatRoom.StaticWebUI.csproj" />
   </ItemGroup>

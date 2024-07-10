@@ -10,6 +10,7 @@ using Json.Schema.Generation;
 using ChatRoom.Github;
 using ChatRoom.Powershell;
 using ChatRoom.WebSearch;
+using ChatRoom.Planner;
 
 namespace ChatRoom.Client;
 
@@ -30,4 +31,8 @@ internal class ChatRoomClientConfiguration : ChatRoomServerConfiguration
     [JsonPropertyName("chatroom_websearch_configuration")]
     [Description("ChatRoom WebSearch configuration, default is null")]
     public ChatRoomWebSearchConfiguration? ChatRoomWebSearchConfiguration { get; set; } = null;
+
+    [JsonPropertyName("chatroom_planner_configuration")]
+    [Description("ChatRoom Planner configuration, default is null")]
+    public ChatRoomPlannerConfiguration? ChatRoomPlannerConfiguration { get; set; } = null;
 }

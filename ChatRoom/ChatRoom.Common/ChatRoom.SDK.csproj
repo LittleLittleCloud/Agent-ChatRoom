@@ -30,6 +30,8 @@
     <InternalsVisibleTo Include="ChatRoom.OpenAI.Tests" />
     <InternalsVisibleTo Include="ChatRoom.Powershell" />
     <InternalsVisibleTo Include="ChatRoom.Powershell.Tests" />
+    <InternalsVisibleTo Include="ChatRoom.Planner" />
+    <InternalsVisibleTo Include="ChatRoom.Planner.Tests" />
     <InternalsVisibleTo Include="ChatRoom.Github" />
     <InternalsVisibleTo Include="ChatRoom.Github.Tests" />
     <InternalsVisibleTo Include="ChatRoom.WebSearch" />

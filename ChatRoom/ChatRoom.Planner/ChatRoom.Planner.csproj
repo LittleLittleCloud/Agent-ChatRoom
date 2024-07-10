@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ToolCommandName>chatroom-planner</ToolCommandName>
+    <PackAsTool>true</PackAsTool>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <Import Project="$(RepoRoot)/nuget/nuget-package.props" />
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChatRoom.Client" />
+    <InternalsVisibleTo Include="ChatRoom.Planner.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="AutoGen" />
+    <PackageReference Include="AutoGen.SourceGenerator" />
+    <PackageReference Include="Octokit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChatRoom.Common\ChatRoom.SDK.csproj" />
+    <ProjectReference Include="..\ChatRoom.OpenAI\ChatRoom.OpenAI.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(RepoRoot)\template\chatroom.planner\*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>template\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

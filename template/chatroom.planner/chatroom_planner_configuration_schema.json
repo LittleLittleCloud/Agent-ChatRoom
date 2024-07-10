@@ -1,0 +1,130 @@
+{
+    "type": "object",
+    "properties": {
+      "room_config": {
+        "type": "object",
+        "properties": {
+          "room": {
+            "$ref": "#/$defs/string"
+          },
+          "port": {
+            "$ref": "#/$defs/integer"
+          }
+        },
+        "description": "the configuration for chat room"
+      },
+      "react_planner_configuration": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/$defs/string1"
+          },
+          "system_message": {
+            "$ref": "#/$defs/string2"
+          },
+          "description": {
+            "$ref": "#/$defs/string3"
+          },
+          "openai_config": {
+            "$ref": "#/$defs/openAIClientConfiguration"
+          }
+        },
+        "description": "the configuration for react planner"
+      }
+    },
+    "$defs": {
+      "string": {
+        "type": "string",
+        "description": "The name of the room. Default is \u0027room\u0027"
+      },
+      "integer": {
+        "type": "integer",
+        "description": "The port number where the room is hosted. Default is 30000"
+      },
+      "string1": {
+        "type": "string",
+        "description": "The name of the agent. Default is \u0027react-planner\u0027"
+      },
+      "string2": {
+        "type": "string",
+        "description": "System message, default is \u0027Answer the question from user as best you can.\r\n\r\nUse the following format:\r\n\r\nQuestion: \u003Cquestion\u003E\r\nThought: \u003Cyou should always think about what to do\u003E\r\nAction: @\u003Cagent\u003E \u003Caction to take\u003E // Use this to ask other agents to perform actions.\r\nObservation: the action result.\r\n\r\n... (this process can be repeated multiple times)\r\n\r\nOnce you collect enough information from observation, you can provide a final answer to the user.\r\nThought: I now know the final answer.\r\nFinal Answer: \u003Cthe final answer to original input question\u003E\r\n\r\nBegin!\u0027"
+      },
+      "string3": {
+        "type": "string",
+        "description": "Description of the agent. Default is \u0027A react planner agent, which can help other agents to plan actions.\u0027"
+      },
+      "openAIClientConfiguration": {
+        "type": "object",
+        "properties": {
+          "llm_type": {
+            "$ref": "#/$defs/lLMType"
+          },
+          "openai_api_key": {
+            "$ref": "#/$defs/string4"
+          },
+          "openai_model_id": {
+            "$ref": "#/$defs/string5"
+          },
+          "azure_openai_endpoint": {
+            "$ref": "#/$defs/string6"
+          },
+          "azure_openai_key": {
+            "$ref": "#/$defs/string7"
+          },
+          "azure_openai_deploy_name": {
+            "$ref": "#/$defs/string8"
+          },
+          "third_party_llm_endpoint": {
+            "$ref": "#/$defs/string9"
+          },
+          "third_party_llm_key": {
+            "$ref": "#/$defs/string10"
+          },
+          "third_party_llm_model_id": {
+            "$ref": "#/$defs/string11"
+          }
+        },
+        "description": "OpenAI configuration for the agent. To get ideal result, it\u0027s recommended to use gpt-4o or above for this agent."
+      },
+      "lLMType": {
+        "enum": [
+          "AOAI",
+          "OpenAI",
+          "ThirdParty"
+        ],
+        "description": "LLM provider, default is Azure OpenAI"
+      },
+      "string4": {
+        "type": "string",
+        "description": "OpenAI API key, default is $env:OPENAI_API_KEY"
+      },
+      "string5": {
+        "type": "string",
+        "description": "OpenAI model ID, default is gpt-3.5-turbo"
+      },
+      "string6": {
+        "type": "string",
+        "description": "Azure OpenAI endpoint, default is $env:AZURE_OPENAI_ENDPOINT"
+      },
+      "string7": {
+        "type": "string",
+        "description": "Azure OpenAI key, default is $env:AZURE_OPENAI_API_KEY"
+      },
+      "string8": {
+        "type": "string",
+        "description": "Azure OpenAI deploy name, default is $env:AZURE_OPENAI_DEPLOY_NAME"
+      },
+      "string9": {
+        "type": "string",
+        "description": "Third-party LLM provider endpoint, default is $env:THIRD_PARTY_LLM_ENDPOINT"
+      },
+      "string10": {
+        "type": "string",
+        "description": "Third-party LLM provider key, default is $env:THIRD_PARTY_LLM_KEY"
+      },
+      "string11": {
+        "type": "string",
+        "description": "Third-party LLM provider model ID, default is $env:THIRD_PARTY_LLM_MODEL_ID"
+      }
+    }
+  }

@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ChatRoom.Github;
 using ChatRoom.OpenAI;
+using ChatRoom.Planner;
 using ChatRoom.Powershell;
 using ChatRoom.SDK;
 using ChatRoom.WebSearch;
@@ -180,6 +181,17 @@ public class ChatRoomClientCommand : AsyncCommand<ChatRoomClientCommandSettings>
             logger.LogInformation("Registering agents from Github configuration.");
             var issueHelperAgent = GithubAgentFactory.CreateIssueHelper(githubConfig);
             await chatRoomClient.RegisterAutoGenAgentAsync(issueHelperAgent, githubConfig.IssueHelper.Description);
+        }
+
+        if (config.ChatRoomPlannerConfiguration is ChatRoomPlannerConfiguration plannerConfig)
+        {
+            logger.LogInformation("Registering agents from Planner configuration.");
+            var plannerAgent = ChatroomPlannerAgentFactory.CreateReactPlanner(plannerConfig.ReActPlannerConfiguration);
+            await chatRoomClient.RegisterAutoGenAgentAsync(plannerAgent, plannerConfig.ReActPlannerConfiguration.Description);
+
+            logger.LogInformation("Registering orchestrator from Planner configuration.");
+            var reactOrchestrator = ChatroomOrchestratorFactory.CreateReactPlanningOrchestrator(plannerConfig.ReActPlannerConfiguration);
+            await chatRoomClient.RegisterOrchestratorAsync(nameof(ReactPlanningOrchestrator), reactOrchestrator);
         }
 
         _deployed = true;
