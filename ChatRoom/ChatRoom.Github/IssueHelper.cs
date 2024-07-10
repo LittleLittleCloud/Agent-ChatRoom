@@ -69,7 +69,11 @@ public partial class IssueHelper : INotifyAgent
         string state)
     {
         WriteLine($"Searching issues in {this.repoOwner}/{this.repoName} with query: {query}");
-        var request = new SearchIssuesRequest(query);
+        var request = query switch
+        {
+            _ when string.IsNullOrEmpty(query) => new SearchIssuesRequest(),
+            _ => new SearchIssuesRequest(query),
+        };
         request.In = [
             IssueInQualifier.Title,
             IssueInQualifier.Body,
