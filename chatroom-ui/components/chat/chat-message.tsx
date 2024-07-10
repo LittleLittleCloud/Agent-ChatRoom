@@ -110,7 +110,6 @@ export function ChatMessage({
               </ToggleGroupItem>
             </ToggleGroup> */}
             {
-              isFromSelectedUser &&
               <Button variant={"ghost"} size={"tiny"} onClick={() => {
                 setEditingText(GetTextContent(message) ?? '');
                 setIsEditing(true);
