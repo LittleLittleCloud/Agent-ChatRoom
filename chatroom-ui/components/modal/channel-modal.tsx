@@ -166,11 +166,11 @@ export function ChannelConfigModal({ onClose, channel, onSave }: ChannelConfigMo
 
     return (
         <div
-            className="relative z-10"
+            className="relative z-20"
             role="dialog"
             aria-modal="true">
             <div
-                className="fixed inset-0 overflow-y-auto z-10 w-screen">
+                className="fixed inset-0 overflow-y-auto w-screen">
                 <div className="flex items-end  justify-center p-4 text-center sm:items-center sm:p-0">
                     <div className=" rounded-lg bg-neutral-100 dark:bg-neutral-900 text-left shadow-xl sm:my-8 sm:w-full sm:max-w-lg">
                         <div className="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">

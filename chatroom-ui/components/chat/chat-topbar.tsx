@@ -6,8 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '../ui/button';
 import { AgentInfo, ChannelInfo, postApiChatRoomClientGetChannelMembers } from '@/chatroom-client';
 import { AgentAvatar } from '../agent-avatar';
-import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { IconTooltip, Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { IconTooltip, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Badge } from '../ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Select, SelectGroup, SelectLabel, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
@@ -19,17 +18,15 @@ export interface OrchestrationSettings {
   maxReply: number;
 }
 
-export interface OrchestrationProps {
-  onContinue?: () => void;
-  onPause?: () => void;
-}
-
-export interface ChatTopbarProps extends OrchestrationProps {
+export interface ChatTopbarProps {
   channel: Channel;
   remainingTurns: number;
+  onChooseNextSpeaker?: (agent: AgentInfo) => void;
   onRefresh?: () => void;
   onDeleteChatHistory?: () => void;
   onChannelChange?: (channel: Channel) => void;
+  onContinue?: () => void;
+  onPause?: () => void;
 }
 
 export const TopbarIcons = [{ icon: Phone }, { icon: Video }, { icon: Info }];
@@ -38,6 +35,7 @@ export default function ChatTopbar({
   channel,
   remainingTurns,
   onRefresh,
+  onChooseNextSpeaker,
   onDeleteChatHistory,
   onChannelChange,
   onContinue,
@@ -159,7 +157,7 @@ export default function ChatTopbar({
               cn(buttonVariants({ variant: "grey", size: "tiny" }))
             }>
             <IconTooltip content="Cancelling">
-              <StepForward size={15} />
+              <StepForward size={iconSize} />
             </IconTooltip>
           </Link>
         }
@@ -172,7 +170,7 @@ export default function ChatTopbar({
               cn(buttonVariants({ variant: "ghost", size: "tiny" }))
             }>
             <IconTooltip content="Continue">
-              <StepForward size={15} />
+              <StepForward size={iconSize} />
             </IconTooltip>
           </Link>
         }
@@ -182,23 +180,42 @@ export default function ChatTopbar({
             href="#"
             onClick={onPause}
             className={
-              cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-9, w-9")
+              cn(buttonVariants({ variant: "ghost", size: "tiny" }))
             }>
             <IconTooltip content="Pause">
-              <Pause size={15} />
+              <Pause size={iconSize} />
             </IconTooltip>
           </Link>
         }
       </div>
 
-      <div className='flex gap-2 flex-wrap justify-end'>
+      <div
+        className='flex gap-2 flex-wrap justify-end'>
         {members.map((agent, index) => (
-          <Badge
-            variant={"accent"}
-            className='text-nowrap'
-            key={index}>
-            {agent.name}
-          </Badge>
+          <TooltipProvider key={index}>
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge
+                  variant={"accent"}
+                  className={
+                    cn(
+                      "text-nowrap",
+                      // if remaining turn is 0, user can click on the agent to proceed the next turn
+                      remainingTurns === 0 && "cursor-pointer",
+                      remainingTurns !== 0 && "bg-accent/20 cursor-not-allowed text-accent/80"
+                    )
+                  }
+                  onClick={() => onChooseNextSpeaker?.(agent)}
+                  key={index}>
+                  {agent.name}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="flex items-center gap-2">
+                {remainingTurns === 0 && <span>Choose {agent.name} as next speaker</span>}
+                {remainingTurns !== 0 && <span>Conversation is undergoing, please wait the current turn to finish</span>}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         ))}
       </div>
     </div>

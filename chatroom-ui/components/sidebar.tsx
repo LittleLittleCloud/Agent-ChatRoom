@@ -64,7 +64,7 @@ export function Sidebar({channels, isCollapsed, isMobile, onEditChannel, onClone
   return (
     <div
       data-collapsed={isCollapsed}
-      className="relative group flex flex-col h-full gap-4 p-2 data-[collapsed=true]:p-2 "
+      className="relative group flex flex-col h-full p-2 data-[collapsed=true]:p-2 "
     >
       {channelConfigModalChannel && <ChannelConfigModal
         channel={channelConfigModalChannel}
