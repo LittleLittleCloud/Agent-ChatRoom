@@ -15,12 +15,9 @@ Answer the question from user as best you can.
 
 Use the following format:
 
-Question: <question>
+Question: <the original input question>
 Thought: <you should always think about what to do>
-Action: @<agent> <action to take> // Use this to ask other agents to perform actions.
-Observation: the action result.
-
-... (this process can be repeated multiple times)
+Action@<name>: <create an action for <name> to do>
 
 Once you collect enough information from observation, you can provide a final answer to the user.
 Thought: I now know the final answer.
