@@ -10,13 +10,21 @@
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 - **Extensible**: Create your own agents and integrate them into the chatroom.
 
-## 🚀 Quick Start
-### Install the `ChatRoom.Client` from NuGet.
+## Install from NuGet
+`Agent Chatroom` is published as a dotnet tool on nuget.org. You can install the latest `Agent Chatroom` client from nuget.org by running the following command, this will install the `ChatRoom.Client` globally:
+
 ```bash
-dotnet tool install -g ChatRoom.Client
+dotnet tool install --global ChatRoom.Client
 ```
 
-### Choose from one of the available templates to get started.
+
+## 🚀 Quick Start with template
+Writing configuration from scratch is painful, so `Agent Chatroom` provides a series of templates to help you get started quickly. Use the `list-templates` command to list all available templates and the `create` command to create a configuration from the selected template.
+
+> [!TIP]
+> `create` command also generates a json schema file for this configuration to provide intellisense in your editor. Use it wisely!
+
+### Step 1 - Choose from one of the available templates to get started.
 ```bash
 chatroom list-templates # list all available templates
 ```
@@ -24,7 +32,7 @@ chatroom list-templates # list all available templates
 The command will list all available templates.
 
 ![list-templates](assets/list-templates.png)
-### Create configuration from the selected template.
+### Step 2 - Create configuration from the selected template.
 
 Instead of writing configuration from scratch, an easier route is to create a chatroom configuration from the selected template using the `create` command, which will not only create a configuration file but also generate a json schema file for this configuration to provide intellisense in your editor.
 
@@ -35,7 +43,7 @@ chatroom create -t chatroom_openai -o chatroom_openai.json
 
 ![fill key](assets/fill-openai-key.png)
 
-### Start the chatroom client with the OpenAI agent.
+### Step 3 - Start the chatroom client with the OpenAI agent.
 
 After filling in the OpenAI key in the configuration file, you can start the chatroom client with the following command.
 
