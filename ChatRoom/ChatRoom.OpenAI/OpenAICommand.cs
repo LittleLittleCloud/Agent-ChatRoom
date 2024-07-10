@@ -6,11 +6,8 @@ using Microsoft.Extensions.Hosting;
 using Spectre.Console;
 using Spectre.Console.Cli;
 namespace ChatRoom.OpenAI;
-internal class OpenAICommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
+internal class OpenAICommand : ChatRoomAgentCommand
 {
-    private IHost? _host = null;
-    private bool _deployed = false;
-
     public static string Description { get; } = "Start the chat room with OpenAI agents and configuration.";
 
     public override async Task<int> ExecuteAsync(CommandContext context, ChatRoomAgentClientCommandSettings setting)
@@ -20,36 +17,6 @@ internal class OpenAICommand : AsyncCommand<ChatRoomAgentClientCommandSettings>
             : new ChatRoomOpenAIConfiguration();
 
         return await ExecuteAsync(config);
-    }
-
-    internal IServiceProvider? ServiceProvider => _host?.Services;
-
-    internal async Task StopAsync()
-    {
-
-       if (_host is not null)
-        {
-            await _host.StopAsync();
-        }
-    }
-
-    internal async Task DeployAsync()
-    {
-        while (true)
-        {
-            if (_host is null)
-            {
-                await Task.Delay(1000);
-                continue;
-            }
-
-            if (_deployed)
-            {
-                break;
-            }
-
-            await Task.Delay(1000);
-        }
     }
 
     internal async Task<int> ExecuteAsync(ChatRoomOpenAIConfiguration config)

@@ -31,7 +31,7 @@ public abstract class ChatRoomClientFixture : IDisposable
         }
     }
 
-    public ChatRoomClientCommand Command { get; private set; }
+    internal ChatRoomClientCommand Command { get; private set; }
 
     public void Dispose()
     {
