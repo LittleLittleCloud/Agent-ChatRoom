@@ -11,7 +11,7 @@ public class ReActPlannerConfiguration
     public string Name { get; set; } = "react-planner";
 
     [JsonPropertyName("system_message")]
-    [Description($"System message, default is '{ReActPlanner.PlannerPrompt}'")]
+    [Description($"System message")]
     public string SystemMessage { get; set; } = ReActPlanner.PlannerPrompt;
 
     [JsonPropertyName("description")]

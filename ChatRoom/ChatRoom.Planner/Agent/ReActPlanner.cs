@@ -10,8 +10,7 @@ namespace ChatRoom.Planner;
 internal class ReActPlanner: IAgent
 {
     private readonly IAgent _agent;
-    public const string PlannerPrompt = """
-Answer the question from user as best you can.
+    public const string PlannerPrompt = @"Answer the question from user as best you can.
 
 Use the following format:
 
@@ -23,8 +22,7 @@ Once you collect enough information from observation, you can provide a final an
 Thought: I now know the final answer.
 Final Answer: <the final answer to original input question>
 
-Begin!
-""";
+Begin!";
 
     public ReActPlanner(IAgent agent)
     {
