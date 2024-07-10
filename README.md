@@ -34,8 +34,6 @@ The command will list all available templates.
 ![list-templates](assets/list-templates.png)
 ### Step 2 - Create configuration from the selected template.
 
-Instead of writing configuration from scratch, an easier route is to create a chatroom configuration from the selected template using the `create` command, which will not only create a configuration file but also generate a json schema file for this configuration to provide intellisense in your editor.
-
 ```bash
 # Create 
 chatroom create -t chatroom_openai -o chatroom_openai.json
