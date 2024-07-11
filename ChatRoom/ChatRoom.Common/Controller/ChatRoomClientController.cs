@@ -75,9 +75,7 @@ internal class ChatRoomClientController : Controller
             return new BadRequestObjectResult("You are not authorized to send message to this channel");
         }
 
-        var channelGrain = _clusterClient.GetGrain<IChannelGrain>(channel);
-
-        await channelGrain.SendMessage(message);
+        await _chatPlatformClient.SendMessageToChannel(channel, message);
 
         return new OkResult();
     }

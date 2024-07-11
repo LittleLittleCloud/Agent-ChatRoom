@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
+using AutoGen.Core;
+using Moq;
 
 namespace ChatRoom.Client.Tests;
 
@@ -96,5 +98,35 @@ public class ChatRoomClientCommandTests : IClassFixture<AllInOneChatRoomClientFi
 
         channels = await _client.GetChannels();
         channels.Count().Should().Be(0);
+    }
+
+
+    [Fact]
+    public async Task ItUseAutoGenOrchstratorTest()
+    {
+        var orchestrator = new RoundRobinOrchestrator();
+        await _client.RegisterAutoGenOrchestratorAsync("autogen-round-robin", orchestrator);
+
+        var availableOrchestrators = await _client.GetOrchestrators();
+        availableOrchestrators.Should().Contain("autogen-round-robin");
+
+        // create a channel with User, gpt3.5, and autogen-round-robin orchestrator
+        await _client.CreateChannel("autogen-channel", ["User", "gpt3.5"], orchestrators: ["autogen-round-robin"]);
+
+        // send a dummy user message to the channel
+        var userMessage = new ChatMsg("User", "Hello, I am a user.");
+        await _client.SendMessageToChannel("autogen-channel", userMessage);
+
+        // generate a reply
+        var reply = await _client.GenerateNextReply("autogen-channel", chatMsgs: [userMessage], candidates: ["User", "gpt3.5"], orchestrator: "autogen-round-robin");
+
+        reply!.From.Should().Be("gpt3.5");
+
+        // clean up
+        await _client.DeleteChannel("autogen-channel");
+        await _client.UnregisterOrchestratorAsync("autogen-round-robin");
+
+        availableOrchestrators = await _client.GetOrchestrators();
+        availableOrchestrators.Should().NotContain("autogen-round-robin");
     }
 }

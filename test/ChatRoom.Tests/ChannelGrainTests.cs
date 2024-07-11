@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoGen.Core;
 using ChatRoom.SDK;
 using FluentAssertions;
 using Moq;
@@ -69,4 +70,5 @@ public class ChannelGrainTests(ClusterFixture fixture)
         var chatHistory = await channel.ReadHistory(1000);
         chatHistory.Count().Should().Be(2);
     }
+
 }

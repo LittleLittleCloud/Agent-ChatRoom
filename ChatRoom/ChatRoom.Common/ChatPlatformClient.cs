@@ -3,6 +3,7 @@ using Orleans.Runtime;
 using Orleans;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ChatRoom.SDK.Orleans;
 
 namespace ChatRoom.SDK;
 
@@ -54,6 +55,12 @@ public class ChatPlatformClient
         {
             _lifetime.ApplicationStopping.Register(async() => await this.UnregisterAgentAsync(name));
         }
+    }
+
+    public async Task RegisterAutoGenOrchestratorAsync(string name, AutoGen.Core.IOrchestrator orchestrator)
+    {
+        var observer = new AutoGenOrchestratorObserver(orchestrator);
+        await this.RegisterOrchestratorAsync(name, observer);
     }
 
     public async Task RegisterOrchestratorAsync(string name, IOrchestrator orchestrator)
@@ -120,6 +127,12 @@ public class ChatPlatformClient
     {
         var channel = _client.GetGrain<IChannelGrain>(channelName);
         await channel.ClearHistory();
+    }
+
+    public async Task SendMessageToChannel(string channelName, ChatMsg msg)
+    {
+        var channel = _client.GetGrain<IChannelGrain>(channelName);
+        await channel.SendMessage(msg);
     }
 
     public async Task<ChatMsg?> GenerateNextReply(string channelName, string[]? candidates = null, ChatMsg[]? chatMsgs = null, string? orchestrator = null)
