@@ -1,4 +1,4 @@
-This tutorial introduce how the release notes of `Agent-Chatroom`  is written using `Agent-Chatroom` and github agents. The release notes are generated based on the completed issue in the milestone of the project. The release notes are written in markdown format and are displayed on the [release notes](../release_notes/) page.
+This tutorial introduce how the release notes of `Agent-Chatroom`  is written using `Agent-Chatroom` and github agents. The release notes are generated based on the completed issue in the milestone of the project. The release notes are written in markdown format and are displayed on the [release notes](../release_notes/0_4.md) page.
 
 ## Overview
 There are two main steps to write the release notes of `Agent-Chatroom`:
