@@ -1,0 +1,36 @@
+{
+    "$schema": "chatroom_configuration_schema.json",
+    "channel_config": {
+        "openai_config": {
+            "llm_type": "OpenAI",
+            "openai_api_key": "<your-api-key>",
+            "openai_model_id": "gpt-3.5-turbo"
+        }
+    },
+    "server_config": {
+        "urls": "http://localhost:51234;https://localhost:51235"
+    },
+    "chatroom_github_configuration": {
+        "github_repo_name": "Agent-ChatRoom",
+        "github_repo_owner": "LittleLittleCloud",
+        "issue_helper": {
+            "openai_config": {
+                "llm_type": "OpenAI",
+                "openai_api_key": "<your-api-key>",
+                "openai_model_id": "gpt-3.5-turbo"
+            }
+        }
+    },
+    "chatroom_openai_configuration": {
+        "agents": [
+            {
+                "name": "gpt4o",
+                "llm_config": {
+                    "llm_type": "OpenAI",
+                    "openai_api_key": "<your-api-key>",
+                    "openai_model_id": "gpt-4o"
+                }
+            }
+        ]
+    }
+}

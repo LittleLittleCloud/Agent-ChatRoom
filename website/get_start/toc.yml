@@ -6,12 +6,14 @@
       href: key_concepts.md
     - name: Installation
       href: installation.md
-    - name: Showcases
+    - name: Tutorials
       items:
         - name: Chat with OpenAI
           href: chat_with_openai.md
         - name: Chat with Powershell helpers
           href: chat_with_powershell_helpers.md
+        - name: Write release notes with Github agents
+          href: write_release_notes.md
 
 - name: Guide
   items:
