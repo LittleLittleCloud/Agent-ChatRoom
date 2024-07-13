@@ -1,5 +1,7 @@
 You can add AutoGen agent from your project to **Agent ChatRoom** using a code-first approach. First, you need to configure the chatroom services to either start a in-proc server or connect to an out-proc one. Then you create a @ChatRoom.SDK.ChatPlatformClient from configured services and use it to interact with the chatroom server. Finally, you can add an AutoGen agent to the chatroom by calling the @ChatRoom.SDK.ChatPlatformClient.RegisterAutoGenAgentAsync method on the `ChatPlatformClient` object.
 
+[![](https://img.shields.io/badge/Open%20on%20Github-grey?logo=github)](https://github.com/LittleLittleCloud/Agent-ChatRoom/blob/main/example/dotnet/hello-world/Program.cs)
+
 > [!Note]
 > `AutoGen.Net` is the .NET implementation of the AutoGen framework. It provides first-class support for connecting to various LLM platforms, tool-call usage, group chat and more. You can find more information and tutorial about `AutoGen.Net` [here](https://microsoft.github.io/autogen-for-net/index.html)
 
