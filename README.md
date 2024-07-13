@@ -9,7 +9,7 @@
 - **Multi-Agent WebUI**: Chat with multiple agents simultaneously in a web browser.
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 - **API driven**: Use the `ChatRoom.SDK` to interact with the chatroom server programmatically.
-- **Extensible**: Use code-first approach to add your own agents to the chatroom.
+- **Extensible**: Use code-first approach to add agents to the chatroom, See [Use AutoGen.Net agent](https://littlelittlecloud.github.io/Agent-ChatRoom/get_start/use_autogen_net_agent.html) for more information.
 
 ## Install from NuGet
 `Agent Chatroom` is published as a dotnet tool on nuget.org. You can install the latest `Agent Chatroom` client from nuget.org by running the following command, this will install the `ChatRoom.Client` globally:

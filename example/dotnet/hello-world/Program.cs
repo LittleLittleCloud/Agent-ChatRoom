@@ -1,6 +1,4 @@
-﻿
-
-using AutoGen.Core;
+﻿using AutoGen.Core;
 using ChatRoom.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
