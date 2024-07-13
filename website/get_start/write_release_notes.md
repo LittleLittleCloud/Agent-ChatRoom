@@ -53,4 +53,8 @@ The `issue-helper` agent will respond with the list of completed issues in the m
 The `gpt4o` agent will respond with the release notes generated based on the completed issues in the milestone. After the release note are generated, you can ask `gpt4o` to improve the release note (if needed) or save the release note for further use.
 
 ## Conclusion
+<<<<<<< HEAD
 This tutorial introduced how the release notes of `Agent-Chatroom` is written using `Agent-Chatroom` and github agents. The release notes are generated based on the completed issue in the milestone of the project. The release notes are written in markdown format and are displayed on the [release notes](../release_notes/) page.
+=======
+This tutorial introduced how the release notes of `Agent-Chatroom` is written using `Agent-Chatroom` and github agents. The release notes are generated based on the completed issue in the milestone of the project. The release notes are written in markdown format and are displayed on the [release notes](../release_notes/) page.
+>>>>>>> main

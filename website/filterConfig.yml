@@ -1,0 +1,3 @@
+apiRules:
+- include:
+    uidRegex: ^ChatRoom.SDK

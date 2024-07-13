@@ -8,7 +8,8 @@
 ## 🌟 Highlights
 - **Multi-Agent WebUI**: Chat with multiple agents simultaneously in a web browser.
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
-- **Extensible**: Create your own agents and integrate them into the chatroom.
+- **API driven**: Use the `ChatRoom.SDK` to interact with the chatroom server programmatically.
+- **Extensible**: Use code-first approach to add your own agents to the chatroom.
 
 ## Install from NuGet
 `Agent Chatroom` is published as a dotnet tool on nuget.org. You can install the latest `Agent Chatroom` client from nuget.org by running the following command, this will install the `ChatRoom.Client` globally:
@@ -63,9 +64,6 @@ We provide the following configuration to help you get started quickly. More con
 
 ## 🌐 Server mode
 To start a restful backend from `ChatRoom.Client`, add a `server_config` section to the client configuration file.
-
-> [!Note]
-> You can find the complete configuration sample in [chatroom-client-server.json](configuration/chatroom-client-server.json)
 
 ```json
 // file: chatroom-client-server.json

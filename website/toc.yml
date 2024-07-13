@@ -1,5 +1,8 @@
 - name: Documentation
   href: get_start/
+
+- name: API Reference
+  href: api/
   
 - name: Release Notes
   href: release_notes/

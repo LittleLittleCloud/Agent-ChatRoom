@@ -14,11 +14,6 @@
           href: chat_with_powershell_helpers.md
         - name: Write release notes with Github agents
           href: write_release_notes.md
-
-- name: Guide
-  items:
-    - name: Develop an agent
-      href: coming_soon.md
-    - name: Develop an orchestrator
-      href: coming_soon.md
+    - name: Add AutoGen.Net agent to chatroom
+      href: use_autogen_net_agent.md
     

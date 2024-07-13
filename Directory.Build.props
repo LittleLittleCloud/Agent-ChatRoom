@@ -14,6 +14,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsTestProject>false</IsTestProject>
     <IsPackable>false</IsPackable>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsTestProject)' == 'true'">
