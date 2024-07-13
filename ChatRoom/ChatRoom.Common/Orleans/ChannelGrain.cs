@@ -24,14 +24,27 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         _logger = logger;
         _config = config;
-        this.DelayDeactivation(TimeSpan.MaxValue);
     }
 
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Channel {ChannelId} activated", this.GetPrimaryKeyString());
-        
-        await base.OnActivateAsync(cancellationToken);
+    }
+
+    public override Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
+    {
+        if (reason.ReasonCode == DeactivationReasonCode.ActivationIdle)
+        {
+            _logger?.LogInformation("Channel {ChannelId} deactivated due to inactivity", this.GetPrimaryKeyString());
+            _logger?.LogInformation("Delaying deactivation for 30 seconds");
+            this.DelayDeactivation(TimeSpan.FromSeconds(30));
+
+            return Task.CompletedTask;
+        }
+
+        var roomID = this.GetPrimaryKeyString();
+        _logger?.LogInformation($"Channel {roomID} deactivated because {reason.Description} and {reason.ReasonCode}");
+        return base.OnDeactivateAsync(reason, cancellationToken);
     }
 
     public async Task Delete()
