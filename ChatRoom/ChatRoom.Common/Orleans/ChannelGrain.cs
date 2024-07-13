@@ -24,7 +24,7 @@ internal class ChannelGrain : Grain, IChannelGrain
     {
         _logger = logger;
         _config = config;
-        this.DelayDeactivation(TimeSpan.MaxValue);
+        this.DelayDeactivation(Timeout.InfiniteTimeSpan);
     }
 
     public override async Task OnActivateAsync(CancellationToken cancellationToken)

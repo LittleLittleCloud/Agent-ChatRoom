@@ -18,7 +18,7 @@ internal class RoomGrain : Grain, IRoomGrain
         : base()
     {
         _logger = logger;
-        this.DelayDeactivation(TimeSpan.MaxValue);
+        this.DelayDeactivation(Timeout.InfiniteTimeSpan);
     }
 
     public virtual string GrainKey => this.GetPrimaryKeyString();
