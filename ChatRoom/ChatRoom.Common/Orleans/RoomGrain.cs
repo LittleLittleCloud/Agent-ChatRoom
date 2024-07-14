@@ -17,23 +17,8 @@ internal class RoomGrain : Grain, IRoomGrain
         ILogger<RoomGrain>? logger = null)
         : base()
     {
+        this.DelayDeactivation(TimeSpan.MaxValue);
         _logger = logger;
-    }
-
-    public override Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
-    {
-        if (reason.ReasonCode == DeactivationReasonCode.ActivationIdle)
-        {
-            _logger?.LogInformation("Room {RoomName} deactivated due to inactivity", this.GrainKey);
-            _logger?.LogInformation("Delaying deactivation for 30 seconds");
-            this.DelayDeactivation(TimeSpan.FromSeconds(30));
-
-            return Task.CompletedTask;
-        }
-
-        var roomID = this.GetPrimaryKeyString();
-        _logger?.LogInformation($"Room {roomID} deactivated because {reason.Description} and {reason.ReasonCode}");
-        return base.OnDeactivateAsync(reason, cancellationToken);
     }
 
     public virtual string GrainKey => this.GetPrimaryKeyString();
