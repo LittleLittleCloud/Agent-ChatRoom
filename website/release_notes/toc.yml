@@ -1,3 +1,6 @@
+- name: 0.5.*
+  href: 0_5.md
+  
 - name: 0.4.*
   href: 0_4.md
 
