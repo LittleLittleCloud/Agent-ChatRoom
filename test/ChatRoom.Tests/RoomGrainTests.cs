@@ -1,4 +1,5 @@
-﻿using ChatRoom.SDK;
+﻿using AutoGen.Core;
+using ChatRoom.SDK;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -193,6 +194,27 @@ public class RoomGrainTests(ClusterFixture fixture)
 
         await Utils.WaitUntilTrue(() => hasCompleted);
         agentInfoList.Should().HaveCount(1);
+    }
+
+
+    [Fact]
+    public async Task ItRegisterAutoGenGroupChatTest()
+    {
+        var roomGrain = _cluster.GrainFactory.GetGrain<IRoomGrain>(nameof(ItRegisterAutoGenGroupChatTest));
+        var chatPlatformClient = new ChatPlatformClient(_cluster.Client, nameof(ItRegisterAutoGenGroupChatTest));
+        var channelName = nameof(ItRegisterAutoGenGroupChatTest);
+        var alice = new DefaultReplyAgent("alice", "I am alice");
+        var bob = new DefaultReplyAgent("bob", "I am bob");
+        var groupChat = new GroupChat([alice, bob]);
+
+        await chatPlatformClient.RegisterAutoGenGroupChatAsync(channelName, groupChat);
+
+        var channels = await chatPlatformClient.GetChannels();
+        channels.Should().HaveCount(1);
+        var channel = await chatPlatformClient.GetChannelInfo(channelName) ?? throw new Exception("Channel not found");
+        channel.Members.Should().HaveCount(2);
+        channel.Orchestrators.Count().Should().Be(1);
+        channel.Orchestrators.First().Should().Be(channelName);
     }
 
     [Fact]
