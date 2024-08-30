@@ -35,6 +35,7 @@ public class ChannelGrainTests(ClusterFixture fixture)
         channelInfo.Orchestrators.Should().NotContain("orchestrator");
     }
 
+
     [Fact]
     public async Task ItUseOrchstratorTest()
     {

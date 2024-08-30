@@ -4,6 +4,7 @@ using Orleans;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ChatRoom.SDK.Orleans;
+using System.Reflection;
 
 namespace ChatRoom.SDK;
 
@@ -57,6 +58,42 @@ public class ChatPlatformClient
         }
     }
 
+    public async Task RegisterAutoGenGroupChatAsync(string name, GroupChat groupChat)
+    {
+        _logger?.LogInformation($"Registering group chat {name}");
+
+        // register agents
+        // use reflection to get groupChat.agents
+        var agents = groupChat.GetType().GetField("agents", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(groupChat) as List<IAgent> ?? new List<IAgent>();
+
+        // register agents if not already registered
+        foreach (var agent in agents)
+        {
+            if (!_observers.ContainsKey(agent.Name))
+            {
+                await this.RegisterAutoGenAgentAsync(agent);
+            }
+        }
+
+        // use reflection to get groupChat.orchestrator
+        var orchestrator = groupChat.GetType().GetField("orchestrator", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(groupChat) as AutoGen.Core.IOrchestrator;
+        // register orchestrator if not already registered
+        if (orchestrator is not null && !_orchestrators.ContainsKey(name))
+        {
+            await this.RegisterAutoGenOrchestratorAsync(name, orchestrator);
+        }
+
+        // create a channel for the group chat if not already created
+        if (await this.GetChannelInfo(name) is null)
+        {
+            await this.CreateChannel(name, agents.Select(a => a.Name).ToArray(), [], [name]);
+        }
+        else
+        {
+            this._logger?.LogWarning($"Channel {name} already exists");
+        }
+    }
+
     public async Task RegisterAutoGenOrchestratorAsync(string name, AutoGen.Core.IOrchestrator orchestrator)
     {
         var observer = new AutoGenOrchestratorObserver(orchestrator);
@@ -85,11 +122,10 @@ public class ChatPlatformClient
         return await room.GetOrchestrators();
     }
 
-    public async Task<ChannelInfo> GetChannelInfo(string channelName)
+    public async Task<ChannelInfo?> GetChannelInfo(string channelName)
     {
-        var channel = _client.GetGrain<IChannelGrain>(channelName);
-
-        return await channel.GetChannelInfo();
+        var channels = await this.GetChannels();
+        return channels.FirstOrDefault(c => c.Name == channelName);
     }
 
     public async Task AddOrchestratorToChannel(string channelName, string orchestratorName)

@@ -155,7 +155,7 @@ internal class ChatRoomClientController : Controller
             var history = await _chatPlatformClient.GetChannelChatHistory(channel.Name, 1000); // TODO: make this configurable (e.g. 1000 messages per channel
             chatHistory[channel.Name] = history.ToArray();
             var members = await _chatPlatformClient.GetChannelMembers(channel.Name);
-            channelInfos[channel.Name] = await _chatPlatformClient.GetChannelInfo(channel.Name);
+            channelInfos[channel.Name] = channel;
         }
 
         var workspaceConfiguration = new ChatRoomContext
