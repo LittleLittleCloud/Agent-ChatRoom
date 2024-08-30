@@ -7,9 +7,9 @@
 
 ## 🌟 Highlights
 - **Multi-Agent WebUI**: Chat with multiple agents simultaneously in a web browser.
+- **Code-First**: Use code-first approach to add agents to the chatroom, see [code-first examples](./example/README.md) for more information.
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 - **API driven**: Use the `ChatRoom.SDK` to interact with the chatroom server programmatically.
-- **Extensible**: Use code-first approach to add agents to the chatroom, See [Use AutoGen.Net agent](https://littlelittlecloud.github.io/Agent-ChatRoom/get_start/use_autogen_net_agent.html) for more information.
 
 ## Install from NuGet
 `Agent Chatroom` is published as a dotnet tool on nuget.org. You can install the latest `Agent Chatroom` client from nuget.org by running the following command, this will install the `ChatRoom.Client` globally:
@@ -17,7 +17,6 @@
 ```bash
 dotnet tool install --global ChatRoom.Client
 ```
-
 
 ## 🚀 Quick Start with template
 Writing configuration from scratch is painful, so `Agent Chatroom` provides a series of templates to help you get started quickly. Use the `list-templates` command to list all available templates and the `create` command to create a configuration from the selected template.
