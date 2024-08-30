@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>gh_release_note_room</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.Github\ChatRoom.Github.csproj" />
+    <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.Common\ChatRoom.SDK.csproj" />
+    <ProjectReference Include="..\..\..\ChatRoom\ChatRoom.StaticWebUI\ChatRoom.StaticWebUI.csproj" />
+  </ItemGroup>
+
+</Project>
