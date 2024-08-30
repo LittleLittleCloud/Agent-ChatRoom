@@ -71,4 +71,6 @@ var groupChat = new GroupChat([userAgent, issueHelper, gpt4oWriter], admin: grou
 
 // add groupchat to chatroom
 await client.RegisterAutoGenGroupChatAsync("release-room", groupChat);
+
+// a web ui will start at http://localhost:50001
 await host.WaitForShutdownAsync();
