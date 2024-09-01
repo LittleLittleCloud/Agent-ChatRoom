@@ -61,7 +61,7 @@ export default function ChatTopbar({
           href="#"
           onClick={onRefresh}
           className={
-            cn(buttonVariants({ variant: "ghost", size: "tiny" }))
+            cn(buttonVariants({ variant: "outline", size: "tiny" }))
           }>
           <IconTooltip content="Refresh">
             <RotateCcw size={iconSize} />
@@ -73,7 +73,7 @@ export default function ChatTopbar({
           href="#"
           onClick={onDeleteChatHistory}
           className={
-            cn(buttonVariants({ variant: "ghost", size: "tiny" }))
+            cn(buttonVariants({ variant: "outline", size: "tiny" }))
           }>
           <IconTooltip content="Delete Chat History">
             <Trash size={iconSize} />
@@ -167,7 +167,7 @@ export default function ChatTopbar({
             href="#"
             onClick={onContinue}
             className={
-              cn(buttonVariants({ variant: "ghost", size: "tiny" }))
+              cn(buttonVariants({ variant: "outline", size: "tiny" }))
             }>
             <IconTooltip content="Continue">
               <StepForward size={iconSize} />

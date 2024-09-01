@@ -69,46 +69,37 @@ export function ChatMessage({
   }
 
   return (
-    <div className={cn("flex flex-col w-full ", isFromSelectedUser ? "items-start" : "items-end")}>
-      <div className="flex flex-col m-3 w-9/12 border-solid border-2 border-accent rounded-md">
+    <div className={cn("flex flex-col w-full items-start")}>
+      <div className="flex flex-col w-full m-3 border-solid border-2 border-accent rounded-md">
         <div
           className="flex items-center py-2 pr-3 bg-accent group/settings">
           <Badge className="text-nowrap" variant={"accent"}>{message.from}</Badge>
           <div className="invisible flex flex-grow items-center justify-end gap-2 group-hover/settings:visible">
-            {/* <ToggleGroup defaultValue="markdown" type="single" size={"tiny"}
-              variant={"accent"}
+          {/* switch between preview and text */}
+          {/* | preview | text | */}
+          {
+            <div
+              className="flex rounded-md"
             >
-              <ToggleGroupItem
-                value="markdown"
-                aria-label="Toggle markdown"
-                onClick={() => setShowMarkdown(true)}>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Columns size={14} />
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="flex items-center gap-10">
-                      Markdown
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                onClick={() => setShowMarkdown(false)}
-                value="plain"
-                aria-label="Toggle plain">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Type size={14} />
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="flex items-center gap-10">
-                      Plain Text
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </ToggleGroupItem>
-            </ToggleGroup> */}
+              <Button
+                variant={"disabled"}
+                className={cn("bg-transparent",
+                  showMarkdown ? "bg-primary/10" : "")}
+                size={"tiny"}
+                onClick={() => setShowMarkdown(!showMarkdown)}>
+                  preview
+                </Button>
+              <Button
+                variant={"disabled"}
+                className={cn("bg-transparent",
+                  !showMarkdown ? "bg-primary/10" : "")}
+                size={"tiny"}
+                onClick={() => setShowMarkdown(!showMarkdown)}>
+                  text
+                </Button>
+            </div>
+          }
+          
             {
               <Button variant={"ghost"} size={"tiny"} onClick={() => {
                 setEditingText(GetTextContent(message) ?? '');
