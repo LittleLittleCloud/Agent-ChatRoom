@@ -70,11 +70,13 @@ export function ChatMessage({
 
   return (
     <div className={cn("flex flex-col w-full items-start")}>
-      <div className="flex flex-col w-full m-3 border-solid border-2 border-accent rounded-md">
+      <div className={cn("flex flex-col w-full m-2 border-solid border-2 border-accent/50 rounded-md", isFromSelectedUser ? "border-accent" : "")}>
         <div
-          className="flex items-center py-2 pr-3 bg-accent group/settings">
-          <Badge className="text-nowrap" variant={"accent"}>{message.from}</Badge>
-          <div className="invisible flex flex-grow items-center justify-end gap-2 group-hover/settings:visible">
+          className={cn("flex items-center p-1 bg-accent/50 group/settings", isFromSelectedUser ? "bg-accent" : "")}>
+          <span
+            className="text-nowrap bg-transparent hover:bg-transparent cursor-default pl-1"
+            >{message.from}</span>
+          <div className="invisible flex flex-grow items-center justify-end gap-1 group-hover/settings:visible">
           {/* switch between preview and text */}
           {/* | preview | text | */}
           {
@@ -132,7 +134,7 @@ export function ChatMessage({
               </DropdownMenuContent>
             </DropdownMenu>
         </div>
-        <div className="p-3 overflow-y-auto">
+        <div className="p-2 overflow-y-auto">
           {isEditing ?
             <div className="flex flex-col border-2 border-solid border-accent rounded-md">
               <textarea
