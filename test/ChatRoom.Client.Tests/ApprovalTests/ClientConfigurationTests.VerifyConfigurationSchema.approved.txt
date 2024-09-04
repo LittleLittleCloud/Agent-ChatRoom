@@ -144,6 +144,9 @@
         },
         "port": {
           "$ref": "#/$defs/integer"
+        },
+        "timeout": {
+          "$ref": "#/$defs/integer1"
         }
       },
       "description": "The configuration for the chat room"
@@ -155,6 +158,10 @@
     "integer": {
       "type": "integer",
       "description": "The port number where the room is hosted. Default is 30000"
+    },
+    "integer1": {
+      "type": "integer",
+      "description": "The timeout in seconds for the channel to wait for a response from its members. Default is 120 seconds."
     },
     "openAIClientConfiguration": {
       "type": "object",
@@ -381,7 +388,7 @@
           "$ref": "#/$defs/string19"
         },
         "last_n_message": {
-          "$ref": "#/$defs/integer1"
+          "$ref": "#/$defs/integer2"
         }
       },
       "description": "Powershell runner configuration"
@@ -394,7 +401,7 @@
       "type": "string",
       "description": "Agent description of the powershell runner agent, default is \u0027A powershell script runner\u0027"
     },
-    "integer1": {
+    "integer2": {
       "type": "integer",
       "description": "Number of last message to look for powershell script, default is 10"
     },
@@ -524,6 +531,9 @@
         },
         "port": {
           "$ref": "#/$defs/integer"
+        },
+        "timeout": {
+          "$ref": "#/$defs/integer1"
         }
       },
       "description": "the configuration for chat room"
