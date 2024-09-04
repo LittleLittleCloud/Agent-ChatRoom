@@ -45,6 +45,9 @@
         },
         "port": {
           "$ref": "#/$defs/integer1"
+        },
+        "timeout": {
+          "$ref": "#/$defs/integer2"
         }
       },
       "description": "The configuration for the chat room"
@@ -159,6 +162,10 @@
     "integer1": {
       "type": "integer",
       "description": "The port number where the room is hosted. Default is 30000"
+    },
+    "integer2": {
+      "type": "integer",
+      "description": "The timeout in seconds for the channel to wait for a response from its members. Default is 120 seconds."
     }
   }
 }
