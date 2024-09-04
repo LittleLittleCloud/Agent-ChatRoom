@@ -34,10 +34,11 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
               className={cn(
                 buttonVariants({
                   variant: isSelected ? "ghost" : "grey",
-                  size: "icon" }),
+                  size: "icon"
+                }),
                 "h-11 w-11 md:h-16 md:w-16",
                 isSelected &&
-                "dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
+                "bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white"
               )}
               onClick={(e) => {
                 onClickChannel?.(channel);
@@ -65,9 +66,10 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
         className={cn(
           buttonVariants({
             variant: isSelected ? "ghost" : "grey"
-            , size: "xl" }),
+            , size: "xl"
+          }),
           isSelected &&
-          "flex w-full dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white shrink",
+          "flex w-full bg-accent text-primary hover:text-primary dark:bg-muted dark:text-primary dark:hover:bg-muted dark:hover:text-white shrink",
           "justify-start gap-1"
         )}
         onClick={(e) => {
@@ -82,11 +84,10 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
           >
             {channel.name}
           </span>
-          <div
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "icon" }),
-              "invisible h-9 w-9 group-hover/channel:visible"
-            )}
+          <Button
+            variant="ghost"
+            size={"tiny"}
+            className="invisible h-9 w-9 group-hover/channel:visible"
           >
             <TooltipProvider>
               <Tooltip>
@@ -103,12 +104,11 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-          <div
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "icon" }),
-              "invisible h-9 w-9 group-hover/channel:visible"
-            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size={"tiny"}
+            className="invisible h-9 w-9 group-hover/channel:visible"
           >
             <TooltipProvider>
               <Tooltip>
@@ -125,12 +125,11 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-          <div
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "icon" }),
-              "invisible h-9 w-9 group-hover/channel:visible"
-            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size={"tiny"}
+            className="invisible h-9 w-9 group-hover/channel:visible"
           >
             <TooltipProvider>
               <Tooltip>
@@ -147,7 +146,7 @@ export function ChannelItem({ channel, isSelected, isCollapsed, onCloneChannel, 
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
+          </Button>
         </div>
       </div>
     );

@@ -355,7 +355,7 @@ export function ChatList({
                 originY: 0.5,
               }}
               className={cn(
-                "flex flex-col gap-2 p-4 whitespace-pre-wrap"
+                "flex flex-col gap-2 p-1 pr-4 whitespace-pre-wrap"
               )}
             >
               <ChatMessage
