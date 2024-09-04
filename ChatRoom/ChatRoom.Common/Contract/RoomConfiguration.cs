@@ -12,4 +12,8 @@ public class RoomConfiguration
     [Description("The port number where the room is hosted. Default is 30000")]
     [JsonPropertyName("port")]
     public int Port { get; set; } = 30000;
+
+    [Description("The timeout in seconds for the channel to wait for a response from its members. Default is 120 seconds.")]
+    [JsonPropertyName("timeout")]
+    public int Timeout { get; set; } = 120;
 }

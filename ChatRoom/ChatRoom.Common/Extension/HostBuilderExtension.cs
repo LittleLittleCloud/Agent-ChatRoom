@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Orleans.Configuration;
 
 namespace ChatRoom.SDK;
 
@@ -93,6 +94,11 @@ public static class HostBuilderExtension
                 siloBuilder
                      .UseLocalhostClustering(gatewayPort: serverConfig.RoomConfig.Port)
                      .AddMemoryGrainStorage("PubSubStore");
+
+                siloBuilder.Configure<SiloMessagingOptions>(option =>
+                {
+                    option.ResponseTimeout = TimeSpan.FromSeconds(serverConfig.RoomConfig.Timeout);
+                });
             })
             .ConfigureServices((ctx, serviceCollections) =>
             {
