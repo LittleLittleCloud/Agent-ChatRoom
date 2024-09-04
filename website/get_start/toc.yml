@@ -8,12 +8,8 @@
       href: installation.md
     - name: Tutorials
       items:
-        - name: Chat with OpenAI
-          href: chat_with_openai.md
-        - name: Chat with Powershell helpers
-          href: chat_with_powershell_helpers.md
+        - name: Add AutoGen.Net agent to chatroom
+          href: use_autogen_net_agent.md
         - name: Write release notes with Github agents
           href: write_release_notes.md
-    - name: Add AutoGen.Net agent to chatroom
-      href: use_autogen_net_agent.md
     

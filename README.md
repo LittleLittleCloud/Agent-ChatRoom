@@ -9,22 +9,23 @@
 - **Multi-Agent WebUI**: Chat with multiple agents simultaneously in a web browser.
 - **Code-First**: Use code-first approach to add agents to the chatroom, see [code-first examples](https://github.com/LittleLittleCloud/Agent-ChatRoom/tree/main/example) for more information.
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
-- **API driven**: Use the `ChatRoom.SDK` to interact with the chatroom server programmatically.
 
-## Install from NuGet
+## Quick Start with code-first approach
+
+## Quick Start with template
+Other than the code-first approach, `Agent Chatroom` also provides a series of templates to help you get started quickly. Use the `list-templates` command to list all available templates and the `create` command to create a configuration from the selected template.
+
+### Step 1 - Install ChatRoom.Client from NuGet
 `Agent Chatroom` is published as a dotnet tool on nuget.org. You can install the latest `Agent Chatroom` client from nuget.org by running the following command, this will install the `ChatRoom.Client` globally:
 
 ```bash
 dotnet tool install --global ChatRoom.Client
 ```
 
-## 🚀 Quick Start with template
-Writing configuration from scratch is painful, so `Agent Chatroom` provides a series of templates to help you get started quickly. Use the `list-templates` command to list all available templates and the `create` command to create a configuration from the selected template.
-
 > [!TIP]
 > `create` command also generates a json schema file for this configuration to provide intellisense in your editor. Use it wisely can greatly save your effort on writing configuration.
 
-### Step 1 - Choose from one of the available templates to get started.
+### Step 2 - Choose from one of the available templates to get started.
 ```bash
 chatroom list-templates # list all available templates
 ```
@@ -32,7 +33,7 @@ chatroom list-templates # list all available templates
 The command will list all available templates.
 
 ![list-templates](assets/list-templates.png)
-### Step 2 - Create configuration from the selected template.
+### Step 3 - Create configuration from the selected template.
 
 ```bash
 # Create 
@@ -41,7 +42,7 @@ chatroom create -t chatroom_openai -o chatroom_openai.json
 
 ![fill key](assets/fill-openai-key.png)
 
-### Step 3 - Start the chatroom client with the OpenAI agent.
+### Step 4 - Start the chatroom client with the OpenAI agent.
 
 After filling in the OpenAI key in the configuration file, you can start the chatroom client with the following command.
 
