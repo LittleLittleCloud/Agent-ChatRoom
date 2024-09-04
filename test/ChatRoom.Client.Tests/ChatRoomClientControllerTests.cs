@@ -1,6 +1,7 @@
 ﻿using ApprovalTests;
 using ApprovalTests.Namers;
 using ApprovalTests.Reporters;
+using AutoGen.Core;
 using ChatRoom.SDK;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
@@ -118,6 +119,41 @@ public class ChatRoomClientControllerTests(ClusterFixture fixture)
         members = await controller.GetRoomMembers();
         membersList = (members.Result as OkObjectResult)?.Value as IEnumerable<AgentInfo>;
         membersList.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GenerateNextReplyReturnBadRequestWhenAgentThrowExceptionAsync()
+    {
+        var agentMock = Mock.Of<IAgent>();
+        var consoleAgent = Mock.Of<ConsoleRoomAgent>();
+        Mock.Get(agentMock)
+            .Setup(a => a.GenerateReplyAsync(It.IsAny<IEnumerable<IMessage>>(), It.IsAny<GenerateReplyOptions>(), It.IsAny<CancellationToken>()))
+            .Throws(() => new Exception("Test exception"));
+
+        Mock.Get(agentMock)
+            .Setup(a => a.Name)
+            .Returns("testAgent");
+
+        var client = new ChatPlatformClient(_cluster.Client, nameof(GenerateNextReplyReturnBadRequestWhenAgentThrowExceptionAsync));
+        await client.RegisterAutoGenAgentAsync(agentMock);
+
+        var controller = new ChatRoomClientController(_cluster.Client, consoleAgent, client);
+
+        var members = await client.GetRoomMembers();
+        members.Count().Should().Be(1);
+
+        // create and add agent to channel
+        var channelName = nameof(GenerateNextReplyReturnBadRequestWhenAgentThrowExceptionAsync);
+        await client.CreateChannel(channelName);
+        await client.AddAgentToChannel(channelName, agentMock.Name);
+
+        // generate next reply
+        var response = await controller.GenerateNextReply(new GenerateNextReplyRequest(channelName, [], [agentMock.Name]));
+        response.Result.Should().BeOfType<BadRequestObjectResult>();
+
+        // exception message should be "Test exception"
+        var result = response.Result as BadRequestObjectResult;
+        result!.Value.Should().Be("Test exception");
     }
 
     public sealed class ClusterFixture : IDisposable

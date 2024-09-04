@@ -236,16 +236,25 @@ internal class ChannelGrain : Grain, IChannelGrain
             return null;
         }
 
-        var reply = await nextSpeakerObserver.GenerateReplyAsync(nextSpeaker, msgs, channelInfo);
-
-        if (reply is not null)
+        try
         {
-            _logger.LogInformation("Generated reply: {Reply}", reply.GetContent());
+            var reply = await nextSpeakerObserver.GenerateReplyAsync(nextSpeaker, msgs, channelInfo);
 
-            await this.SendMessage(reply);
+            if (reply is not null)
+            {
+                _logger.LogInformation("Generated reply: {Reply}", reply.GetContent());
+
+                await this.SendMessage(reply);
+            }
+
+            return reply;
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating reply");
 
-        return reply;
+            throw;
+        }
     }
 
     public Task AddOrchestratorToChannel(string name, IOrchestratorObserver orchestrator)
