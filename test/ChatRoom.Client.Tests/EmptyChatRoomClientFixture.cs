@@ -13,13 +13,14 @@ namespace ChatRoom.Client.Tests;
 public abstract class ChatRoomClientFixture : IDisposable
 {
     private readonly Task _start;
+    private readonly ChatRoomClientConfiguration _configuration;
     public ChatRoomClientFixture(string templateName)
     {
         // called once before every test
         var configurationPath = Path.Combine("template", "chatroom", $"{templateName}.json"); // "template/chatroom/chatroom.json
-        var configuration = JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
+        this._configuration = JsonSerializer.Deserialize<ChatRoomClientConfiguration>(File.ReadAllText(configurationPath)) ?? throw new InvalidOperationException("Failed to load configuration file.");
         this.Command = new ChatRoomClientCommand();
-        this._start = this.Command.ExecuteAsync(configuration);
+        this._start = this.Command.ExecuteAsync(this._configuration);
 
         var timeout = Task.Delay(10000);
         var deployTask = this.Command.DeployAsync();
@@ -30,6 +31,8 @@ public abstract class ChatRoomClientFixture : IDisposable
             throw new TimeoutException("Failed to deploy the client in time.");
         }
     }
+
+    internal ChatRoomClientConfiguration Configuration => _configuration;
 
     internal ChatRoomClientCommand Command { get; private set; }
 

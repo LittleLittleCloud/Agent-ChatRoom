@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import ChatBottombar from "./chat-bottombar";
 import { AnimatePresence, motion } from "framer-motion";
-import { AgentInfo, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, getApiChatRoomClientDeleteMessageByChannelNameByMessageId, postApiChatRoomClientEditTextMessage, postApiChatRoomClientGenerateNextReply, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
+import { AgentInfo, ApiError, ChannelInfo, ChatMsg, OpenAPI, getApiChatRoomClientClearHistoryByChannelName, getApiChatRoomClientDeleteMessageByChannelNameByMessageId, postApiChatRoomClientEditTextMessage, postApiChatRoomClientGenerateNextReply, postApiChatRoomClientGetChannelChatHistory, postApiChatRoomClientSendTextMessageToChannel } from "@/chatroom-client";
 import ChatTopbar, { OrchestrationSettings } from "./chat-topbar";
 import { ChatMessage } from "./chat-message";
 import { on } from "events";
@@ -31,12 +31,12 @@ export function ChatList({
   const [eventSource, setEventSource] = React.useState<EventSource | undefined>(undefined);
   const [currentChannel, setCurrentChannel] = React.useState<Channel>(channel);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     setCurrentChannel(channel);
   }
     , [channel]);
-  
+
   const onReloadMessages = async (currentMessage: ChatMsg[]) => {
     var data = await postApiChatRoomClientGetChannelChatHistory({
       requestBody: {
@@ -52,7 +52,7 @@ export function ChatList({
       console.log("No new messages");
       return;
     }
-    else{
+    else {
       setMessages(data);
     }
   }
@@ -196,7 +196,7 @@ export function ChatList({
     await onReloadMessages(messages);
   };
 
-  const onOrchestrationClickNext = async (remainingTurn :number, msgs: ChatMsg[]) => {
+  const onOrchestrationClickNext = async (msgs: ChatMsg[]) => {
     if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
       return
     }
@@ -212,27 +212,27 @@ export function ChatList({
       );
       return;
     }
-    var response = await postApiChatRoomClientGenerateNextReply({
-      requestBody: {
-        channelName: channel.name,
-        chatMsgs: msgs,
-        candidates: channel.members.map((member) => member.name!),
-        orchestrator: channel.orchestrator,
-      },
-    });
 
-    if (response.message === undefined || response.message === null) {
-      toast({
-        title: "Orchestration complete",
-        description: "No more turns left",
-        variant: "default",
+    try {
+      var response = await postApiChatRoomClientGenerateNextReply({
+        requestBody: {
+          channelName: channel.name,
+          chatMsgs: msgs,
+          candidates: channel.members.map((member) => member.name!),
+          orchestrator: channel.orchestrator,
+        },
       });
-      setRemainingTurns(0);
-    }
-    else
-    {
-      setRemainingTurns((prev) =>
-        {
+
+      if (response.message === undefined || response.message === null) {
+        toast({
+          title: "Orchestration complete",
+          description: "No more turns left",
+          variant: "default",
+        });
+        setRemainingTurns(0);
+      }
+      else {
+        setRemainingTurns((prev) => {
           prev = prev - 1;
           if (prev <= 0) {
             toast({
@@ -245,7 +245,21 @@ export function ChatList({
 
           return prev;
         }
-      );
+        );
+      }
+    }
+    catch (error) {
+
+      if (error instanceof ApiError) {
+        console.log("Error", error.response);
+        toast({
+          title: "Orchestration error",
+          description: error.response.body,
+          variant: "default",
+        });
+      }
+
+      setRemainingTurns(0);
     }
   }
 
@@ -282,7 +296,7 @@ export function ChatList({
 
     if (channel.maxReply > 0 && remainingTurns > 0) {
       console.log("message received, calling next");
-      onOrchestrationClickNext(remainingTurns, messages);
+      onOrchestrationClickNext(messages);
     }
   }, [messages]);
 
@@ -309,7 +323,7 @@ export function ChatList({
             var remainingTurn = currentChannel.maxReply > 0 ? currentChannel.maxReply : 1;
             console.log("remainingTurns", remainingTurn)
             setRemainingTurns(remainingTurn);
-            await onOrchestrationClickNext(remainingTurn, messages);
+            await onOrchestrationClickNext(messages);
           }}
           onChooseNextSpeaker={onChooseNextSpeaker}
           onChannelChange={onChannelChange}

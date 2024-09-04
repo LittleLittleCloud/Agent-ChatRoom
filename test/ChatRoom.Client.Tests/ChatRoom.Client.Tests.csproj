@@ -18,4 +18,8 @@
     <ProjectReference Include="..\..\ChatRoom\ChatRoom.Client\ChatRoom.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChatRoom.Tests" />
+  </ItemGroup>
+
 </Project>

@@ -278,8 +278,16 @@ internal class ChatRoomClientController : Controller
         var chatMsgs = request.ChatMsgs;
         var candidates = request.Candidates;
 
-        var reply = await _chatPlatformClient.GenerateNextReply(channelName, candidates, chatMsgs, request.Orchestrator);
-        return new OkObjectResult(new GenerateNextReplyResponse(reply));
+        try
+        {
+            var reply = await _chatPlatformClient.GenerateNextReply(channelName, candidates, chatMsgs, request.Orchestrator);
+            return new OkObjectResult(new GenerateNextReplyResponse(reply));
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error generating next reply");
+            return new BadRequestObjectResult(ex.Message);
+        }
     }
 
     [HttpGet]
