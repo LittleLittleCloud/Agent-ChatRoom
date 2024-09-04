@@ -7,6 +7,7 @@ export class ApiError extends Error {
 	public readonly statusText: string;
 	public readonly body: unknown;
 	public readonly request: ApiRequestOptions;
+	public readonly response: ApiResult;
 
 	constructor(request: ApiRequestOptions, response: ApiResult, message: string) {
 		super(message);
@@ -17,5 +18,6 @@ export class ApiError extends Error {
 		this.statusText = response.statusText;
 		this.body = response.body;
 		this.request = request;
+		this.response = response;
 	}
 }
