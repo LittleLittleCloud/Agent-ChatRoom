@@ -105,15 +105,76 @@ export function ChatList({
       return;
     }
     setRemainingTurns(1);
-    await postApiChatRoomClientGenerateNextReply({
-      requestBody: {
-        channelName: channel.name,
-        chatMsgs: messages,
-        candidates: [availableCandidate.name],
-      },
-    });
+    await onOrchestrationClickNext(messages, availableCandidate);
     setRemainingTurns(0);
   };
+
+  const onOrchestrationClickNext = async (msgs: ChatMsg[], nextSpeaker?: AgentInfo) => {
+    if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
+      return
+    }
+
+    if (channel.orchestrator == undefined && nextSpeaker == undefined) {
+      setRemainingTurns(0);
+      toast(
+        {
+          title: "Orchestrator not selected",
+          description: "Please select an orchestrator",
+          variant: "default",
+        }
+      );
+      return;
+    }
+
+    try {
+      var response = await postApiChatRoomClientGenerateNextReply({
+        requestBody: {
+          channelName: channel.name,
+          chatMsgs: msgs,
+          candidates: nextSpeaker == undefined ? channel.members.map((member) => member.name!) : [nextSpeaker.name!],
+          orchestrator: nextSpeaker == undefined ? channel.orchestrator : undefined,
+        },
+      });
+
+      if (response.message === undefined || response.message === null) {
+        toast({
+          title: "Orchestration complete",
+          description: "No more turns left",
+          variant: "default",
+        });
+        setRemainingTurns(0);
+      }
+      else {
+        setRemainingTurns((prev) => {
+          prev = prev - 1;
+          if (prev <= 0) {
+            toast({
+              title: "Orchestration complete",
+              description: "No more turns left",
+              variant: "default",
+            });
+            return 0;
+          }
+
+          return prev;
+        }
+        );
+      }
+    }
+    catch (error) {
+
+      if (error instanceof ApiError) {
+        console.log("Error", error.response);
+        toast({
+          title: "Orchestration error",
+          description: error.response.body,
+          variant: "default",
+        });
+      }
+
+      setRemainingTurns(0);
+    }
+  }
 
   const deleteMessageHandler = async (message: ChatMsg) => {
     if (confirm(`Are you sure you want to delete this message?`) === false) {
@@ -196,72 +257,6 @@ export function ChatList({
     await onReloadMessages(messages);
   };
 
-  const onOrchestrationClickNext = async (msgs: ChatMsg[]) => {
-    if (channel.members === undefined || channel.members === null || channel.members.length === 0) {
-      return
-    }
-
-    if (channel.orchestrator == undefined) {
-      setRemainingTurns(0);
-      toast(
-        {
-          title: "Orchestrator not selected",
-          description: "Please select an orchestrator",
-          variant: "default",
-        }
-      );
-      return;
-    }
-
-    try {
-      var response = await postApiChatRoomClientGenerateNextReply({
-        requestBody: {
-          channelName: channel.name,
-          chatMsgs: msgs,
-          candidates: channel.members.map((member) => member.name!),
-          orchestrator: channel.orchestrator,
-        },
-      });
-
-      if (response.message === undefined || response.message === null) {
-        toast({
-          title: "Orchestration complete",
-          description: "No more turns left",
-          variant: "default",
-        });
-        setRemainingTurns(0);
-      }
-      else {
-        setRemainingTurns((prev) => {
-          prev = prev - 1;
-          if (prev <= 0) {
-            toast({
-              title: "Orchestration complete",
-              description: "No more turns left",
-              variant: "default",
-            });
-            return 0;
-          }
-
-          return prev;
-        }
-        );
-      }
-    }
-    catch (error) {
-
-      if (error instanceof ApiError) {
-        console.log("Error", error.response);
-        toast({
-          title: "Orchestration error",
-          description: error.response.body,
-          variant: "default",
-        });
-      }
-
-      setRemainingTurns(0);
-    }
-  }
 
   useEffect(() => {
     var es = new EventSource(`${OpenAPI.BASE}/api/ChatRoomClient/NewMessageSse/${channel.name}`);
