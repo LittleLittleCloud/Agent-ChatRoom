@@ -11,6 +11,7 @@
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 
 ## Quick Start with code-first approach
+You can create an agent by writing code and add it to chatroom. See [code-first examples](https://github.com/LittleLittleCloud/Agent-ChatRoom/tree/main/example) for how to do it.
 
 ## Quick Start with template
 Other than the code-first approach, `Agent Chatroom` also provides a series of templates to help you get started quickly. Use the `list-templates` command to list all available templates and the `create` command to create a configuration from the selected template.
