@@ -7,7 +7,7 @@
 
 ## 🌟 Highlights
 - **Multi-Agent WebUI**: Chat with multiple agents simultaneously in a web browser.
-- **Code-First**: Use code-first approach to add agents to the chatroom, see [code-first examples](./example/README.md) for more information.
+- **Code-First**: Use code-first approach to add agents to the chatroom, see [code-first examples](https://github.com/LittleLittleCloud/Agent-ChatRoom/tree/main/example) for more information.
 - **Server mode**: You can run `ChatRoom.Client` as a restful server. For more information, see [Server mode](#-server-mode).
 - **API driven**: Use the `ChatRoom.SDK` to interact with the chatroom server programmatically.
 
