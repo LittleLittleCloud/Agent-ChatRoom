@@ -35,7 +35,7 @@ Mock.Get(throwExceptionAgent)
             .Setup(a => a.GenerateReplyAsync(It.IsAny<IEnumerable<IMessage>>(), It.IsAny<GenerateReplyOptions>(), It.IsAny<CancellationToken>()))
             .Throws(() =>
             {
-                Task.Delay(35 * 1000).Wait();
+                //Task.Delay(35 * 1000).Wait();
 
                 return new Exception("Test exception");
             });
