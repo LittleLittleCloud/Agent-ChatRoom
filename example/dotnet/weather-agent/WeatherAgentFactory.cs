@@ -7,6 +7,7 @@ using AutoGen.Core;
 using AutoGen.OpenAI;
 using AutoGen.OpenAI.Extension;
 using Azure.AI.OpenAI;
+using OpenAI;
 
 namespace weather_agent;
 
@@ -34,9 +35,8 @@ public static class WeatherAgentFactory
             });
 
         return new OpenAIChatAgent(
-            openAIClient: openAIClient,
-            name: name,
-            modelName: modelName)
+            chatClient: openAIClient.GetChatClient(modelName),
+            name: name)
             .RegisterMessageConnector()
             .RegisterMiddleware(functionMiddleware)
             .RegisterPrintMessage();
