@@ -1,7 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ClientModel.Primitives;
+using System.Text.Json.Serialization;
 using Azure.AI.OpenAI;
 using Azure.Core.Pipeline;
 using Json.Schema.Generation;
+using OpenAI;
 
 namespace ChatRoom.SDK;
 
@@ -80,7 +82,7 @@ public class OpenAIClientConfiguration
                 && AzureOpenAIKey is string
                 && AzureOpenAIDeployName is string)
             {
-                return new OpenAIClient(new Uri(AzureOpenAIEndpoint), new Azure.AzureKeyCredential(AzureOpenAIKey));
+                return new AzureOpenAIClient(new Uri(AzureOpenAIEndpoint), new Azure.AzureKeyCredential(AzureOpenAIKey));
             }
             else
             {
@@ -115,10 +117,10 @@ public class OpenAIClientConfiguration
 
                 var openaiClientOption = new OpenAIClientOptions()
                 {
-                    Transport = new HttpClientTransport(httpClient)
+                    Transport = new HttpClientPipelineTransport(httpClient)
                 };
 
-                return new OpenAIClient(ThirdPartyLLMKey, openaiClientOption);
+                return new OpenAIClient(ThirdPartyLLMKey ?? string.Empty, openaiClientOption);
             }
             else
             {

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoGen.Core;
+﻿using AutoGen.Core;
 using AutoGen.OpenAI;
 using AutoGen.OpenAI.Extension;
-using Azure.AI.OpenAI;
 using Octokit;
+using OpenAI;
+using OpenAI.Chat;
 using Spectre.Console;
 
 namespace ChatRoom.Github;
@@ -44,8 +40,7 @@ internal static class GithubAgentFactory
         if (issueHelper is null)
         {
             issueHelper = GithubAgentFactory.CreateIssueHelperAgent(
-                openaiClient!,
-                deployModelName!,
+                openaiClient!.GetChatClient(deployModelName!),
                 ghClient,
                 config.GithubRepoOwner!,
                 config.GithubRepoName!,
@@ -57,8 +52,7 @@ internal static class GithubAgentFactory
     }
 
     public static IAgent CreateIssueHelperAgent(
-        OpenAIClient openaiClient,
-        string deployModelName,
+        ChatClient chatClient,
         GitHubClient gitHubClient,
         string repoOwner,
         string repoName,
@@ -66,9 +60,8 @@ internal static class GithubAgentFactory
         string systemMessage = "You are a github issue helper")
     {
         var openaiChatAgent = new OpenAIChatAgent(
-            openAIClient: openaiClient,
+            chatClient: chatClient,
             name: name,
-            modelName: deployModelName!,
             systemMessage: systemMessage)
             .RegisterMessageConnector();
 

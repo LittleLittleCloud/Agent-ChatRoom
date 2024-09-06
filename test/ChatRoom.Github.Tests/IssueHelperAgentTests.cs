@@ -10,6 +10,7 @@ using Azure.AI.OpenAI;
 using ChatRoom.Tests;
 using FluentAssertions;
 using Octokit;
+using OpenAI;
 
 namespace ChatRoom.Github.Tests;
 
@@ -22,10 +23,10 @@ public class IssueHelperAgentTests
         var aoaiDeployName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOY_NAME");
         var aoaiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
 
-        var openaiClient = new OpenAIClient(new Uri(aoaiEndpoint!), new Azure.AzureKeyCredential(aoaiKey!));
+        var openaiClient = new AzureOpenAIClient(new Uri(aoaiEndpoint!), new Azure.AzureKeyCredential(aoaiKey!));
         
         var ghClient = new GitHubClient(new ProductHeaderValue("chatroom-github-test"));
-        var issueHelperAgent = GithubAgentFactory.CreateIssueHelperAgent(openaiClient, aoaiDeployName!, ghClient, "LittleLittleCloud", "Agent-ChatRoom");
+        var issueHelperAgent = GithubAgentFactory.CreateIssueHelperAgent(openaiClient.GetChatClient(aoaiDeployName), ghClient, "LittleLittleCloud", "Agent-ChatRoom");
 
         var reply = await issueHelperAgent.SendAsync("Get the first issue in the https://github.com/LittleLittleCloud/Agent-ChatRoom repository?");
 
@@ -43,10 +44,10 @@ public class IssueHelperAgentTests
         var aoaiDeployName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOY_NAME");
         var aoaiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
 
-        var openaiClient = new OpenAIClient(new Uri(aoaiEndpoint!), new Azure.AzureKeyCredential(aoaiKey!));
+        var openaiClient = new AzureOpenAIClient(new Uri(aoaiEndpoint!), new Azure.AzureKeyCredential(aoaiKey!));
 
         var ghClient = new GitHubClient(new ProductHeaderValue("chatroom-github-test"));
-        var issueHelperAgent = GithubAgentFactory.CreateIssueHelperAgent(openaiClient, aoaiDeployName!, ghClient, "LittleLittleCloud", "Agent-ChatRoom");
+        var issueHelperAgent = GithubAgentFactory.CreateIssueHelperAgent(openaiClient.GetChatClient(aoaiDeployName!), ghClient, "LittleLittleCloud", "Agent-ChatRoom");
 
         var reply = await issueHelperAgent.SendAsync("Search issues related to Add documents in https://github.com/LittleLittleCloud/Agent-ChatRoom repository. Return the first issue.");
 
@@ -64,10 +65,10 @@ public class IssueHelperAgentTests
         var aoaiDeployName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOY_NAME");
         var aoaiEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
 
-        var openaiClient = new OpenAIClient(new Uri(aoaiEndpoint!), new Azure.AzureKeyCredential(aoaiKey!));
+        var openaiClient = new AzureOpenAIClient(new Uri(aoaiEndpoint!), new Azure.AzureKeyCredential(aoaiKey!));
 
         var ghClient = new GitHubClient(new ProductHeaderValue("chatroom-github-test"));
-        var issueHelperAgent = GithubAgentFactory.CreateIssueHelperAgent(openaiClient, aoaiDeployName!, ghClient, "LittleLittleCloud", "Agent-ChatRoom");
+        var issueHelperAgent = GithubAgentFactory.CreateIssueHelperAgent(openaiClient.GetChatClient(aoaiDeployName!), ghClient, "LittleLittleCloud", "Agent-ChatRoom");
 
         var reply = await issueHelperAgent.SendAsync("What's the comments of the 9th issue in the https://github.com/LittleLittleCloud/Agent-ChatRoom repository?");
 

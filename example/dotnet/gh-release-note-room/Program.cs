@@ -1,12 +1,12 @@
 ﻿using AutoGen.Core;
 using AutoGen.OpenAI;
 using AutoGen.OpenAI.Extension;
-using Azure.AI.OpenAI;
 using ChatRoom.Github;
 using ChatRoom.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Octokit;
+using OpenAI;
 
 var roomConfig = new RoomConfiguration
 {
@@ -33,16 +33,16 @@ var client = host.Services.GetRequiredService<ChatPlatformClient>();
 
 var openAIApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new Exception("OPENAI_API_KEY is not set.");
 var openAIClient = new OpenAIClient(openAIApiKey);
+var chatClient = openAIClient.GetChatClient("gpt-4o-mini");
 var ghClient = new GitHubClient(new ProductHeaderValue("ChatRoom"));
 var repoOwner = "LittleLittleCloud";
 var repoName = "Agent-ChatRoom";
 
-var issueHelper = GithubAgentFactory.CreateIssueHelperAgent(openAIClient, "gpt-4o-mini", ghClient, repoOwner, repoName);
+var issueHelper = GithubAgentFactory.CreateIssueHelperAgent(chatClient, ghClient, repoOwner, repoName);
 
 var gpt4oWriter = new OpenAIChatAgent(
-    openAIClient: openAIClient,
+    chatClient: chatClient,
     name: "release-note-writer",
-    modelName: "gpt-4o-mini",
     systemMessage: """
     You write release notes based on github issues.
 
@@ -56,9 +56,8 @@ var gpt4oWriter = new OpenAIChatAgent(
     .RegisterPrintMessage();
 
 var groupChatAdmin = new OpenAIChatAgent(
-    openAIClient: openAIClient,
-    name: "admin",
-    modelName: "gpt-4o-mini")
+    chatClient: openAIClient.GetChatClient("gpt-4o-mini"),
+    name: "admin")
     .RegisterMessageConnector()
     .RegisterPrintMessage();
 

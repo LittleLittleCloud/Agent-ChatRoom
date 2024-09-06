@@ -25,9 +25,8 @@ internal class ChatroomPlannerAgentFactory
         }
 
         var openaiAgent = new OpenAIChatAgent(
-            openaiClient,
+            openaiClient.GetChatClient(modelName),
             configuration.Name,
-            modelName,
             configuration.SystemMessage)
             .RegisterMessageConnector()
             .RegisterPrintMessage()

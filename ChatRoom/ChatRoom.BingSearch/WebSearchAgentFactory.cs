@@ -13,6 +13,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Plugins.Web;
 using Microsoft.SemanticKernel.Plugins.Web.Bing;
 using Microsoft.SemanticKernel.Plugins.Web.Google;
+using OpenAI;
 
 namespace ChatRoom.WebSearch;
 
@@ -44,9 +45,8 @@ internal static class WebSearchAgentFactory
 
 
         var agent = new OpenAIChatAgent(
-            openAIClient: openaiClient,
+            chatClient: openaiClient.GetChatClient(deployModelName),
             name: config.Name,
-            modelName: deployModelName,
             systemMessage: config.SystemMessage)
             .RegisterMessageConnector()
             .RegisterMiddleware(middleware)
@@ -105,9 +105,8 @@ internal static class WebSearchAgentFactory
 
 
         var agent = new OpenAIChatAgent(
-            openAIClient: openaiClient,
+            chatClient: openaiClient.GetChatClient(deployModelName),
             name: config.Name,
-            modelName: deployModelName,
             systemMessage: config.SystemMessage)
             .RegisterMessageConnector()
             .RegisterMiddleware(middleware)

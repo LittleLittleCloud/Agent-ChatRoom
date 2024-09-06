@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <AutoGenVersion>0.1.0</AutoGenVersion>
+    <AutoGenVersion>0.2.0</AutoGenVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="JsonSchema.Net.Generation" Version="4.3.0.2" />
