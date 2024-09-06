@@ -120,7 +120,7 @@ public class OpenAIClientConfiguration
                     Transport = new HttpClientPipelineTransport(httpClient)
                 };
 
-                return new OpenAIClient(ThirdPartyLLMKey ?? string.Empty, openaiClientOption);
+                return new OpenAIClient(ThirdPartyLLMKey ?? "api-key", openaiClientOption);
             }
             else
             {
