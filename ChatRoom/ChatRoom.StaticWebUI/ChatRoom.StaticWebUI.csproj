@@ -24,16 +24,28 @@
     </Content>
   </ItemGroup>
 
-  <!-- Custom target to check if wwwroot exists -->
-  <Target Name="CheckWwwrootExists" BeforeTargets="PrepareForRun">
+  <!-- Custom target to check if wwwroot exists and build chatroom-ui if it doesn't -->
+  <Target Name="CheckAndBuildWwwroot" BeforeTargets="PrepareForRun">
     <!-- Check if the wwwroot directory exists -->
     <PropertyGroup>
       <WwwrootExists Condition="Exists('$(RepoRoot)\chatroom-ui\out\index.html')">true</WwwrootExists>
     </PropertyGroup>
 
-    <!-- Optionally, do something based on the existence of wwwroot -->
-    <Message Text="wwwroot doesn't exist. Have you built the chatroom-ui project?" Condition="'$(WwwrootExists)' == 'false'" />
-    <Error Text="The wwwroot directory does not exist. Please build chatroom-ui project by running `npm run build` under their root. For more information on how to build chatroom-ui, please refer to https://github.com/LittleLittleCloud/Agent-ChatRoom/tree/main/chatroom-ui" Condition="'$(WwwrootExists)' == 'false'" />
+    <!-- If wwwroot doesn't exist, run: npm install && npm run build -->   
+    <!-- Run npm install if wwwroot doesn't exist -->
+    <Exec Command="npm install" Condition="'$(WwwrootExists)' == 'false'" WorkingDirectory="$(RepoRoot)\chatroom-ui" />   
+    <!-- Run npm run build after npm install -->
+    <Exec Command="npm run build" Condition="'$(WwwrootExists)' == 'false'" WorkingDirectory="$(RepoRoot)\chatroom-ui" />
+    <!-- Optionally, display message after build -->
+    <Message Text="Running 'npm run build' to generate wwwroot as it doesn't exist." Condition="'$(WwwrootExists)' == 'false'" />
+
+    <!-- After the build, check again if wwwroot exists -->
+    <PropertyGroup>
+      <WwwrootExists Condition="Exists('$(RepoRoot)\chatroom-ui\out\index.html')">true</WwwrootExists>
+    </PropertyGroup>
+
+    <!-- If wwwroot still doesn't exist after the build, show an error -->
+    <Error Text="The wwwroot directory still does not exist after running 'npm run build'. Please check the chatroom-ui build process." Condition="'$(WwwrootExists)' == 'false'" />
   </Target>
 
 </Project>
